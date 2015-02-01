@@ -1,0 +1,79 @@
+<html>
+	<head>
+		<!-- compiled and minified CSS -->
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/style.css">
+		
+		<!-- Font -->
+		<link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
+
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+
+		<!-- compiled and minified JavaScript -->
+		<script src="js/jquery.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/docu.js"></script>
+	</head>
+	<body>
+		<nav class="navbar navbar-default">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="navbar-header">
+					<a class="navbar-brand" href="#">CubicWorld</a>
+				</div>
+
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+					<ul class="nav navbar-nav">
+						<li class="active"><a href="#" class="siteChanger" data-target="home">Start</a></li>
+						<li><a href="#" class="siteChanger" data-target="getting_started">Getting Started</a></li>
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Basics <span class="caret"></span></a>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="#" class="siteChanger" data-target="basic_plugin">Plugin System</a></li>
+								<li><a href="#" class="siteChanger" data-target="basic_voxel">Voxel System</a></li>
+								<li><a href="#" class="siteChanger" data-target="basic_inventory">Inventory System</a></li>
+								<li><a href="#" class="siteChanger" data-target="basic_entity">Entity System</a></li>
+								<li><a href="#" class="siteChanger" data-target="basic_gui">GUI System</a></li>
+								<li><a href="#" class="siteChanger" data-target="basic_networking">Networking System</a></li>
+							</ul>
+						</li>
+					</ul>
+					<ul class="nav navbar-nav navbar-right">
+						<li><a href="apiref/index.html" target="_blank">API reference</a></li>
+					</ul>
+				</div><!-- /.navbar-collapse -->
+			</div><!-- /.container-fluid -->
+		</nav>
+		
+		<div id="contentWrapper">
+			<div id="home">
+				<h1>Start</h1>
+			</div>
+			<div id="getting_started">
+				<h1>Setting up Eclipse</h1>
+				<p>
+					Hello and welcome to the cubicworld documentation.<br>
+					In this first step we will prepare eclipse for plugin programming.<br>
+					First, you have to install the gradle plugin.<br>
+					In order to do so, you must open the "Install Software" dialog which is located under Help > Install new software.<br>
+					Click on the "Add" Button and add the gradle repository url for your Eclipse version (Luna: http://dist.springsource.com/snapshot/TOOLS/gradle/nightly).<br> 
+					<img src="img/getting_started/setup_eclipse_install_new_software.png"><br>
+					After you added the repository, install the Gradle IDE component:<br>
+					<img src="img/getting_started/setup_eclipse_install_gradle.png"><br>
+					Now your IDE is ready for the Gradle build system.
+				</p>
+				<p>
+					Now, checkout the cubicworld repository and import the project as gradle project (File > Import): <br>
+					<img src="img/getting_started/setup_eclipse_install_gradle_import.png"><br>
+					Press the "Build Model" button and finish the import.<br>
+					Now you're ready for programming your plugin.<br>
+				</p>
+			</div>
+			<div id="basic_plugin">
+				<h1>Plugin System</h1>
+			</div>
+		</div>
+	</body>
+</html>

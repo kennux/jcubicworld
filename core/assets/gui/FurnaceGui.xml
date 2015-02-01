@@ -1,0 +1,5 @@
+<overlay align="center" width="50%" height="75%">
+	<inventoryview position-x="20%" position-y="80%" height="20%" width="60%" start-slot-id="0" end-slot-id="2" cellspacing="1%" inventory="inventory" slots-per-row="2" id="inv1" />
+	<inventoryview position-x="10%" position-y="10%" height="80%" width="80%" start-slot-id="0" end-slot-id="30" cellspacing="1.5%" inventory="playerInventory" slots-per-row="5" id="inv2" />
+	<textbox position-x="20%" position-y="60%" height="5%" width="80%" id="textbox" />
+</overlay>

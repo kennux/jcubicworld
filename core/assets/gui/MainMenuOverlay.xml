@@ -1,0 +1,7 @@
+<overlay align="center" width="50%" height="75%">
+	<button caption="Resume" position-x="20%" position-y="80%" height="10%" width="60%" font-scale="1.5" id="btn_resume"/>
+	<button caption="Options" position-x="20%" position-y="60%"
+		height="10%" width="60%" font-scale="1.5" id="btn_options" />
+	<button caption="End" position-x="20%" position-y="40%" height="10%"
+		width="60%" font-scale="1.5" id="btn_end" />
+</overlay>

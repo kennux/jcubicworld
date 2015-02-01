@@ -1,0 +1,11 @@
+*
+{
+	font-family: 'Droid Serif', serif;
+}
+
+#contentWrapper div
+{
+	display: none;
+	width: 90%;
+	margin: 0 5%;
+}
