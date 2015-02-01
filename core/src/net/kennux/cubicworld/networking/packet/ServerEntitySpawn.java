@@ -5,9 +5,9 @@ import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.entity.AEntity;
 import net.kennux.cubicworld.entity.EntitySystem;
 import net.kennux.cubicworld.networking.APacketModel;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 /**
  * Server entity spawn packet. Packet id: 0x13 Packet data: [entity type id -

@@ -6,8 +6,8 @@ import java.util.Map.Entry;
 import java.util.zip.DataFormatException;
 
 import net.kennux.cubicworld.assets.TextureAtlas;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.util.CompressionUtils;
 import net.kennux.cubicworld.util.ConsoleHelper;
 

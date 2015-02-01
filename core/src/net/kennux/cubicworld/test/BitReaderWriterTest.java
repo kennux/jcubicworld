@@ -1,9 +1,9 @@
 package net.kennux.cubicworld.test;
 
 import junit.framework.TestCase;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
 import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelEngine;
 

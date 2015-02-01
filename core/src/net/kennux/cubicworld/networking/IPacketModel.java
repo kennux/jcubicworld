@@ -2,6 +2,8 @@ package net.kennux.cubicworld.networking;
 
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 import com.badlogic.gdx.math.Vector3;
 

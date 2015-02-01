@@ -7,6 +7,8 @@ import net.kennux.cubicworld.pathfinder.Path;
 import net.kennux.cubicworld.pathfinder.Pathfinder;
 import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.util.Mathf;
+import net.kennux.cubicworld.voxel.generator.AWorldGenerator;
+import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;

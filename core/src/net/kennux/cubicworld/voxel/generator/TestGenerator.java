@@ -1,6 +1,5 @@
 package net.kennux.cubicworld.voxel.generator;
 
-import net.kennux.cubicworld.voxel.AWorldGenerator;
 import net.kennux.cubicworld.voxel.VoxelChunk;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelWorld;

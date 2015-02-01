@@ -4,9 +4,9 @@ import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.gui.hud.Chatbox;
 import net.kennux.cubicworld.networking.APacketModel;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 public class ChatMessage extends APacketModel
 {

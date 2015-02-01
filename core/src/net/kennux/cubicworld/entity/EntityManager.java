@@ -1,8 +1,8 @@
 package net.kennux.cubicworld.entity;
 
 import net.kennux.cubicworld.CubicWorldConfiguration;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 
 import com.badlogic.gdx.graphics.Camera;

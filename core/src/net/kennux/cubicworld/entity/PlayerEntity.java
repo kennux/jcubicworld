@@ -1,8 +1,8 @@
 package net.kennux.cubicworld.entity;
 
 import net.kennux.cubicworld.inventory.PlayerInventory;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;

@@ -9,7 +9,7 @@ import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.inventory.IInventoryUpdateHandler;
 import net.kennux.cubicworld.networking.packet.inventory.ServerBlockInventoryUpdate;
-import net.kennux.cubicworld.util.ConsoleHelper;
+import net.kennux.cubicworld.voxel.handlers.IVoxelUpdateHandler;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -929,7 +929,7 @@ public class VoxelChunk implements Disposable
 		{
 			HashMap<Vector3, IVoxelUpdateHandler> updateHandlersClone = (HashMap<Vector3, IVoxelUpdateHandler>) this.voxelUpdateHandlers.clone();
 
-			// Voxel updates
+			// Exec voxel updates
 			for (Entry<Vector3, IVoxelUpdateHandler> entry : updateHandlersClone.entrySet())
 			{
 				int x = (int) entry.getKey().x;

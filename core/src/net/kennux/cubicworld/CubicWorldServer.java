@@ -11,20 +11,20 @@ import net.kennux.cubicworld.entity.AEntity;
 import net.kennux.cubicworld.entity.EntityManager;
 import net.kennux.cubicworld.entity.EntitySystem;
 import net.kennux.cubicworld.environment.DayNightCycle;
-import net.kennux.cubicworld.networking.BitReader;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
 import net.kennux.cubicworld.networking.IPacketModel;
 import net.kennux.cubicworld.networking.packet.ServerEntityDestroy;
 import net.kennux.cubicworld.networking.packet.ServerVoxelUpdate;
 import net.kennux.cubicworld.profiler.Profiler;
 import net.kennux.cubicworld.profiler.Profiler.FileFormat;
+import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.util.ConsoleHelper;
-import net.kennux.cubicworld.voxel.IVoxelDataUpdateHandler;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 import net.kennux.cubicworld.voxel.VoxelWorldSave;
 import net.kennux.cubicworld.voxel.generator.WorldGenerator;
 import net.kennux.cubicworld.voxel.generator.noise.SimplexNoise3D;
+import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;
 
 import com.badlogic.gdx.math.Vector3;
 

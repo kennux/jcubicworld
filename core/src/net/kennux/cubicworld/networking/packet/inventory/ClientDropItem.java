@@ -5,9 +5,9 @@ import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.entity.ItemEntity;
 import net.kennux.cubicworld.item.ItemStack;
 import net.kennux.cubicworld.networking.APacketModel;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 import com.badlogic.gdx.math.Vector3;
 

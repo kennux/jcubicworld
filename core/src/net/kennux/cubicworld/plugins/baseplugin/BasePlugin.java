@@ -61,21 +61,16 @@ import net.kennux.cubicworld.plugins.baseplugin.input.MovementKeyHandler;
 import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.util.DebugHelper;
 import net.kennux.cubicworld.util.VectorHelper;
-import net.kennux.cubicworld.voxel.IVoxelActionHandler;
-import net.kennux.cubicworld.voxel.MachineUpdateHandler;
 import net.kennux.cubicworld.voxel.RaycastHit;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelEngine;
 import net.kennux.cubicworld.voxel.VoxelRenderState;
+import net.kennux.cubicworld.voxel.handlers.IVoxelActionHandler;
+import net.kennux.cubicworld.voxel.handlers.MachineUpdateHandler;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
-import com.badlogic.gdx.graphics.g3d.loader.ObjLoader.ObjLoaderParameters;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 

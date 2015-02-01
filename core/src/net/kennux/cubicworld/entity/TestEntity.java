@@ -1,6 +1,5 @@
 package net.kennux.cubicworld.entity;
 
-import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -38,7 +37,7 @@ public class TestEntity extends AModelMobEntity
 	@Override
 	public ModelInstance getModelInstance()
 	{
-		return null; //new ModelInstance(BasePlugin.testEntityModel);
+		return null; // new ModelInstance(BasePlugin.testEntityModel);
 	}
 
 	@Override

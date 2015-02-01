@@ -1,8 +1,8 @@
 package net.kennux.cubicworld.inventory;
 
 import net.kennux.cubicworld.item.ItemStack;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 /**
  * Basic inventory implementation.

@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import net.kennux.cubicworld.inventory.InventoryFilterRuleSet;
+import net.kennux.cubicworld.voxel.handlers.IVoxelActionHandler;
+import net.kennux.cubicworld.voxel.handlers.IVoxelUpdateHandler;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;

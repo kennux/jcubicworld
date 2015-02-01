@@ -2,9 +2,9 @@ package net.kennux.cubicworld.voxel;
 
 import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.inventory.BlockInventory;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
 import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -67,7 +67,6 @@ public class VoxelData
 	{
 		short voxelId = reader.readShort();
 		byte rotation = reader.readByte();
-		reader.readInt();
 
 		// Filter invalid block data
 		if (voxelId == -1 || rotation == -1)
@@ -96,13 +95,11 @@ public class VoxelData
 		{
 			writer.writeShort((short) -1);
 			writer.writeByte((byte) 0);
-			writer.writeInt(0);
 		}
 		else
 		{
 			writer.writeShort(voxelDataObject.voxelType.voxelId);
 			writer.writeByte(voxelDataObject.rotation);
-			writer.writeInt(0);
 
 			// Write inventory
 			if (voxelDataObject.voxelType.getInventorySize() > 0)

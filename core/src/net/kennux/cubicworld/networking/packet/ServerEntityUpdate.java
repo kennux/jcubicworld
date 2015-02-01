@@ -4,9 +4,9 @@ import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.entity.AEntity;
 import net.kennux.cubicworld.networking.APacketModel;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 /**
  * Server client packet for updating an entity. Packet id: 0x12 Packet data: [3

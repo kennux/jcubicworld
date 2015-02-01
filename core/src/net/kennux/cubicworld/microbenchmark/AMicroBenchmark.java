@@ -67,7 +67,7 @@ public abstract class AMicroBenchmark
 					System.out.println("");
 					System.out.println("Iterations: " + iterationCount);
 					System.out.println("All iterations (Seconds): " + elapsedSeconds);
-					System.out.println("Meantime (Seconds): " + elapsedSeconds);
+					System.out.println("Meantime (Seconds): " + meanTime);
 					System.out.println("Lowest time (Seconds): " + lowestTime);
 					System.out.println("Highest time (Seconds): " + highestTime);
 					System.out.println("");

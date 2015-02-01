@@ -4,9 +4,9 @@ import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.networking.APacketModel;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 /**
  * This packet gets sent by the server if a player's inventory got updated.

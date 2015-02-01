@@ -13,6 +13,7 @@ import net.kennux.cubicworld.entity.PlayerEntity;
 import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.networking.packet.ClientLogin;
 import net.kennux.cubicworld.networking.packet.ServerChunkData;
+import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.voxel.VoxelChunk;
 

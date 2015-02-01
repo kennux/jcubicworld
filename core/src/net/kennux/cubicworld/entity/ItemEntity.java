@@ -4,9 +4,9 @@ import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.item.ItemSystem;
 import net.kennux.cubicworld.item.ItemType;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;

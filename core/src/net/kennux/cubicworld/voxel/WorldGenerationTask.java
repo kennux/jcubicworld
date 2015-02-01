@@ -1,5 +1,7 @@
 package net.kennux.cubicworld.voxel;
 
+import net.kennux.cubicworld.voxel.generator.AWorldGenerator;
+
 /**
  * Dataholder which represents a world generation task.
  * 

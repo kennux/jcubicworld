@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.LinkedList;
 
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.util.ConsoleHelper;
 
 /**

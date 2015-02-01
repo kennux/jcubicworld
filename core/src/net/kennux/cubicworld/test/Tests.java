@@ -30,6 +30,7 @@ public class Tests
 		tests.add(InventoryTest.class.getName());
 		tests.add(VoxelWorldTest.class.getName());
 		tests.add(InputSystemTest.class.getName());
+		tests.add(SerializerTest.class.getName());
 
 		if (executeNetworkTests)
 		{

@@ -1,7 +1,7 @@
 package net.kennux.cubicworld.item;
 
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 
 /**
  * Represents a stack of items.

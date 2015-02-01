@@ -3,8 +3,8 @@ package net.kennux.cubicworld;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import net.kennux.cubicworld.networking.BitWriter;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.util.ConsoleHelper;
 
 /**

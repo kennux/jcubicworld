@@ -6,9 +6,9 @@ import net.kennux.cubicworld.inventory.BlockInventory;
 import net.kennux.cubicworld.item.ItemStack;
 import net.kennux.cubicworld.item.ItemType;
 import net.kennux.cubicworld.networking.APacketModel;
-import net.kennux.cubicworld.networking.BitReader;
-import net.kennux.cubicworld.networking.BitWriter;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelData;
 
 import com.badlogic.gdx.math.Vector3;
