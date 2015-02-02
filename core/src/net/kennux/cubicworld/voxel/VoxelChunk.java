@@ -11,6 +11,7 @@ import net.kennux.cubicworld.inventory.IInventoryUpdateHandler;
 import net.kennux.cubicworld.networking.packet.inventory.ServerBlockInventoryUpdate;
 import net.kennux.cubicworld.voxel.handlers.IVoxelUpdateHandler;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -659,6 +660,17 @@ public class VoxelChunk implements Disposable
 	}
 
 	/**
+	 * The last frame id when render() was called.
+	 * Used to limit chunk updates per frame for lag reduction.
+	 */
+	private static long lastRenderFrameId = -1;
+	
+	/**
+	 * Contains the number of createNewMesh() calls this frame.
+	 */
+	private static int generationsProcessedThisFrame = -1;
+	
+	/**
 	 * Renders this chunk. Will do nothing if the current voxel mesh is not
 	 * available yet.
 	 * 
@@ -666,9 +678,22 @@ public class VoxelChunk implements Disposable
 	 */
 	public void render(Camera cam, ShaderProgram shader)
 	{
-		if (this.voxelMeshDirty && this.newMeshDataReady)
+		boolean frameMismatch = lastRenderFrameId != Gdx.graphics.getFrameId();
+		
+		if (this.voxelMeshDirty && this.newMeshDataReady && (CubicWorldConfiguration.chunkUpdatesPerFrameLimit == -1 || lastRenderFrameId == -1 || 
+				frameMismatch || generationsProcessedThisFrame <= CubicWorldConfiguration.chunkUpdatesPerFrameLimit))
 		{
+			// If the frame ids mismatch
+			if (frameMismatch)
+			{
+				// Update frame id and reset counter
+				lastRenderFrameId = Gdx.graphics.getFrameId();
+				generationsProcessedThisFrame = 0;
+			}
+			
 			this.createNewMesh();
+			generationsProcessedThisFrame++;
+			
 		}
 
 		synchronized (this.meshLockObject)
@@ -905,24 +930,7 @@ public class VoxelChunk implements Disposable
 		// Lighting check
 		if (this.lightingDirty && this.isInitialized())
 		{
-			synchronized (this.voxelDataLockObject)
-			{
-				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
-					for (int y = 0; y < VoxelWorld.chunkHeight; y++)
-						for (int z = 0; z < VoxelWorld.chunkDepth; z++)
-							if (this.voxelData[x][y][z] != null)
-							{
-								byte lightLevel = (byte) (this.chunkY + 1);
-
-								// Min light level == 1
-								if (lightLevel < 1)
-									lightLevel = 1;
-
-								this.voxelData[x][y][z].lightLevel = lightLevel;
-							}
-
-				this.lightingDirty = false;
-			}
+			this.recalculateLighting();
 		}
 
 		synchronized (this.voxelDataLockObject)
@@ -949,6 +957,31 @@ public class VoxelChunk implements Disposable
 			{
 				this.generateMesh();
 			}
+		}
+	}
+	
+	/**
+	 * Gets called in update() if the lighting dirty flag is set.
+	 */
+	private void recalculateLighting()
+	{
+		synchronized (this.voxelDataLockObject)
+		{
+			for (int x = 0; x < VoxelWorld.chunkWidth; x++)
+				for (int y = 0; y < VoxelWorld.chunkHeight; y++)
+					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
+						if (this.voxelData[x][y][z] != null)
+						{
+							byte lightLevel = (byte) (this.chunkY + 1);
+	
+							// Min light level == 1
+							if (lightLevel < 1)
+								lightLevel = 1;
+	
+							this.voxelData[x][y][z].lightLevel = lightLevel;
+						}
+	
+			this.lightingDirty = false;
 		}
 	}
 

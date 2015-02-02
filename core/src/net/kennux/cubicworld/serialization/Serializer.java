@@ -9,17 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.dynamic.ClassLoadingStrategy;
-import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.matcher.StringMatcher;
-import net.bytebuddy.matcher.StringMatcher.Mode;
-import net.bytebuddy.modifier.MethodManifestation;
 import net.kennux.cubicworld.serialization.annotations.SerializerField;
 import net.kennux.cubicworld.util.ConsoleHelper;
 
 /**
+ * <pre>
  * The serializer base class.
+ * This serializer can get used to serialize object whose classes got the @SerializerField annotation on it's members.
+ * </pre>
  * @author KennuX
  *
  */
@@ -161,6 +158,8 @@ public class Serializer
 				}
 				
 			};
+			
+			serializers.put(clazz, serializer);
 		}
 		
 		return serializer;

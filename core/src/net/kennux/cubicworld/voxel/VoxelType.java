@@ -27,6 +27,11 @@ import com.badlogic.gdx.graphics.g3d.Model;
 public class VoxelType
 {
 	public short voxelId;
+	
+	/**
+	 * The name used for voxelid -> name and name -> voxelid mapping.
+	 */
+	public String voxelName;
 
 	private Sound footstepSound;
 

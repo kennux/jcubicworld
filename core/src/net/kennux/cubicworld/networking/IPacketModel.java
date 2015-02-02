@@ -73,7 +73,7 @@ public interface IPacketModel
 	 * @param server
 	 *            The server instance.
 	 * @param client
-	 *            The clien instance
+	 *            The client instance
 	 */
 	public void interpretServerSide(CubicWorldServer server, CubicWorldServerClient client);
 

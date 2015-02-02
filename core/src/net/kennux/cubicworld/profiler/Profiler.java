@@ -159,7 +159,7 @@ public class Profiler
 
 	/**
 	 * <pre>
-	 * Call this after your frame got rendered.
+	 * Call this after your frame got rendered / tick was processed.
 	 * Will remove all current profilings and re-initialize the profile.
 	 * Also clears the profiler result set.
 	 * 
@@ -173,7 +173,6 @@ public class Profiler
 	{
 		synchronized (this.lockObject)
 		{
-
 			// Write to file?
 			if (writeToFile && profilingFileOutput != null)
 			{

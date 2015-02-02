@@ -13,6 +13,8 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.zip.DataFormatException;
 
+import net.kennux.cubicworld.item.ItemSystem;
+import net.kennux.cubicworld.item.ItemType;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.util.CompressionUtils;
@@ -116,8 +118,78 @@ public class VoxelWorldSave
 			Statement statement = this.writerDatabaseConnection.createStatement();
 
 			statement.execute("CREATE TABLE chunks\r\n" + "(\r\n" + "chunkX INT,\r\n" + "chunkY INT,\r\n" + "chunkZ INT,\r\n" + "chunkData BLOB,\r\n" + "PRIMARY KEY (chunkX, chunkY, chunkZ)\r\n" + ");\r\n" + "CREATE INDEX chunkIndex ON chunks (chunkX, chunkY, chunkZ);");
-
+			statement.execute("CREATE TABLE `voxeltypes`\r\n (\r\n`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\r\n`name`\r\nTEXT NOT NULL UNIQUE\r\n);\r\nCREATE INDEX typeIndex ON `voxeltypes` (`id`)");
+			statement.execute("CREATE TABLE `itemtypes`\r\n (\r\n`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\r\n`name`\r\nTEXT NOT NULL UNIQUE\r\n);\r\nCREATE INDEX typeIndex ON `itemtypes` (`id`)");
+			
+			// Write voxel and item types table
+			VoxelType[] voxelTypes = VoxelEngine.getVoxelTypes();
+			ItemType[] itemTypes = ItemSystem.getItemTypes();
+			for (VoxelType type : voxelTypes)
+			{
+				statement.execute("INSERT INTO `voxeltypes` (`id`, `name`) VALUES ("+type.voxelId+", '"+type.voxelName+"');");
+			}
+			
+			for (ItemType type : itemTypes)
+			{
+				statement.execute("INSERT INTO `itemtypes` (`id`, `name`) VALUES ("+type.getItemId()+", '"+type.getItemName()+"');");
+			}
+			
 			statement.close();
+		}
+		
+		// Match voxel and item types of the local instance against the ones stored in sqlite
+		VoxelType[] voxelTypes = VoxelEngine.getVoxelTypes();
+		ItemType[] itemTypes = ItemSystem.getItemTypes();
+		Statement statement = this.readerDatabaseConnection.createStatement();
+		
+		// Query db for all types
+		ResultSet voxelTypesResultSet = statement.executeQuery("SELECT * FROM voxeltypes");
+		ResultSet itemTypesResultSet = statement.executeQuery("SELECT * FROM itemtypes");
+		
+		// Check voxel types
+		while (voxelTypesResultSet.next())
+		{
+			boolean typeFoundAndCorrect = false;
+			for (VoxelType type : voxelTypes)
+			{
+				if (type != null && type.voxelName.equals(voxelTypesResultSet.getString("name")))
+				{
+					if (type.voxelId != voxelTypesResultSet.getInt("id"))
+					{
+						ConsoleHelper.writeLog("ERROR", "Voxel id mismatch for type: " + type.voxelName, "WorldSave");
+					}
+					
+					typeFoundAndCorrect = true;
+				}
+			}
+			
+			if (!typeFoundAndCorrect)
+			{
+				ConsoleHelper.writeLog("ERROR", "Save game voxel type info table doesnt match local table. Porting worlds is not implemented yet!", "WorldSave");
+			}
+		}
+		
+		// Check item types
+		while (itemTypesResultSet.next())
+		{
+			boolean typeFoundAndCorrect = false;
+			for (ItemType type : itemTypes)
+			{
+				if (type != null && type.getItemName().equals(voxelTypesResultSet.getString("name")))
+				{
+					if (type.getItemId() != voxelTypesResultSet.getInt("id"))
+					{
+						ConsoleHelper.writeLog("ERROR", "Item id mismatch for type: " + type.getItemName(), "WorldSave");
+					}
+					
+					typeFoundAndCorrect = true;
+				}
+			}
+			
+			if (!typeFoundAndCorrect)
+			{
+				ConsoleHelper.writeLog("ERROR", "Save game item type info table doesnt match local table. Porting worlds is not implemented yet!", "WorldSave");
+			}
 		}
 	}
 

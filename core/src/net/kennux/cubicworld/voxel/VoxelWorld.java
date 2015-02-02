@@ -357,34 +357,35 @@ public class VoxelWorld
 	public BoundingBox getBoundingBox(int x, int y, int z)
 	{
 		// Calculate chunk position for calculating relative position
-		Vector3 chunk = this.getChunkspacePosition(new Vector3(x, y, z));
+		Vector3 chunkPos = this.getChunkspacePosition(new Vector3(x, y, z));
 
 		// Calculate relative position
-		x -= (int) (chunk.x * VoxelWorld.chunkWidth);
-		y -= (int) (chunk.y * VoxelWorld.chunkHeight);
-		z -= (int) (chunk.z * VoxelWorld.chunkDepth);
-		ChunkKey chunkKey = new ChunkKey((int) chunk.x, (int) chunk.y, (int) chunk.z);
+		x -= (int) (chunkPos.x * VoxelWorld.chunkWidth);
+		y -= (int) (chunkPos.y * VoxelWorld.chunkHeight);
+		z -= (int) (chunkPos.z * VoxelWorld.chunkDepth);
+		ChunkKey chunkKey = new ChunkKey((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z);
 
 		BoundingBox boundingBox = null;
 
 		synchronized (this.chunksLockObject)
 		{
-			if (!this.chunks.containsKey(chunkKey))
+			VoxelChunk chunk = this.chunks.get(chunkKey);
+			if (chunk == null)
 			{
 				return null;
 			}
 
 			// Offset the bounding box
-			boundingBox = this.chunks.get(chunkKey).getBoundingBox(x, y, z);
+			boundingBox = chunk.getBoundingBox(x, y, z);
 		}
 
 		if (boundingBox == null)
 			return null;
 		else
 		{
-			int xOffset = (int) (VoxelWorld.chunkWidth * chunk.x);
-			int yOffset = (int) (VoxelWorld.chunkHeight * chunk.y);
-			int zOffset = (int) (VoxelWorld.chunkDepth * chunk.z);
+			int xOffset = (int) (VoxelWorld.chunkWidth * chunkPos.x);
+			int yOffset = (int) (VoxelWorld.chunkHeight * chunkPos.y);
+			int zOffset = (int) (VoxelWorld.chunkDepth * chunkPos.z);
 			boundingBox.min.add(xOffset, yOffset, zOffset);
 			boundingBox.max.add(xOffset, yOffset, zOffset);
 
@@ -459,23 +460,23 @@ public class VoxelWorld
 	public byte getLightLevel(int x, int y, int z)
 	{
 		// Calculate chunk position for calculating relative position
-		Vector3 chunk = this.getChunkspacePosition(new Vector3(x, y, z));
+		Vector3 chunkPos = this.getChunkspacePosition(new Vector3(x, y, z));
 
 		// Calculate relative position
-		x -= (int) (chunk.x * VoxelWorld.chunkWidth);
-		y -= (int) (chunk.y * VoxelWorld.chunkHeight);
-		z -= (int) (chunk.z * VoxelWorld.chunkDepth);
-		ChunkKey chunkKey = new ChunkKey((int) chunk.x, (int) chunk.y, (int) chunk.z);
+		x -= (int) (chunkPos.x * VoxelWorld.chunkWidth);
+		y -= (int) (chunkPos.y * VoxelWorld.chunkHeight);
+		z -= (int) (chunkPos.z * VoxelWorld.chunkDepth);
 
 		synchronized (this.chunksLockObject)
 		{
-			if (!this.chunks.containsKey(chunkKey))
+			VoxelChunk chunk = this.getChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z, false);
+			if (chunk == null)
 			{
 				ConsoleHelper.writeLog("error", "Tried to get voxel light level from non existing chunk: " + chunk + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
 				return -1;
 			}
 
-			return this.chunks.get(chunkKey).getLightLevel(x, y, z);
+			return chunk.getLightLevel(x, y, z);
 		}
 	}
 
@@ -500,7 +501,7 @@ public class VoxelWorld
 			for (int x = (int) (chunkPos.x - chunkRadius); x <= chunkPos.x + chunkRadius; x++)
 				for (int z = (int) (chunkPos.z - chunkRadius); z <= chunkPos.z + chunkRadius; z++)
 					for (int y = 0; y < this.worldHeight / VoxelWorld.chunkHeight; y++)
-						if (!this.chunks.containsKey(new ChunkKey(x, y, z)) && y <= this.worldHeight / VoxelWorld.chunkHeight && new Vector3(chunkPos).sub(new Vector3(x, chunkPos.y, z)).len() <= chunkRadius)
+						if (y <= this.worldHeight / VoxelWorld.chunkHeight && new Vector3(chunkPos).sub(new Vector3(x, chunkPos.y, z)).len() <= chunkRadius && !this.chunks.containsKey(new ChunkKey(x, y, z)))
 						{
 							positions.add(new Vector3(x, y, z));
 
@@ -538,23 +539,24 @@ public class VoxelWorld
 	public VoxelData getVoxel(int x, int y, int z)
 	{
 		// Calculate chunk position for calculating relative position
-		Vector3 chunk = this.getChunkspacePosition(new Vector3(x, y, z));
+		Vector3 chunkPos = this.getChunkspacePosition(new Vector3(x, y, z));
 
 		// Calculate relative position
-		x -= (int) (chunk.x * VoxelWorld.chunkWidth);
-		y -= (int) (chunk.y * VoxelWorld.chunkHeight);
-		z -= (int) (chunk.z * VoxelWorld.chunkDepth);
-		ChunkKey chunkKey = new ChunkKey((int) chunk.x, (int) chunk.y, (int) chunk.z);
+		x -= (int) (chunkPos.x * VoxelWorld.chunkWidth);
+		y -= (int) (chunkPos.y * VoxelWorld.chunkHeight);
+		z -= (int) (chunkPos.z * VoxelWorld.chunkDepth);
+		ChunkKey chunkKey = new ChunkKey((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z);
 
 		synchronized (this.chunksLockObject)
 		{
-			if (!this.chunks.containsKey(chunkKey))
+			VoxelChunk chunk = this.chunks.get(chunkKey);
+			if (chunk == null)
 			{
 				ConsoleHelper.writeLog("error", "Tried to get voxel from non existing chunk: " + chunk + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
 				return null;
 			}
 
-			return this.chunks.get(chunkKey).getVoxel(x, y, z);
+			return chunk.getVoxel(x, y, z);
 		}
 	}
 
@@ -599,22 +601,21 @@ public class VoxelWorld
 	public boolean hasVoxel(int x, int y, int z)
 	{
 		// Calculate chunk position for calculating relative position
-		Vector3 chunk = this.getChunkspacePosition(new Vector3(x, y, z));
+		Vector3 chunkPos = this.getChunkspacePosition(new Vector3(x, y, z));
 
 		// Calculate relative position
-		x -= (int) (chunk.x * VoxelWorld.chunkWidth);
-		y -= (int) (chunk.y * VoxelWorld.chunkHeight);
-		z -= (int) (chunk.z * VoxelWorld.chunkDepth);
-		ChunkKey chunkKey = new ChunkKey((int) chunk.x, (int) chunk.y, (int) chunk.z);
+		x -= (int) (chunkPos.x * VoxelWorld.chunkWidth);
+		y -= (int) (chunkPos.y * VoxelWorld.chunkHeight);
+		z -= (int) (chunkPos.z * VoxelWorld.chunkDepth);
+		ChunkKey chunkKey = new ChunkKey((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z);
 
 		synchronized (this.chunksLockObject)
 		{
-			if (!this.chunks.containsKey(chunkKey))
-			{
+			VoxelChunk chunk = this.chunks.get(chunkKey);
+			if (chunk == null)
 				return false;
-			}
 
-			return this.chunks.get(chunkKey).hasVoxel(x, y, z);
+			return chunk.hasVoxel(x, y, z);
 		}
 	}
 
@@ -893,23 +894,24 @@ public class VoxelWorld
 	public void setVoxel(int x, int y, int z, VoxelData voxel)
 	{
 		// Calculate chunk position for calculating relative position
-		Vector3 chunk = this.getChunkspacePosition(new Vector3(x, y, z));
+		Vector3 chunkPos = this.getChunkspacePosition(new Vector3(x, y, z));
 
 		// Calculate relative position
-		x -= (int) (chunk.x * VoxelWorld.chunkWidth);
-		y -= (int) (chunk.y * VoxelWorld.chunkHeight);
-		z -= (int) (chunk.z * VoxelWorld.chunkDepth);
-		ChunkKey chunkKey = new ChunkKey((int) chunk.x, (int) chunk.y, (int) chunk.z);
+		x -= (int) (chunkPos.x * VoxelWorld.chunkWidth);
+		y -= (int) (chunkPos.y * VoxelWorld.chunkHeight);
+		z -= (int) (chunkPos.z * VoxelWorld.chunkDepth);
+		ChunkKey chunkKey = new ChunkKey((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z);
 
 		synchronized (this.chunksLockObject)
 		{
-			if (!this.chunks.containsKey(chunkKey))
+			VoxelChunk chunk = this.chunks.get(chunkKey);
+			if (chunk == null)
 			{
 				ConsoleHelper.writeLog("error", "Tried to set voxel from non existing chunk: " + chunk + " at position " + x + "|" + y + "|" + z + ", isServer: " + this.isServer, "VoxelWorld");
 				return;
 			}
 
-			this.chunks.get(chunkKey).setVoxel(x, y, z, voxel);
+			chunk.setVoxel(x, y, z, voxel);
 		}
 	}
 

@@ -73,7 +73,6 @@ public class CubicWorldServerSaveThread implements Runnable
 				}
 				catch (Exception e)
 				{
-					e.printStackTrace();
 					ConsoleHelper.writeLog("ERROR", "Error while writing savegame: ", "Server");
 					ConsoleHelper.logError(e);
 					System.exit(-1);

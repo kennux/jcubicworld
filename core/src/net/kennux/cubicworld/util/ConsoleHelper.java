@@ -13,8 +13,10 @@ import java.util.Date;
  */
 public class ConsoleHelper
 {
+	public static boolean silent = false;
+	
 	/**
-	 * Logs a stacktrace to the console.
+	 * Logs an exception to the console.
 	 */
 	public static void logError(Exception e)
 	{
@@ -40,6 +42,4 @@ public class ConsoleHelper
 			return;
 		System.out.println("[" + type + "][" + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()) + "][" + module + "]: " + message);
 	}
-
-	public static boolean silent = false;
 }

@@ -95,10 +95,16 @@ public class CubicWorldConfiguration
 
 	/**
 	 * The standard packet cull distance.
-	 * Will get returned by getCullDistance() in APacketModel.
+	 * Will get returned by getCullDistance() in APacketModel by standard.
 	 */
 	public static final float standardDistanceCullDistance = entityCullDistance;
 
+	/**
+	 * Limits the voxel mesh updates for chunks per frame.
+	 * -1 means there is no limit.
+	 */
+	public static final int chunkUpdatesPerFrameLimit = 10;
+	
 	/**
 	 * All plugin classpaths are stored in here after load() was called.
 	 */
