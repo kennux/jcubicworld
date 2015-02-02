@@ -180,6 +180,42 @@ public class VoxelWorld
 			}
 		}
 	}
+	
+	/**
+	 * Returns true if the chunk at the given position is loaded & initialized.
+	 * @param chunkX
+	 * @param chunkY
+	 * @param chunkZ
+	 * @return
+	 */
+	public boolean hasChunk(Vector3 chunkPos)
+	{
+		return this.hasChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
+	}
+	
+	/**
+	 * Returns true if the chunk at the given position is loaded & initialized.
+	 * @param chunkX
+	 * @param chunkY
+	 * @param chunkZ
+	 * @return
+	 */
+	public boolean hasChunk(int chunkX, int chunkY, int chunkZ)
+	{
+		return this.hasChunk(new ChunkKey(chunkX, chunkY, chunkZ));
+	}
+	
+	/**
+	 * Returns true if the chunk at the given position is loaded & initialized.
+	 * @param chunkKey
+	 * @return
+	 */
+	public boolean hasChunk(ChunkKey chunkKey)
+	{
+		VoxelChunk chunk = this.chunks.get(chunkKey);
+		
+		return chunk != null && chunk.isInitialized();
+	}
 
 	/**
 	 * Performs a cleanup, iterates through every chunkobject and checks if it

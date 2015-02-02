@@ -326,8 +326,10 @@ public class PlayerController extends AEntity
 		// Move
 		Vector3 newPos = new Vector3(this.getPosition()).add(this.velocity);
 
-		// Collision check
+		// Collision check for the new player position
 		VoxelCollision collision = this.voxelWorld.collisionCheck(this.getBoundingBox(newPos));
+		
+		// Check for collision
 		if (collision != null)
 		{
 			// Intersection! reset collided axis!
@@ -337,7 +339,7 @@ public class PlayerController extends AEntity
 				this.velocity.y = 0;
 			else if (collision.collisionZ)
 				this.velocity.z = 0;
-
+			
 			newPos = this.getPosition();
 		}
 

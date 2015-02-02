@@ -102,8 +102,9 @@ public class CubicWorldConfiguration
 	/**
 	 * Limits the voxel mesh updates for chunks per frame.
 	 * -1 means there is no limit.
+	 * This function is currently not completely implemented.
 	 */
-	public static final int chunkUpdatesPerFrameLimit = 10;
+	public static final int chunkUpdatesPerFrameLimit = -1;
 	
 	/**
 	 * All plugin classpaths are stored in here after load() was called.
