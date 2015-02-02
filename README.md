@@ -94,3 +94,11 @@ Planned Features
 - Weapons (Swords, Bows, Guns)
 - Tools (Pickaxe, Shovel, ...)
 - Trading System with either direct trading (Player to Player) or shops.
+
+
+Screenshots
+------------------
+
+![Furnaces, the middle one is working](http://kennux.net/wordpress/wp-content/uploads/2015/02/jcubicworld_furnaces-1024x789.png)
+![Player inventory](http://kennux.net/wordpress/wp-content/uploads/2015/02/jcubicworld_inventory-1024x792.png)
+![Test entity implementation with A* Pathfinding](http://kennux.net/wordpress/wp-content/uploads/2014/11/screenshot1416230295.png)
