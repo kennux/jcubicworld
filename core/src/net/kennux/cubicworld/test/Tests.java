@@ -1,6 +1,8 @@
 package net.kennux.cubicworld.test;
 
+import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import net.kennux.cubicworld.Bootstrap;
 import net.kennux.cubicworld.CubicWorldConfiguration;
@@ -8,6 +10,7 @@ import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.PluginManager;
 import net.kennux.cubicworld.ServerBootstrap;
 import net.kennux.cubicworld.util.ConsoleHelper;
+import net.kennux.cubicworld.voxel.VoxelType;
 
 /**
  * This class contains a main function for executing cubic world tests.
@@ -19,6 +22,7 @@ import net.kennux.cubicworld.util.ConsoleHelper;
  */
 public class Tests
 {
+	  
 	public static void main(String[] args)
 	{
 		// Change this to true if you want to test the networking

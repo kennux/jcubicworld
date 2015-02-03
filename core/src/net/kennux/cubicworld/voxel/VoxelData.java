@@ -5,6 +5,8 @@ import net.kennux.cubicworld.inventory.BlockInventory;
 import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
+import net.kennux.cubicworld.util.ConsoleHelper;
+import net.kennux.cubicworld.voxel.datamodels.IVoxelDataModel;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -41,6 +43,21 @@ public class VoxelData
 			data.blockInventory = new BlockInventory(data.voxelType.getInventorySize());
 			data.blockInventory.setFilterRuleSet(data.voxelType.getFilterRuleSet());
 			data.blockInventory.addItemsToStack(1, 10, BasePlugin.itemCoalId);
+		}
+		
+		// Data model instantiation
+		Class<? extends IVoxelDataModel> dataModelClass = data.voxelType.getDataModelClass();
+		if (dataModelClass != null)
+		{
+			try
+			{
+				data.dataModel = dataModelClass.newInstance();
+			}
+			catch (InstantiationException | IllegalAccessException e)
+			{
+				ConsoleHelper.writeLog("ERROR", "Error instantiating a voxel data model!", "VoxelData.construct");
+				ConsoleHelper.logError(e);
+			}
 		}
 
 		return data;
@@ -79,6 +96,11 @@ public class VoxelData
 		{
 			v.blockInventory.deserializeInventory(reader);
 		}
+		
+		if (v.dataModel != null)
+		{
+			v.dataModel.deserialize(reader);
+		}
 
 		return v;
 	}
@@ -90,7 +112,6 @@ public class VoxelData
 	 */
 	public static void serialize(VoxelData voxelDataObject, BitWriter writer)
 	{
-
 		if (voxelDataObject == null || voxelDataObject.voxelType == null)
 		{
 			writer.writeShort((short) -1);
@@ -106,6 +127,12 @@ public class VoxelData
 			{
 				voxelDataObject.blockInventory.serializeInventory(writer);
 			}
+			
+			// Write data model
+			if (voxelDataObject.dataModel != null)
+			{
+				voxelDataObject.dataModel.serialize(writer);
+			}
 		}
 	}
 
@@ -115,11 +142,25 @@ public class VoxelData
 	 */
 	public static Sound standardFootstepSound;
 
+	/**
+	 * The voxel type of this voxel data.
+	 */
 	public VoxelType voxelType;
 
+	/**
+	 * The rotation of this voxel data.
+	 */
 	public byte rotation = 0;
 
+	/**
+	 * This voxeldata's light level.
+	 */
 	public byte lightLevel;
+	
+	/**
+	 * The voxel data model.
+	 */
+	public IVoxelDataModel dataModel;
 
 	/**
 	 * Gets created in the construct() methods.
@@ -144,7 +185,11 @@ public class VoxelData
 	 */
 	public BlockInventory blockInventory;
 
-	private int renderStateId = 0;
+	/**
+	 * The current render state.
+	 * This is a byte, because there shouldnt be more than 127 render states. never.
+	 */
+	private byte renderStateId = 0;
 
 	/**
 	 * @return the renderStateId
@@ -185,6 +230,6 @@ public class VoxelData
 	 */
 	public void setRenderStateId(int renderStateId)
 	{
-		this.renderStateId = renderStateId;
+		this.renderStateId = (byte)renderStateId;
 	}
 }

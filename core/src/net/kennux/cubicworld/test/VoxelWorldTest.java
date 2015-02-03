@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import junit.framework.TestCase;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
+import net.kennux.cubicworld.test.voxel.TestDataModel;
 import net.kennux.cubicworld.voxel.RaycastHit;
 import net.kennux.cubicworld.voxel.VoxelChunk;
 import net.kennux.cubicworld.voxel.VoxelData;
@@ -314,15 +315,18 @@ public class VoxelWorldTest extends TestCase
 		// Set the update handler temporary
 		VoxelType dirtType = VoxelEngine.getVoxelType(BasePlugin.voxelDirtId);
 		dirtType.setUpdateHandler(voxelUpdateHandler);
+		dirtType.setDataModelClass(TestDataModel.class);
 
 		// Generate 0|0|0 chunk
 		voxelWorld.generateChunk(0, 0, 0, true);
 
 		// Create the voxel data for testing
 		VoxelData voxelData = VoxelData.construct(BasePlugin.voxelDirtId);
-
+		
+		assertEquals(voxelData.dataModel.getClass(), TestDataModel.class);
+		
 		// Record expected update handler behaviour
-		voxelUpdateHandler.handleUpdate(voxelData, 0, 4, 0, true);
+		voxelUpdateHandler.handleUpdate(voxelData, 0, 4, 0, true, voxelData.dataModel);
 
 		EasyMock.replay(voxelUpdateHandler);
 
@@ -347,5 +351,6 @@ public class VoxelWorldTest extends TestCase
 
 		// Remove update handler
 		dirtType.setUpdateHandler(null);
+		dirtType.setDataModelClass(null);
 	}
 }

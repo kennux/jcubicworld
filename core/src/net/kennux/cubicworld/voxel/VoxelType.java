@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import net.kennux.cubicworld.inventory.InventoryFilterRuleSet;
+import net.kennux.cubicworld.voxel.datamodels.IVoxelDataModel;
 import net.kennux.cubicworld.voxel.handlers.IVoxelActionHandler;
 import net.kennux.cubicworld.voxel.handlers.IVoxelUpdateHandler;
 
@@ -97,6 +98,11 @@ public class VoxelType
 	 * Value = rendering definition
 	 */
 	private HashMap<Integer, VoxelRenderState> renderStates = new HashMap<Integer, VoxelRenderState>();
+	
+	/**
+	 * The data model class of this voxel type.
+	 */
+	private Class<? extends IVoxelDataModel> dataModelClass;
 
 	/**
 	 * Returns true if this voxel type is able to physically collide with other objects.
@@ -343,12 +349,28 @@ public class VoxelType
 	}
 
 	/**
-	 * @param updateHandler
-	 *            the updateHandler to set
+	 * @param updateHandler the updateHandler to set
 	 */
 	public VoxelType setUpdateHandler(IVoxelUpdateHandler updateHandler)
 	{
 		this.updateHandler = updateHandler;
+		return this;
+	}
+
+	/**
+	 * @return the dataModelClass
+	 */
+	public Class<? extends IVoxelDataModel> getDataModelClass()
+	{
+		return dataModelClass;
+	}
+
+	/**
+	 * @param dataModelClass the dataModelClass to set
+	 */
+	public VoxelType setDataModelClass(Class<? extends IVoxelDataModel> dataModelClass)
+	{
+		this.dataModelClass = dataModelClass;
 		return this;
 	}
 }

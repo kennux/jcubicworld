@@ -20,8 +20,8 @@ public class ConsoleHelper
 	 */
 	public static void logError(Exception e)
 	{
-		if (silent)
-			return;
+		/*if (silent)
+			return;*/
 
 		e.printStackTrace();
 	}

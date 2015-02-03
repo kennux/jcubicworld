@@ -65,6 +65,7 @@ import net.kennux.cubicworld.voxel.RaycastHit;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelEngine;
 import net.kennux.cubicworld.voxel.VoxelRenderState;
+import net.kennux.cubicworld.voxel.datamodels.IVoxelDataModel;
 import net.kennux.cubicworld.voxel.handlers.IVoxelActionHandler;
 import net.kennux.cubicworld.voxel.handlers.MachineUpdateHandler;
 
@@ -399,7 +400,7 @@ public class BasePlugin extends APlugin
 
 					if (voxelActionHandler != null)
 					{
-						voxelActionHandler.handleAction(voxelData, blockPos);
+						voxelActionHandler.handleAction(voxelData, blockPos, voxelData.dataModel);
 					}
 				}
 			}
@@ -449,7 +450,7 @@ public class BasePlugin extends APlugin
 		{
 
 			@Override
-			public void handleAction(VoxelData voxelData, Vector3 voxelPosition)
+			public void handleAction(VoxelData voxelData, Vector3 voxelPosition, IVoxelDataModel dataModel)
 			{
 				// Get cubic world game instance.
 				CubicWorldGame cubicWorld = CubicWorld.getClient();

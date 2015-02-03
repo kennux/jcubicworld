@@ -949,8 +949,10 @@ public class VoxelChunk implements Disposable
 				int absoluteX = (int) absolutePosition.x;
 				int absoluteY = (int) absolutePosition.y;
 				int absoluteZ = (int) absolutePosition.z;
-
-				entry.getValue().handleUpdate(this.getVoxel(x, y, z), absoluteX, absoluteY, absoluteZ, this.master.isServer());
+				
+				VoxelData voxelData = this.getVoxel(x, y, z);
+				
+				entry.getValue().handleUpdate(voxelData, absoluteX, absoluteY, absoluteZ, this.master.isServer(), voxelData.dataModel);
 			}
 
 			if (this.voxelMeshDirty && this.generationDone && !this.master.isServer())
