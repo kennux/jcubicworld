@@ -108,6 +108,11 @@ public class VoxelWorld
 	 * The camer used for model rendering.
 	 */
 	private Camera camera;
+	
+	/**
+	 * Gets incremented after every update call.
+	 */
+	public int updateCallId;
 
 	// Event handlers
 	private IVoxelDataUpdateHandler voxelDataUpdateHandler;
@@ -134,8 +139,6 @@ public class VoxelWorld
 		this.camera = camera;
 		this.chunkModelBatch = new ModelBatch();
 		this.worldShader = shader;
-
-		this.initUpdateThread();
 	}
 
 	public VoxelWorld(ShaderProgram shader, Camera camera, int worldHeight)
@@ -145,6 +148,14 @@ public class VoxelWorld
 		this.worldHeight = worldHeight;
 	}
 
+	/**
+	 * Returns true if all chunks are ready for rendering.
+	 */
+	public boolean allChunksReady()
+	{
+		return this.chunks.allChunksReady();
+	}
+	
 	/**
 	 * Returns the count of chunks stacked on the y-axis.
 	 * Counting begins at 0!
@@ -215,6 +226,42 @@ public class VoxelWorld
 		VoxelChunk chunk = this.chunks.get(chunkKey);
 		
 		return chunk != null && chunk.isInitialized();
+	}
+	
+	/**
+	 * Returns true if the chunk at the given position is loaded, initialized and lighting ready.
+	 * @param chunkX
+	 * @param chunkY
+	 * @param chunkZ
+	 * @return
+	 */
+	public boolean chunkLightingReady(Vector3 chunkPos)
+	{
+		return this.chunkLightingReady((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
+	}
+	
+	/**
+	 * Returns true if the chunk at the given position is loaded, initialized and lighting ready.
+	 * @param chunkX
+	 * @param chunkY
+	 * @param chunkZ
+	 * @return
+	 */
+	public boolean chunkLightingReady(int chunkX, int chunkY, int chunkZ)
+	{
+		return this.chunkLightingReady(new ChunkKey(chunkX, chunkY, chunkZ));
+	}
+	
+	/**
+	 * Returns true if the chunk at the given position is loaded, initialized and lighting ready.
+	 * @param chunkKey
+	 * @return
+	 */
+	public boolean chunkLightingReady(ChunkKey chunkKey)
+	{
+		VoxelChunk chunk = this.chunks.get(chunkKey);
+		
+		return chunk != null && chunk.isInitializedAndLightingReady();
 	}
 
 	/**
@@ -486,7 +533,7 @@ public class VoxelWorld
 
 	/**
 	 * Gets the voxel light level at the given global voxelspace position.
-	 * Returns -1 in case of an error.
+	 * Returns 0 in case of an error.
 	 * 
 	 * @param x
 	 * @param y
@@ -508,8 +555,8 @@ public class VoxelWorld
 			VoxelChunk chunk = this.getChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z, false);
 			if (chunk == null)
 			{
-				ConsoleHelper.writeLog("error", "Tried to get voxel light level from non existing chunk: " + chunk + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
-				return -1;
+				// ConsoleHelper.writeLog("error", "Tried to get voxel light level from non existing chunk: " + chunkPos + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
+				return 0;
 			}
 
 			return chunk.getLightLevel(x, y, z);
@@ -537,7 +584,7 @@ public class VoxelWorld
 			for (int x = (int) (chunkPos.x - chunkRadius); x <= chunkPos.x + chunkRadius; x++)
 				for (int z = (int) (chunkPos.z - chunkRadius); z <= chunkPos.z + chunkRadius; z++)
 					for (int y = 0; y < this.worldHeight / VoxelWorld.chunkHeight; y++)
-						if (y <= this.worldHeight / VoxelWorld.chunkHeight && new Vector3(chunkPos).sub(new Vector3(x, chunkPos.y, z)).len() <= chunkRadius && !this.chunks.containsKey(new ChunkKey(x, y, z)))
+						if (y <= this.worldHeight / VoxelWorld.chunkHeight && new Vector3(new Vector3(chunkPos.x, 0, chunkPos.z)).sub(new Vector3(x, 0, z)).len() <= chunkRadius && !this.chunks.containsKey(new ChunkKey(x, y, z)))
 						{
 							positions.add(new Vector3(x, y, z));
 
@@ -680,7 +727,7 @@ public class VoxelWorld
 	 * This gets only called on the client. The server got it's own update thread handler-
 	 * The thread will continously call chunks.update().
 	 */
-	private void initUpdateThread()
+	public void initUpdateThread()
 	{
 		// World update handler
 		this.worldUpdateThread = new Thread(new Runnable()
@@ -820,9 +867,21 @@ public class VoxelWorld
 	 */
 	public RaycastHit raycast(Vector3 start, Vector3 direction, float length)
 	{
+		return this.raycast(start, direction, length, 0.05f);
+	}
 
+	/**
+	 * Performs a raycast check in the voxel world and returns a raycast hit.
+	 * Will return null if nothing was found on the ray.
+	 * 
+	 * @param start
+	 * @param direction
+	 * @param length
+	 * @return
+	 */
+	public RaycastHit raycast(Vector3 start, Vector3 direction, float length, float distancePerStep)
+	{
 		float distanceTraveled = 0;
-		float distancePerStep = 0.05f;
 
 		Vector3 directionPerStep = new Vector3(direction).nor();
 		directionPerStep.x *= distancePerStep;
@@ -830,6 +889,7 @@ public class VoxelWorld
 		directionPerStep.z *= distancePerStep;
 
 		Vector3 currentPosition = new Vector3(start);
+		Vector3 lastBlockPosition = new Vector3();
 
 		// Perform raycast
 		while (distanceTraveled <= length)
@@ -838,7 +898,7 @@ public class VoxelWorld
 			currentPosition = currentPosition.add(directionPerStep);
 			Vector3 blockPosition = this.getVoxelspacePosition(currentPosition);
 
-			if (this.hasVoxel((int) blockPosition.x, (int) blockPosition.y, (int) blockPosition.z))
+			if (blockPosition != lastBlockPosition && this.hasVoxel((int) blockPosition.x, (int) blockPosition.y, (int) blockPosition.z))
 			{
 				// Voxel hit
 				RaycastHit hitInfo = new RaycastHit();
@@ -882,6 +942,8 @@ public class VoxelWorld
 
 				return hitInfo;
 			}
+			
+			lastBlockPosition = blockPosition;
 			distanceTraveled += distancePerStep;
 		}
 
@@ -1005,5 +1067,6 @@ public class VoxelWorld
 		{
 			this.chunks.update();
 		}
+		updateCallId++;
 	}
 }

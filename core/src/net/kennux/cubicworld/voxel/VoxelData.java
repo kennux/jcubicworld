@@ -36,7 +36,6 @@ public class VoxelData
 
 		data.voxelType = VoxelEngine.getVoxelType(typeId);
 		data.rotation = 0;
-		data.lightLevel = CubicWorldConfiguration.baseLightLevel;
 
 		if (data.voxelType.getInventorySize() > 0)
 		{
@@ -87,7 +86,7 @@ public class VoxelData
 
 		// Filter invalid block data
 		if (voxelId == -1 || rotation == -1)
-			return null;
+			return new VoxelData();
 
 		VoxelData v = VoxelData.construct(voxelId);
 		v.rotation = rotation;

@@ -10,6 +10,7 @@ import net.kennux.cubicworld.gui.GuiManager;
 import net.kennux.cubicworld.input.GameInputProcessor;
 import net.kennux.cubicworld.input.InputManager;
 import net.kennux.cubicworld.networking.CubicWorldClient;
+import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.profiler.Profiler;
 import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.util.DebugHelper;
@@ -236,6 +237,7 @@ public class CubicWorldGame extends ApplicationAdapter
 		try
 		{
 			this.client = new CubicWorldClient(this, "127.0.0.1", (short) 13371);
+			this.client.update(this.playerController.getPosition());
 		}
 		catch (Exception e)
 		{
@@ -243,6 +245,42 @@ public class CubicWorldGame extends ApplicationAdapter
 			ConsoleHelper.logError(e);
 			System.exit(-1);
 		}
+		
+		// Wait till all chunk requests are processed
+		while(ClientChunkRequest.areRequestsPending())
+		{
+			this.client.update(this.playerController.getPosition());
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		// Generate all chunk meshes
+		int creationPerFrameLimit = CubicWorldConfiguration.meshCreationPerFrameLimit;
+		int generationPerFrameLimit = CubicWorldConfiguration.meshGenerationsPerFrameLimit;
+		CubicWorldConfiguration.meshCreationPerFrameLimit = -1;
+		
+		// Wait till all chunks are ready
+		while(!this.voxelWorld.allChunksReady())
+		{
+			this.voxelWorld.update();
+			this.voxelWorld.render(this.cam);
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		CubicWorldConfiguration.meshCreationPerFrameLimit = creationPerFrameLimit;
+		CubicWorldConfiguration.meshGenerationsPerFrameLimit = generationPerFrameLimit;
+		
+		// Start update thread AFTER the client requested all chunks
+		this.voxelWorld.initUpdateThread();
 
 		// Setup input multiplexer
 		this.inputMultiplexer = new InputMultiplexer();
@@ -341,7 +379,7 @@ public class CubicWorldGame extends ApplicationAdapter
 		this.profiler.startProfiling("Plugin updates", "");
 		this.pluginManager.fireEvent("update", false);
 		this.profiler.stopProfiling("Plugin updates");
-
+		
 		this.profiler.stopProfiling("Update");
 
 		this.profiler.startProfiling("Render", "The whole rendering part of the render() routine");

@@ -83,8 +83,8 @@ public class CubicWorldClient extends AClientSocket
 	{
 		super.update();
 
-		// Make sure all chunks are loaded every 60th frame
-		if (Gdx.graphics.getFrameId() % 60 == 0)
+		// Make sure all chunks are loaded every 60th frame or in the init() method which has frameid -1
+		if (Gdx.graphics.getFrameId() % 60 == 0 || Gdx.graphics.getFrameId() == -1)
 		{
 			Vector3[] chunksToRequest = this.cubicWorld.voxelWorld.getNeededChunks(playerPosition, CubicWorldConfiguration.chunkLoadDistance, true);
 
@@ -94,6 +94,8 @@ public class CubicWorldClient extends AClientSocket
 				chunkRequest.chunkX = (int) chunkPos.x;
 				chunkRequest.chunkY = (int) chunkPos.y;
 				chunkRequest.chunkZ = (int) chunkPos.z;
+				
+				ClientChunkRequest.requestedChunkData(chunkRequest.chunkX, chunkRequest.chunkY, chunkRequest.chunkZ);
 
 				this.sendPacket(chunkRequest);
 			}

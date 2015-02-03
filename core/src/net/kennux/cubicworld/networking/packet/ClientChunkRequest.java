@@ -1,5 +1,9 @@
 package net.kennux.cubicworld.networking.packet;
 
+import java.util.ArrayList;
+
+import com.badlogic.gdx.math.Vector3;
+
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.networking.APacketModel;
@@ -18,6 +22,43 @@ import net.kennux.cubicworld.serialization.BitWriter;
  */
 public class ClientChunkRequest extends APacketModel
 {
+	/**
+	 * The pending chunk requests list.
+	 */
+	private static ArrayList<Vector3> pendingRequests = new ArrayList<Vector3>();
+	
+	/**
+	 * Returns true if there are chunk requests pending.
+	 * @return
+	 */
+	public static boolean areRequestsPending()
+	{
+		return pendingRequests.size() > 0;
+	}
+	
+	/**
+	 * Call this function if a pending chunk request was processed.
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	public static void recievedChunkData(int x, int y, int z)
+	{
+		Vector3 vector = new Vector3(x,y,z);
+		pendingRequests.remove(vector);
+	}
+	
+	/**
+	 * Call this function if a chunk was requested.
+	 * @param chunkX
+	 * @param chunkY
+	 * @param chunkZ
+	 */
+	public static void requestedChunkData(int chunkX, int chunkY, int chunkZ)
+	{
+		pendingRequests.add(new Vector3(chunkX, chunkY, chunkZ));
+	}
+	
 	// Chunk coordinates
 	public int chunkX = 0;
 	public int chunkY = 0;
@@ -39,6 +80,7 @@ public class ClientChunkRequest extends APacketModel
 				return;
 			}
 		}
+		
 		client.chunkRequests.add(this);
 	}
 

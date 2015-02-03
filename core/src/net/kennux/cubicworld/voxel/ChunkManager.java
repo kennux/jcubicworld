@@ -328,4 +328,23 @@ public class ChunkManager
 			}
 		}
 	}
+
+	/**
+	 * Returns true if all chunks are ready for rendering.
+	 */
+	public boolean allChunksReady()
+	{
+		boolean allReady = true;
+
+		synchronized (this.lockObject)
+		{
+			for (VoxelChunk c : this.chunks)
+			{
+				if (c != null && !c.isReadyForRendering())
+					allReady = false;
+			}
+		}
+		
+		return allReady;
+	}
 }

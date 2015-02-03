@@ -8,6 +8,7 @@ import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.inventory.IInventoryUpdateHandler;
+import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.networking.packet.inventory.ServerBlockInventoryUpdate;
 import net.kennux.cubicworld.voxel.handlers.IVoxelUpdateHandler;
 
@@ -96,7 +97,27 @@ public class VoxelChunk implements Disposable
 			new VoxelFace[] { VoxelFace.RIGHT, VoxelFace.LEFT, VoxelFace.TOP, VoxelFace.BOTTOM, VoxelFace.FRONT, VoxelFace.BACK },
 			// Facing left
 			new VoxelFace[] { VoxelFace.BACK, VoxelFace.FRONT, VoxelFace.TOP, VoxelFace.BOTTOM, VoxelFace.RIGHT, VoxelFace.LEFT } };
-
+	
+	/**
+	 * <pre>
+	 * The normal vectors for voxelfaces.
+	 * Example usage:
+	 * 
+	 * VoxelFace f = VoxelFace.LEFT;
+	 * Vector3 normal = FACE_NORMALS[f.getValue()];
+	 * 
+	 * All vectors are 1 unit long!.
+	 * </pre>
+	 */
+	public static final Vector3[] FACE_NORMALS = new Vector3[]
+	{
+		new Vector3(1,0,0),
+		new Vector3(-1,0,0),
+		new Vector3(0,1,0),
+		new Vector3(0,-1,0),
+		new Vector3(0,0,1),
+		new Vector3(0,0,-1),
+	};
 	/**
 	 * Rotation quaternion mappings.
 	 * This quaternions will get used to define a voxel model's rendering rotation based on the rotation byte.
@@ -398,12 +419,12 @@ public class VoxelChunk implements Disposable
 			{
 				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
 				{
-					for (int y = 0; y < VoxelWorld.chunkHeight; y++)
+					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
 					{
-						for (int z = 0; z < VoxelWorld.chunkDepth; z++)
+						for (int y = 0; y < VoxelWorld.chunkHeight; y++)
 						{
 							// Voxel in my position?
-							if (voxelData[x][y][z] == null)
+							if (voxelData[x][y][z] == null || voxelData[x][y][z].voxelType == null)
 								continue;
 
 							// Model or normal voxel rendering?
@@ -426,49 +447,58 @@ public class VoxelChunk implements Disposable
 							}
 							else
 							{
-								// Traditional voxel rendering
+								// Normal voxel rendering
 								VoxelFace[] faceMappings = ROTATION_MAPPINGS[voxelData[x][y][z].rotation];
-
-								// Left side un-covered?
-								if (x == 0 || (voxelData[x - 1][y][z] == null || voxelData[x - 1][y][z].voxelType.voxelId < 0 || voxelData[x - 1][y][z].voxelType.transparent))
+								Vector3 absolutePos = this.getAbsoluteBlockPosition(x, y, z);
+								int absX = (int)absolutePos.x;
+								int absY = (int)absolutePos.y;
+								int absZ = (int)absolutePos.z;
+								
+								// Check which sites are visible and which not.
+								boolean leftSideVisible = x == 0 || (voxelData[x - 1][y][z] == null || voxelData[x - 1][y][z].voxelType == null || voxelData[x - 1][y][z].voxelType.voxelId < 0 || voxelData[x - 1][y][z].voxelType.transparent);
+								boolean rightSideVisible = x == VoxelWorld.chunkWidth - 1 || ((voxelData[x + 1][y][z] == null || voxelData[x + 1][y][z].voxelType == null || voxelData[x + 1][y][z].voxelType.voxelId < 0 || voxelData[x + 1][y][z].voxelType.transparent));
+								boolean topSideVisible = y == VoxelWorld.chunkHeight - 1 || ((voxelData[x][y + 1][z] == null || voxelData[x][y + 1][z].voxelType == null || voxelData[x][y + 1][z].voxelType.voxelId < 0 || voxelData[x][y + 1][z].voxelType.transparent));
+								boolean bottomSideVisible = y == 0 || (voxelData[x][y - 1][z] == null || voxelData[x][y - 1][z].voxelType == null || voxelData[x][y - 1][z].voxelType.voxelId < 0 || voxelData[x][y - 1][z].voxelType.transparent);
+								boolean backSideVisible = z == 0 || (voxelData[x][y][z - 1] == null || voxelData[x][y][z - 1].voxelType == null || voxelData[x][y][z - 1].voxelType.voxelId < 0 || voxelData[x][y][z - 1].voxelType.transparent);
+								boolean frontSideVisible = z == VoxelWorld.chunkDepth - 1 || ((voxelData[x][y][z + 1] == null || this.voxelData[x][y][z+1].voxelType == null || voxelData[x][y][z + 1].voxelType.voxelId < 0 || voxelData[x][y][z + 1].voxelType.transparent));
+								
+								// Variables for lighting
+								byte leftLighting = (leftSideVisible ? this.master.getLightLevel(absX+1, absY, absZ) : -1);
+								byte rightLighting = (rightSideVisible ? this.master.getLightLevel(absX-1, absY, absZ) : -1);
+								byte topLighting = (topSideVisible ? this.master.getLightLevel(absX, absY+1, absZ) : -1);
+								byte bottomLighting = (bottomSideVisible ? this.master.getLightLevel(absX, absY-1, absZ) : -1);
+								byte backLighting = (backSideVisible ? this.master.getLightLevel(absX, absY, absZ-1) : -1);
+								byte frontLighting = (frontSideVisible ? this.master.getLightLevel(absX, absY, absZ+1) : -1);
+								
+								// Write mesh data
+								if (leftSideVisible)
 								{
-									// Un-Covered! Add mesh data!
-									this.WriteSideData(vertices, indices, uvs, colors, normals, LEFT_SIDE_VERTICES, LEFT_SIDE_NORMALS, LEFT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[0], voxelData[x][y][z].lightLevel);
+									this.WriteSideData(vertices, indices, uvs, colors, normals, LEFT_SIDE_VERTICES, LEFT_SIDE_NORMALS, LEFT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[0], leftLighting);
 									indicesCounter += LEFT_SIDE_VERTICES.length;
 								}
-								// Right side un-covered?
-								if (x == VoxelWorld.chunkWidth - 1 || ((voxelData[x + 1][y][z] == null || voxelData[x + 1][y][z].voxelType.voxelId < 0 || voxelData[x + 1][y][z].voxelType.transparent)))
+								if (rightSideVisible)
 								{
-									// Un-Covered!
-									this.WriteSideData(vertices, indices, uvs, colors, normals, RIGHT_SIDE_VERTICES, RIGHT_SIDE_NORMALS, RIGHT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[1], voxelData[x][y][z].lightLevel);
+									this.WriteSideData(vertices, indices, uvs, colors, normals, RIGHT_SIDE_VERTICES, RIGHT_SIDE_NORMALS, RIGHT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[1], rightLighting);
 									indicesCounter += RIGHT_SIDE_VERTICES.length;
 								}
-								// Top side un-covered?
-								if (y == VoxelWorld.chunkHeight - 1 || ((voxelData[x][y + 1][z] == null || voxelData[x][y + 1][z].voxelType.voxelId < 0 || voxelData[x][y + 1][z].voxelType.transparent)))
+								if (topSideVisible)
 								{
-									// Un-Covered!
-									this.WriteSideData(vertices, indices, uvs, colors, normals, TOP_SIDE_VERTICES, TOP_SIDE_NORMALS, TOP_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[2], voxelData[x][y][z].lightLevel);
+									this.WriteSideData(vertices, indices, uvs, colors, normals, TOP_SIDE_VERTICES, TOP_SIDE_NORMALS, TOP_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[2], topLighting);
 									indicesCounter += TOP_SIDE_VERTICES.length;
 								}
-								// Bottom side un-covered?
-								if (y == 0 || (voxelData[x][y - 1][z] == null || voxelData[x][y - 1][z].voxelType.voxelId < 0 || voxelData[x][y - 1][z].voxelType.transparent))
+								if (bottomSideVisible)
 								{
-									// Un-Covered!
-									this.WriteSideData(vertices, indices, uvs, colors, normals, BOTTOM_SIDE_VERTICES, BOTTOM_SIDE_NORMALS, BOTTOM_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[3], voxelData[x][y][z].lightLevel);
+									this.WriteSideData(vertices, indices, uvs, colors, normals, BOTTOM_SIDE_VERTICES, BOTTOM_SIDE_NORMALS, BOTTOM_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[3], bottomLighting);
 									indicesCounter += BOTTOM_SIDE_VERTICES.length;
 								}
-								// Back side un-covered?
-								if (z == 0 || (voxelData[x][y][z - 1] == null || voxelData[x][y][z - 1].voxelType.voxelId < 0 || voxelData[x][y][z - 1].voxelType.transparent))
+								if (backSideVisible)
 								{
-									// Un-Covered!
-									this.WriteSideData(vertices, indices, uvs, colors, normals, BACK_SIDE_VERTICES, BACK_SIDE_NORMALS, BACK_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[4], voxelData[x][y][z].lightLevel);
+									this.WriteSideData(vertices, indices, uvs, colors, normals, BACK_SIDE_VERTICES, BACK_SIDE_NORMALS, BACK_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[4], backLighting);
 									indicesCounter += BACK_SIDE_VERTICES.length;
 								}
-								// Front side un-covered?
-								if (z == VoxelWorld.chunkDepth - 1 || ((voxelData[x][y][z + 1] == null || voxelData[x][y][z + 1].voxelType.voxelId < 0 || voxelData[x][y][z + 1].voxelType.transparent)))
+								if (frontSideVisible)
 								{
-									// Un-Covered!
-									this.WriteSideData(vertices, indices, uvs, colors, normals, FRON_SIDE_VERTICES, FRONT_SIDE_NORMALS, FRONT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[5], voxelData[x][y][z].lightLevel);
+									this.WriteSideData(vertices, indices, uvs, colors, normals, FRON_SIDE_VERTICES, FRONT_SIDE_NORMALS, FRONT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[5], frontLighting);
 									indicesCounter += FRON_SIDE_VERTICES.length;
 								}
 							}
@@ -533,6 +563,7 @@ public class VoxelChunk implements Disposable
 		{
 			synchronized (this.voxelDataLockObject)
 			{
+				if (this.voxelData[x][y][z] != null)
 				return this.voxelData[x][y][z].lightLevel;
 			}
 		}
@@ -598,7 +629,7 @@ public class VoxelChunk implements Disposable
 		{
 			synchronized (this.voxelDataLockObject)
 			{
-				return this.voxelData[x][y][z] != null;
+				return this.voxelData[x][y][z] != null && this.voxelData[x][y][z].voxelType != null;
 			}
 		}
 
@@ -615,6 +646,15 @@ public class VoxelChunk implements Disposable
 	{
 		return generationDone;
 	}
+	
+	/**
+	 * Returns true if this voxel chunk is ready for rendering (this means, lighting is done and mesh is generated).
+	 * @return
+	 */
+	public boolean isReadyForRendering()
+	{
+		return this.isInitializedAndLightingReady() && !this.voxelMeshDirty && this.voxelMesh != null;
+	}
 
 	/**
 	 * Chunk gets initialized after data got set by the generator or it was
@@ -627,6 +667,15 @@ public class VoxelChunk implements Disposable
 		return this.voxelData != null && this.isGenerationDone();
 	}
 
+	/**
+	 * Returns true if this chunk is initialized and it's lighting is not dirty.
+	 * @return
+	 */
+	public boolean isInitializedAndLightingReady()
+	{
+		return this.isInitialized() && !this.lightingDirty;
+	}
+	
 	/**
 	 * Loads the voxel data from the voxel chunk file.
 	 */
@@ -664,9 +713,14 @@ public class VoxelChunk implements Disposable
 	 * Used to limit chunk updates per frame for lag reduction.
 	 */
 	private static long lastRenderFrameId = -1;
-	
+
 	/**
 	 * Contains the number of createNewMesh() calls this frame.
+	 */
+	private static int creationProcessedThisFrame = -1;
+	
+	/**
+	 * Contains the number of generateMesh() calls this frame.
 	 */
 	private static int generationsProcessedThisFrame = -1;
 	
@@ -680,19 +734,19 @@ public class VoxelChunk implements Disposable
 	{
 		boolean frameMismatch = lastRenderFrameId != Gdx.graphics.getFrameId();
 		
-		if (this.voxelMeshDirty && this.newMeshDataReady && (CubicWorldConfiguration.chunkUpdatesPerFrameLimit == -1 || lastRenderFrameId == -1 || 
-				frameMismatch || generationsProcessedThisFrame <= CubicWorldConfiguration.chunkUpdatesPerFrameLimit))
+		if (this.voxelMeshDirty && this.newMeshDataReady && (CubicWorldConfiguration.meshCreationPerFrameLimit == -1 || lastRenderFrameId == -1 || 
+				frameMismatch || creationProcessedThisFrame <= CubicWorldConfiguration.meshCreationPerFrameLimit))
 		{
 			// If the frame ids mismatch
 			if (frameMismatch)
 			{
 				// Update frame id and reset counter
 				lastRenderFrameId = Gdx.graphics.getFrameId();
-				generationsProcessedThisFrame = 0;
+				creationProcessedThisFrame = 0;
 			}
 			
 			this.createNewMesh();
-			generationsProcessedThisFrame++;
+			creationProcessedThisFrame++;
 			
 		}
 
@@ -878,7 +932,7 @@ public class VoxelChunk implements Disposable
 				for (int y = 0; y < this.voxelData[x].length; y++)
 					for (int z = 0; z < this.voxelData[x][y].length; z++)
 					{
-						if (this.voxelData[x][y][z] != null)
+						if (this.voxelData[x][y][z] != null && this.voxelData[x][y][z].voxelType != null)
 						{
 							// Update voxel handlers map
 							IVoxelUpdateHandler updateHandler = this.voxelData[x][y][z].voxelType.getUpdateHandler();
@@ -915,7 +969,7 @@ public class VoxelChunk implements Disposable
 	 * </pre>
 	 */
 	public void update()
-	{
+	{	
 		// Save needed?
 		if (this.saveDirty && this.master.hasWorldFile() && this.isInitialized())
 		{
@@ -928,7 +982,9 @@ public class VoxelChunk implements Disposable
 		}
 
 		// Lighting check
-		if (this.lightingDirty && this.isInitialized())
+		// The lighting algorithm needs all chunks around this chunk to be ready.
+		if (this.lightingDirty && this.isInitialized() &&
+				(this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLightingReady(new ChunkKey(this.chunkX, this.chunkY+1, this.chunkZ))))
 		{
 			this.recalculateLighting();
 		}
@@ -954,35 +1010,66 @@ public class VoxelChunk implements Disposable
 				
 				entry.getValue().handleUpdate(voxelData, absoluteX, absoluteY, absoluteZ, this.master.isServer(), voxelData.dataModel);
 			}
-
-			if (this.voxelMeshDirty && this.generationDone && !this.master.isServer())
+			
+			boolean frameMismatch = (lastRenderFrameId != this.master.updateCallId);
+			
+			if (!ClientChunkRequest.areRequestsPending() && !this.lightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() && 
+					(CubicWorldConfiguration.meshGenerationsPerFrameLimit == -1 || lastRenderFrameId == -1 || 
+					frameMismatch || generationsProcessedThisFrame <= CubicWorldConfiguration.meshGenerationsPerFrameLimit))
 			{
+				// If the frame ids mismatch
+				if (frameMismatch)
+				{
+					// Update frame id and reset counter
+					lastRenderFrameId = this.master.updateCallId;
+					generationsProcessedThisFrame = 0;
+				}
+				
 				this.generateMesh();
+				generationsProcessedThisFrame++;
+				
 			}
 		}
 	}
 	
 	/**
-	 * Gets called in update() if the lighting dirty flag is set.
+	 * Calculates the light for the given position and face of a voxel.
 	 */
 	private void recalculateLighting()
 	{
 		synchronized (this.voxelDataLockObject)
 		{
-			for (int x = 0; x < VoxelWorld.chunkWidth; x++)
-				for (int y = 0; y < VoxelWorld.chunkHeight; y++)
-					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
+			for (int x = VoxelWorld.chunkWidth-1; x >= 0; x--)
+				for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
+					for (int z = VoxelWorld.chunkDepth-1; z >= 0; z--)
 						if (this.voxelData[x][y][z] != null)
 						{
-							byte lightLevel = (byte) (this.chunkY + 1);
-	
-							// Min light level == 1
-							if (lightLevel < 1)
-								lightLevel = 1;
-	
-							this.voxelData[x][y][z].lightLevel = lightLevel;
+							VoxelData v = this.voxelData[x][y][z];
+							Vector3 absolutePos = this.getAbsoluteBlockPosition(x, y, z);
+							int absX = (int)absolutePos.x;
+							int absY = (int)absolutePos.y;
+							int absZ = (int)absolutePos.z;
+							
+							if (absY == this.master.worldHeight-1)
+							{
+								v.lightLevel = CubicWorldConfiguration.maxLightLevel;
+							}
+							else
+							{
+								byte topLightLevel = this.master.getLightLevel(absX, absY+1, absZ);
+								
+								// Forward light through air and transparent blocks
+								if (v.voxelType == null || v.voxelType.transparent)
+									v.lightLevel = topLightLevel;
+								else
+								{
+									// Divide light by 2 if this is a solid block
+									v.lightLevel = (byte) ((float)topLightLevel / 1.25f);
+								}
+							}
+							
 						}
-	
+			
 			this.lightingDirty = false;
 		}
 	}
