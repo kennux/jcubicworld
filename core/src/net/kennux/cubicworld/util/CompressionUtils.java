@@ -6,9 +6,10 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import org.iq80.snappy.Snappy;
+
 /**
- * Copied from: http://qupera.blogspot.de/2013/02/howto-compress-and-uncompress-java-byte.html
- * TODO Rewrite!
+ * Deflate code copied from: http://qupera.blogspot.de/2013/02/howto-compress-and-uncompress-java-byte.html
  * 
  * @author kennux
  *
@@ -24,7 +25,7 @@ public class CompressionUtils
 	 */
 	public static byte[] compress(byte[] data) throws IOException
 	{
-		Deflater deflater = new Deflater();
+		/*Deflater deflater = new Deflater();
 		deflater.setInput(data);
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
@@ -41,7 +42,8 @@ public class CompressionUtils
 
 		deflater.end();
 
-		return output;
+		return output;*/
+		return Snappy.compress(data);
 	}
 
 	/**
@@ -54,6 +56,7 @@ public class CompressionUtils
 	 */
 	public static byte[] decompress(byte[] data) throws IOException, DataFormatException
 	{
+		/*
 		Inflater inflater = new Inflater();
 		inflater.setInput(data);
 
@@ -69,6 +72,7 @@ public class CompressionUtils
 
 		inflater.end();
 
-		return output;
+		return output;*/
+		return Snappy.uncompress(data, 0, data.length);
 	}
 }

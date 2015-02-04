@@ -57,6 +57,7 @@ project(":core") {
 		compile "org.mapdb:mapdb:1.0.6"
 		compile "org.easymock:easymock:3.1"
 		compile "org.xerial:sqlite-jdbc:3.8.7"
+		compile "org.iq80.snappy:snappy:0.3"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
     }

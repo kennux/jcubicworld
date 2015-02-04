@@ -144,7 +144,7 @@ public class VoxelWorldSave
 		// Write jobs to database
 		synchronized (this.connectionLockObject)
 		{
-			long startTime = System.currentTimeMillis();
+			//long startTime = System.currentTimeMillis();
 			
 			// Iterate through every update job.
 			for (Entry<Vector3, VoxelData[][][]> e : updateJobs.entrySet())
@@ -180,7 +180,7 @@ public class VoxelWorldSave
 			// Commit to db
 			this.databaseConnection.commit();
 
-			System.out.println("DB Sync done in: " + (System.currentTimeMillis() - startTime) + " ms");
+			//System.out.println("DB Sync done in: " + (System.currentTimeMillis() - startTime) + " ms");
 		}
 	}
 

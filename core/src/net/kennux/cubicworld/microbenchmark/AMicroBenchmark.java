@@ -34,6 +34,8 @@ public abstract class AMicroBenchmark
 				{
 					MicroBenchmark annotation = currentMethod.getAnnotation(MicroBenchmark.class);
 
+					System.out.println("");
+					System.out.println("-----------------------------------------------------------------------------------");
 					System.out.println("Executing Microbenchmark " + annotation.name() + "...");
 
 					// Prepare
@@ -75,6 +77,7 @@ public abstract class AMicroBenchmark
 				catch (Exception e)
 				{
 					System.err.println("Error while benchmarking method " + currentMethod.getName());
+					e.printStackTrace();
 				}
 			}
 		}
