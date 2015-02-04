@@ -436,7 +436,7 @@ public class VoxelChunk implements Disposable
 			ArrayList<ModelInstance> modelList = new ArrayList<ModelInstance>();
 			short indicesCounter = 0;
 
-			synchronized (this.voxelDataLockObject)
+			// synchronized (this.voxelDataLockObject)
 			{
 				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
 				{

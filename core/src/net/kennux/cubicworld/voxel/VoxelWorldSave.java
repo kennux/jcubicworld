@@ -144,7 +144,6 @@ public class VoxelWorldSave
 		
 		// Query db for all types
 		ResultSet voxelTypesResultSet = statement.executeQuery("SELECT * FROM voxeltypes");
-		ResultSet itemTypesResultSet = statement.executeQuery("SELECT * FROM itemtypes");
 		
 		// Check voxel types
 		while (voxelTypesResultSet.next())
@@ -160,6 +159,7 @@ public class VoxelWorldSave
 					}
 					
 					typeFoundAndCorrect = true;
+					break;
 				}
 			}
 			
@@ -168,6 +168,8 @@ public class VoxelWorldSave
 				ConsoleHelper.writeLog("ERROR", "Save game voxel type info table doesnt match local table. Porting worlds is not implemented yet!", "WorldSave");
 			}
 		}
+		
+		ResultSet itemTypesResultSet = statement.executeQuery("SELECT * FROM itemtypes");
 		
 		// Check item types
 		while (itemTypesResultSet.next())
