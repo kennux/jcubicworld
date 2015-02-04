@@ -93,6 +93,7 @@ public class VoxelWorldSave
 	 */
 	public VoxelWorldSave(String savePath) throws Exception
 	{
+		
 		// Create save file if not existing
 		boolean fileWasCreated = false;
 		File saveFile = new File(savePath + "world.dat");

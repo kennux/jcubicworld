@@ -5,7 +5,7 @@ This project was started by me as an educational training-project with libgdx.
 I was porting my unity3d voxel engine to libgdx, but it was that much fun that i started to write kind of a game.
 I dunno if i ever finish this, may i will. may i'll quit at some point :P
 
-This project is currently under heavy development and not ready for playing yet!
+This project is currently under heavy development and not ready for playing!
 
 What is jCubicWorld?
 ==============
@@ -60,7 +60,7 @@ Generally classes in this project are not thread-safe, only if the documentation
 
 Entities
 ------------------
-Entity positions always... ALWAYS point to the bottom center position of it's collision box.
+Entity positions ALWAYS point to the bottom center position of it's collision box.
 If you access entity position or rotation use the getter and setter method!
 Otherwise it is not guaranteed that the values will be updated correctly.
 
@@ -69,6 +69,17 @@ Also, if any value of an entity depends on position or rotation, just overwrite 
 Formatting
 ------------------
 You can find my eclipse code style configuration for auto-formatting in this repo under eclipse_settings/formatter_settings.xml!
+
+Libraries
+==============
+jCubicWorld uses the following libraries:
+
+- libGDX - http://libgdx.badlogicgames.com/ - Apache 2.0 license
+- jUnit - http://junit.org/ - EPL 1.0
+- EasyMock - http://easymock.org/ - MIT License
+- Hamcrest-Junit - https://github.com/hamcrest/hamcrest-junit - EPL 1.0
+- Sqlite-JDBC - https://bitbucket.org/xerial/sqlite-jdbc - Apache 2.0 license
+- MapDB - http://www.mapdb.org/ - Apache 2.0 license
 
 Current Features
 ==============
