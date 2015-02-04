@@ -11,6 +11,7 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.zip.DataFormatException;
 
 import net.kennux.cubicworld.item.ItemSystem;
@@ -20,6 +21,8 @@ import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.util.CompressionUtils;
 import net.kennux.cubicworld.util.ConsoleHelper;
 
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteConfig.SynchronousMode;
 
@@ -64,21 +67,25 @@ public class VoxelWorldSave
 	/**
 	 * The database connection.
 	 */
-	private Connection readerDatabaseConnection;
+	private DB databaseConnection;
 
-	private Connection writerDatabaseConnection;
 	/**
-	 * Locks the SQL connection.
+	 * Locks the connection.
 	 */
-	private Object readerConnectionLockObject = new Object();
+	private Object connectionLockObject = new Object();
 
-	private Object writerConnectionLockObject = new Object();
 	/**
 	 * The queue of jobs waiting for writing.
 	 */
 	private LinkedList<AbstractMap.SimpleEntry<Vector3, VoxelData[][][]>> writerQueue;
 
 	private Object writerQueueLock = new Object();
+	
+	/**
+	 * Gets initialized in constructor.
+	 * Holds all chunk entry infos.
+	 */
+	private ConcurrentNavigableMap<ChunkKey, byte[]> chunkEntries;
 
 	// Helper function
 	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
@@ -93,7 +100,6 @@ public class VoxelWorldSave
 	 */
 	public VoxelWorldSave(String savePath) throws Exception
 	{
-		
 		// Create save file if not existing
 		boolean fileWasCreated = false;
 		File saveFile = new File(savePath + "world.dat");
@@ -103,96 +109,18 @@ public class VoxelWorldSave
 			saveFile.createNewFile();
 			fileWasCreated = true;
 		}
-
-		Class.forName("org.sqlite.JDBC");
-		SQLiteConfig config = new SQLiteConfig();
-		config.setSharedCache(true);
-		config.setSynchronous(SynchronousMode.FULL);
-
-		this.readerDatabaseConnection = DriverManager.getConnection("jdbc:sqlite:" + saveFile.getAbsolutePath(), config.toProperties());
-		this.writerDatabaseConnection = DriverManager.getConnection("jdbc:sqlite:" + saveFile.getAbsolutePath(), config.toProperties());
+		
 		this.writerQueue = new LinkedList<AbstractMap.SimpleEntry<Vector3, VoxelData[][][]>>();
+		
+		// Create db connection
+		this.databaseConnection = DBMaker.newFileDB(saveFile).closeOnJvmShutdown().make();
 
+		// Load data
+		this.chunkEntries = this.databaseConnection.getTreeMap("chunks");
+		
+		// TODO voxel and item type check
 		if (fileWasCreated)
 		{
-			// Initial database structure
-			Statement statement = this.writerDatabaseConnection.createStatement();
-
-			statement.execute("CREATE TABLE chunks\r\n" + "(\r\n" + "chunkX INT,\r\n" + "chunkY INT,\r\n" + "chunkZ INT,\r\n" + "chunkData BLOB,\r\n" + "PRIMARY KEY (chunkX, chunkY, chunkZ)\r\n" + ");\r\n" + "CREATE INDEX chunkIndex ON chunks (chunkX, chunkY, chunkZ);");
-			statement.execute("CREATE TABLE `voxeltypes`\r\n (\r\n`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\r\n`name`\r\nTEXT NOT NULL UNIQUE\r\n);\r\nCREATE INDEX typeIndex ON `voxeltypes` (`id`)");
-			statement.execute("CREATE TABLE `itemtypes`\r\n (\r\n`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\r\n`name`\r\nTEXT NOT NULL UNIQUE\r\n);\r\nCREATE INDEX typeIndex ON `itemtypes` (`id`)");
-			
-			// Write voxel and item types table
-			VoxelType[] voxelTypes = VoxelEngine.getVoxelTypes();
-			ItemType[] itemTypes = ItemSystem.getItemTypes();
-			for (VoxelType type : voxelTypes)
-			{
-				statement.execute("INSERT INTO `voxeltypes` (`id`, `name`) VALUES ("+type.voxelId+", '"+type.voxelName+"');");
-			}
-			
-			for (ItemType type : itemTypes)
-			{
-				statement.execute("INSERT INTO `itemtypes` (`id`, `name`) VALUES ("+type.getItemId()+", '"+type.getItemName()+"');");
-			}
-			
-			statement.close();
-		}
-		
-		// Match voxel and item types of the local instance against the ones stored in sqlite
-		VoxelType[] voxelTypes = VoxelEngine.getVoxelTypes();
-		ItemType[] itemTypes = ItemSystem.getItemTypes();
-		Statement statement = this.readerDatabaseConnection.createStatement();
-		
-		// Query db for all types
-		ResultSet voxelTypesResultSet = statement.executeQuery("SELECT * FROM voxeltypes");
-		
-		// Check voxel types
-		while (voxelTypesResultSet.next())
-		{
-			boolean typeFoundAndCorrect = false;
-			for (VoxelType type : voxelTypes)
-			{
-				if (type != null && type.voxelName.equals(voxelTypesResultSet.getString("name")))
-				{
-					if (type.voxelId != voxelTypesResultSet.getInt("id"))
-					{
-						ConsoleHelper.writeLog("ERROR", "Voxel id mismatch for type: " + type.voxelName, "WorldSave");
-					}
-					
-					typeFoundAndCorrect = true;
-					break;
-				}
-			}
-			
-			if (!typeFoundAndCorrect)
-			{
-				ConsoleHelper.writeLog("ERROR", "Save game voxel type info table doesnt match local table. Porting worlds is not implemented yet!", "WorldSave");
-			}
-		}
-		
-		ResultSet itemTypesResultSet = statement.executeQuery("SELECT * FROM itemtypes");
-		
-		// Check item types
-		while (itemTypesResultSet.next())
-		{
-			boolean typeFoundAndCorrect = false;
-			for (ItemType type : itemTypes)
-			{
-				if (type != null && type.getItemName().equals(voxelTypesResultSet.getString("name")))
-				{
-					if (type.getItemId() != voxelTypesResultSet.getInt("id"))
-					{
-						ConsoleHelper.writeLog("ERROR", "Item id mismatch for type: " + type.getItemName(), "WorldSave");
-					}
-					
-					typeFoundAndCorrect = true;
-				}
-			}
-			
-			if (!typeFoundAndCorrect)
-			{
-				ConsoleHelper.writeLog("ERROR", "Save game item type info table doesnt match local table. Porting worlds is not implemented yet!", "WorldSave");
-			}
 		}
 	}
 
@@ -214,11 +142,10 @@ public class VoxelWorldSave
 		}
 
 		// Write jobs to database
-		synchronized (this.writerConnectionLockObject)
+		synchronized (this.connectionLockObject)
 		{
-			// Create statement
-			Statement statement = null;
-
+			long startTime = System.currentTimeMillis();
+			
 			// Iterate through every update job.
 			for (Entry<Vector3, VoxelData[][][]> e : updateJobs.entrySet())
 			{
@@ -238,19 +165,10 @@ public class VoxelWorldSave
 
 				try
 				{
-					if (statement == null)
-					{
-						statement = this.writerDatabaseConnection.createStatement();
-						statement.execute("BEGIN TRANSACTION");
-					}
-
 					// Prepare chunk data
 					byte[] data = CompressionUtils.compress(writer.getPacket());
-					String hexData = "x'" + bytesToHex(data) + "'";
-
-					// Add insert or replace to batch
-					statement.addBatch("INSERT OR REPLACE INTO chunks (chunkX, chunkY, chunkZ, chunkData) VALUES\r\n (" + chunkX + ",\r\n" + chunkY + ",\r\n" + chunkZ + ",\r\n" + hexData + "\r\n" + ");\r\n");
-
+					
+					this.chunkEntries.put(new ChunkKey(chunkX, chunkY, chunkZ), data);
 				}
 				catch (Exception e1)
 				{
@@ -258,29 +176,11 @@ public class VoxelWorldSave
 					ConsoleHelper.logError(e1);
 				}
 			}
+			
+			// Commit to db
+			this.databaseConnection.commit();
 
-			try
-			{
-				// long startTime = System.currentTimeMillis();
-
-				if (statement != null)
-				{
-					// Execute save statement
-					statement.executeBatch();
-
-					statement.execute("END TRANSACTION");
-
-					// Close statement
-					statement.close();
-				}
-
-				// System.out.println("DB Sync done in: " + (System.currentTimeMillis() - startTime) + " ms");
-			}
-			catch (Exception e)
-			{
-				ConsoleHelper.writeLog("ERROR", "Error while flushing save jobs: ", "WorldSave");
-				ConsoleHelper.logError(e);
-			}
+			System.out.println("DB Sync done in: " + (System.currentTimeMillis() - startTime) + " ms");
 		}
 	}
 
@@ -294,28 +194,9 @@ public class VoxelWorldSave
 	 */
 	public boolean hasChunk(int chunkX, int chunkY, int chunkZ)
 	{
-		synchronized (this.readerConnectionLockObject)
+		synchronized (this.connectionLockObject)
 		{
-			try
-			{
-				// Create select statement
-				Statement statement = this.readerDatabaseConnection.createStatement();
-
-				// Get count
-				ResultSet resultSet = statement.executeQuery("SELECT chunkX FROM chunks WHERE chunkX = '" + chunkX + "' AND chunkY = '" + chunkY + "' AND chunkZ = '" + chunkZ + "'");
-
-				boolean ret = resultSet.next();
-
-				statement.close();
-
-				return ret;
-			}
-			catch (SQLException e)
-			{
-				ConsoleHelper.writeLog("ERROR", "Error while checking if a chunk exists: ", "WorldSave");
-				ConsoleHelper.logError(e);
-				return false;
-			}
+			return this.chunkEntries.containsKey(new ChunkKey(chunkX, chunkY, chunkZ));
 		}
 	}
 
@@ -330,20 +211,12 @@ public class VoxelWorldSave
 	 */
 	public VoxelData[][][] readChunk(int chunkX, int chunkY, int chunkZ)
 	{
-		synchronized (this.readerConnectionLockObject)
+		synchronized (this.connectionLockObject)
 		{
 			try
 			{
-				// Create select statement
-				Statement statement = this.readerDatabaseConnection.createStatement();
-
-				// Get count
-				ResultSet resultSet = statement.executeQuery("SELECT chunkData FROM chunks WHERE chunkX = '" + chunkX + "' AND chunkY = '" + chunkY + "' AND chunkZ = '" + chunkZ + "'");
-
 				// Get chunk data blob
-				byte[] chunkData = resultSet.getBytes("chunkData");
-
-				statement.close();
+				byte[] chunkData = this.chunkEntries.get(new ChunkKey(chunkX, chunkY, chunkZ));
 
 				// Deserialize data
 				byte[] decompressedChunkData = CompressionUtils.decompress(chunkData);
@@ -359,7 +232,7 @@ public class VoxelWorldSave
 
 				return voxelData;
 			}
-			catch (SQLException | IOException | DataFormatException e)
+			catch (IOException | DataFormatException e)
 			{
 				ConsoleHelper.writeLog("ERROR", "Error while reading chunk: ", "WorldSave");
 				ConsoleHelper.logError(e);

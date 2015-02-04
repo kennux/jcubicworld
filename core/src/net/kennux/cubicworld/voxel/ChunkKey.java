@@ -1,5 +1,7 @@
 package net.kennux.cubicworld.voxel;
 
+import java.io.Serializable;
+
 /**
  * <pre>
  * A key implementation for use in a hashtable. Gets used in VoxelWorld for
@@ -14,8 +16,13 @@ package net.kennux.cubicworld.voxel;
  * @author KennuX
  *
  */
-public class ChunkKey implements Comparable<ChunkKey>
+public class ChunkKey implements Comparable<ChunkKey>, Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2071141507889353282L;
+	
 	public int x, y, z;
 
 	public ChunkKey(int chunkX, int chunkY, int chunkZ)
