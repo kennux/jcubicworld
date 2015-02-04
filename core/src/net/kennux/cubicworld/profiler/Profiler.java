@@ -35,7 +35,7 @@ public class Profiler
 	 * When this is set to true the profiler will write to the file opened with it.
 	 * Set this to false in a production environment to not waste performance.
 	 */
-	private static final boolean writeToFile = true;
+	private static final boolean writeToFile = false;
 
 	/**
 	 * The current running profilings.
