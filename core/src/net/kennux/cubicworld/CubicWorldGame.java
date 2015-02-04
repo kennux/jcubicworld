@@ -259,9 +259,8 @@ public class CubicWorldGame extends ApplicationAdapter
 		}
 		
 		// Generate all chunk meshes
-		int creationPerFrameLimit = CubicWorldConfiguration.meshCreationPerFrameLimit;
 		int generationPerFrameLimit = CubicWorldConfiguration.meshGenerationsPerFrameLimit;
-		CubicWorldConfiguration.meshCreationPerFrameLimit = -1;
+		CubicWorldConfiguration.meshGenerationsPerFrameLimit = -1;
 		
 		// Wait till all chunks are ready
 		while(!this.voxelWorld.allChunksReady())
@@ -276,8 +275,9 @@ public class CubicWorldGame extends ApplicationAdapter
 			}
 		}
 		
-		CubicWorldConfiguration.meshCreationPerFrameLimit = creationPerFrameLimit;
 		CubicWorldConfiguration.meshGenerationsPerFrameLimit = generationPerFrameLimit;
+		
+		// System.exit(1);
 		
 		// Start update thread AFTER the client requested all chunks
 		this.voxelWorld.initUpdateThread();

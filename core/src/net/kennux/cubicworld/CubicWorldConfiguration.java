@@ -55,7 +55,7 @@ public class CubicWorldConfiguration
 	 * This gets used to check if the player needs to request any new chunks
 	 * from the server.
 	 */
-	public static final int chunkLoadDistance = 5;
+	public static final int chunkLoadDistance = 6;
 
 	/**
 	 * The distance used to cull chunk update packets.
@@ -70,7 +70,7 @@ public class CubicWorldConfiguration
 	/**
 	 * The maximum light level a block can have.
 	 */
-	public static final int maxLightLevel = 15;
+	public static final int maxLightLevel = 16;
 
 	/**
 	 * The distance used to cull entity update packets.
@@ -100,17 +100,10 @@ public class CubicWorldConfiguration
 	public static final float standardDistanceCullDistance = entityCullDistance;
 
 	/**
-	 * Limits the voxel mesh creations (calls to VoxelChunk.createNewMesh()) for chunks per frame.
-	 * -1 means there is no limit.
-	 */
-	public static int meshCreationPerFrameLimit = -1;
-	
-
-	/**
 	 * Limits the voxel mesh creations (calls to VoxelChunk.generateMesh()) for chunks per frame.
 	 * -1 means there is no limit.
 	 */
-	public static int meshGenerationsPerFrameLimit = -1;
+	public static int meshGenerationsPerFrameLimit = 2;
 	
 	/**
 	 * All plugin classpaths are stored in here after load() was called.

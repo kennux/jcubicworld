@@ -100,7 +100,7 @@ public class VoxelWorldTest extends TestCase
 
 				for (int y = 3; y < VoxelWorld.chunkHeight; y++)
 				{
-					assertNull(voxelWorld.getVoxel(x, y, z));
+					assertNull(voxelWorld.getVoxel(x, y, z).voxelType);
 				}
 			}
 	}
@@ -131,9 +131,9 @@ public class VoxelWorldTest extends TestCase
 		assertNotNull(voxelData);
 		assertEquals(voxelData.voxelType, VoxelEngine.getVoxelType(BasePlugin.voxelDirtId));
 
-		// Test getting null voxel
+		// Test getting air voxel
 		voxelData = voxelWorld.getVoxel(0, 5, 0);
-		assertNull(voxelData);
+		assertNull(voxelData.voxelType);
 
 		// Test getting null voxel out of generated range
 		voxelData = voxelWorld.getVoxel(100, 5, 0);
@@ -145,7 +145,7 @@ public class VoxelWorldTest extends TestCase
 
 		// Test removing voxel
 		voxelWorld.setVoxel(0, 4, 0, null);
-		assertNull(voxelWorld.getVoxel(0, 4, 0));
+		assertNull(voxelWorld.getVoxel(0, 4, 0).voxelType);
 	}
 
 	/**
@@ -250,7 +250,7 @@ public class VoxelWorldTest extends TestCase
 				return true;
 			}
 		}).times(2);
-
+		
 		// Returns a voxel data array with one dirt voxel at 0|0|0
 		EasyMock.expect(saveMock.readChunk(0, 0, 0)).andAnswer(new IAnswer<VoxelData[][][]>()
 		{

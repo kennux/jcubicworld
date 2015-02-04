@@ -46,5 +46,9 @@ public class ChunkKey implements Comparable<ChunkKey>
 
 		return false;
 	}
-
+	
+	public int hashCode()
+	{
+		return (this.x ^ this.y ^ this.z);
+	}
 }

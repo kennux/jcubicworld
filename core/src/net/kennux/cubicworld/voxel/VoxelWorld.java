@@ -230,6 +230,7 @@ public class VoxelWorld
 	
 	/**
 	 * Returns true if the chunk at the given position is loaded, initialized and lighting ready.
+	 * If the chunk is non-existing, this function will return true.
 	 * @param chunkX
 	 * @param chunkY
 	 * @param chunkZ
@@ -242,6 +243,7 @@ public class VoxelWorld
 	
 	/**
 	 * Returns true if the chunk at the given position is loaded, initialized and lighting ready.
+	 * If the chunk is non-existing, this function will return true.
 	 * @param chunkX
 	 * @param chunkY
 	 * @param chunkZ
@@ -254,6 +256,7 @@ public class VoxelWorld
 	
 	/**
 	 * Returns true if the chunk at the given position is loaded, initialized and lighting ready.
+	 * If the chunk is non-existing, this function will return true.
 	 * @param chunkKey
 	 * @return
 	 */
@@ -261,7 +264,7 @@ public class VoxelWorld
 	{
 		VoxelChunk chunk = this.chunks.get(chunkKey);
 		
-		return chunk != null && chunk.isInitializedAndLightingReady();
+		return chunk == null || chunk.isInitializedAndLightingReady();
 	}
 
 	/**
@@ -608,8 +611,8 @@ public class VoxelWorld
 
 	/**
 	 * <pre>
-	 * Gets the voxel at the given global voxelspace position. Returns null if
-	 * the voxel was not found.
+	 * Gets the voxel at the given global voxelspace position. Returns null if the voxel was not found.
+	 * If the returned voxel's type is null it means the voxel is an air voxel.
 	 * 
 	 * If you modify any values of the voxel returned by this function, you must re-set it by calling setVoxel() or call chunkDataWasModified() after your work is done.
 	 * </pre>
@@ -635,7 +638,7 @@ public class VoxelWorld
 			VoxelChunk chunk = this.chunks.get(chunkKey);
 			if (chunk == null)
 			{
-				ConsoleHelper.writeLog("error", "Tried to get voxel from non existing chunk: " + chunk + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
+				// ConsoleHelper.writeLog("error", "Tried to get voxel from non existing chunk: " + chunk + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
 				return null;
 			}
 
@@ -729,6 +732,8 @@ public class VoxelWorld
 	 */
 	public void initUpdateThread()
 	{
+		final VoxelWorld world = this;
+		
 		// World update handler
 		this.worldUpdateThread = new Thread(new Runnable()
 		{
@@ -740,7 +745,7 @@ public class VoxelWorld
 					synchronized (chunksLockObject)
 					{
 						// Fire updates
-						chunks.update();
+						world.update();
 					}
 
 					// Wait some time
@@ -772,7 +777,7 @@ public class VoxelWorld
 	{
 		VoxelChunk chunk = new VoxelChunk(chunkX, chunkY, chunkZ, this);
 
-		chunks.add(new ChunkKey(chunkX, chunkY, chunkZ), chunk);
+		chunks.put(new ChunkKey(chunkX, chunkY, chunkZ), chunk);
 
 		return chunk;
 	}

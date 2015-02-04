@@ -1,6 +1,7 @@
 package net.kennux.cubicworld.desktop;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -15,6 +16,7 @@ import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.ServerBootstrap;
 import net.kennux.cubicworld.util.ConsoleHelper;
+import net.kennux.cubicworld.voxel.ChunkKey;
 
 public class DesktopLauncher
 {
@@ -25,6 +27,12 @@ public class DesktopLauncher
 		/*try {
 			Thread.sleep(25000);
 		} catch (InterruptedException e1) {
+			// TODO Auto-generated caHashMap<K, V>ck
+			e1.printStackTrace();
+		}*/
+		/*try {
+			System.in.read();
+		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}*/

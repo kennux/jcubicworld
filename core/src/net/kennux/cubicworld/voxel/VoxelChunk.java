@@ -159,6 +159,11 @@ public class VoxelChunk implements Disposable
 	 * The voxel mesh's bounding box.
 	 */
 	private BoundingBox boundingBox;
+	
+	/**
+	 * The voxel mesh's new bounding box.
+	 */
+	private BoundingBox newBoundingBox;
 
 	/**
 	 * The voxel data (voxeltype id's, -1 for no block here). You must lock
@@ -260,7 +265,18 @@ public class VoxelChunk implements Disposable
 	 * Sets this chunk to dirty which will regenerate the mesh data.
 	 * ONLY call this if you loaded the chunk data from the world file.
 	 */
-	public void chunkDataWasLoaded()
+	private void chunkDataWasLoaded()
+	{
+		this.lightingDirty = true;
+		this.voxelMeshDirty = true;
+		this.saveDirty = false;
+	}
+	
+	/**
+	 * Causes this chunk to regenerate it's mesh.
+	 * Will only recalculate lighting and the mesh.
+	 */
+	public void regenerateChunkMesh()
 	{
 		this.lightingDirty = true;
 		this.voxelMeshDirty = true;
@@ -271,7 +287,7 @@ public class VoxelChunk implements Disposable
 	 * Sets this chunk to dirty which will regenerate the mesh data. You have to
 	 * call this function after direct writing to voxelData.
 	 */
-	public void chunkDataWasModified()
+	private void chunkDataWasModified()
 	{
 		this.lightingDirty = true;
 		this.voxelMeshDirty = true;
@@ -352,12 +368,16 @@ public class VoxelChunk implements Disposable
 			// Calculate bounding box
 			try
 			{
-				this.boundingBox = newMesh.calculateBoundingBox();
+				// DISABLED DUE TO HIGH PERFORMANCE COST
+				// INSTEAD STATIC BOUNDING BOXES WILL GET USED GENERATED IN generateMesh()
+				// this.boundingBox = newMesh.calculateBoundingBox();
+				this.boundingBox = this.newBoundingBox;
 			}
 			catch (Exception e)
 			{
 				// Happens if there are no vertices in this mesh, so just ignore this error.
 			}
+			
 			this.newMeshDataReady = false;
 			this.voxelMeshDirty = false;
 
@@ -367,6 +387,7 @@ public class VoxelChunk implements Disposable
 			this.newUvs = null;
 			this.newIndices = null;
 			this.newNormals = null;
+			this.newBoundingBox = null;
 
 			synchronized (this.meshLockObject)
 			{
@@ -426,11 +447,30 @@ public class VoxelChunk implements Disposable
 							// Voxel in my position?
 							if (voxelData[x][y][z] == null || voxelData[x][y][z].voxelType == null)
 								continue;
+							
+							Vector3 absolutePos = this.getAbsoluteBlockPosition(x, y, z);
+							int absX = (int)absolutePos.x;
+							int absY = (int)absolutePos.y;
+							int absZ = (int)absolutePos.z;
 
+							VoxelData leftVoxel = (x == 0 ? this.master.getVoxel(absX-1, absY, absZ) : this.voxelData[x-1][y][z]);
+							VoxelData rightVoxel = (x == VoxelWorld.chunkWidth-1 ? this.master.getVoxel(absX+1, absY, absZ) : this.voxelData[x+1][y][z]);
+							VoxelData topVoxel = (y == VoxelWorld.chunkHeight-1 ? this.master.getVoxel(absX, absY+1, absZ) : this.voxelData[x][y+1][z]);
+							VoxelData bottomVoxel = (y == 0 ? this.master.getVoxel(absX, absY-1, absZ) : this.voxelData[x][y-1][z]);
+							VoxelData backVoxel = (z == 0 ? this.master.getVoxel(absX, absY, absZ-1) : this.voxelData[x][y][z-1]);
+							VoxelData frontVoxel = (z == VoxelWorld.chunkDepth-1 ? this.master.getVoxel(absX, absY, absZ+1) : this.voxelData[x][y][z+1]);
+							
+							boolean leftSideVisible = x != 0 ? (leftVoxel == null || leftVoxel.voxelType == null || leftVoxel.voxelType.voxelId < 0 || leftVoxel.voxelType.transparent) : true;
+							boolean rightSideVisible = x != VoxelWorld.chunkWidth-1 ? (rightVoxel == null || rightVoxel.voxelType == null || rightVoxel.voxelType.voxelId < 0 || rightVoxel.voxelType.transparent) : true;
+							boolean topSideVisible = y != VoxelWorld.chunkHeight-1 ? (topVoxel == null || topVoxel.voxelType == null || topVoxel.voxelType.voxelId < 0 || topVoxel.voxelType.transparent) : true;
+							boolean bottomSideVisible = y != 0 ? (bottomVoxel == null || bottomVoxel.voxelType == null || bottomVoxel.voxelType.voxelId < 0 || bottomVoxel.voxelType.transparent) : true;
+							boolean backSideVisible = z != 0 ? (backVoxel == null || backVoxel.voxelType == null || backVoxel.voxelType.voxelId < 0 || backVoxel.voxelType.transparent) : true;
+							boolean frontSideVisible = z != VoxelWorld.chunkDepth-1 ? (frontVoxel == null || frontVoxel.voxelType == null || frontVoxel.voxelType.voxelId < 0 || frontVoxel.voxelType.transparent) : true;
+							
 							// Model or normal voxel rendering?
 							if (this.voxelData[x][y][z].voxelType.isModelRendering() && (
 							// Atleast any side visible?
-									(x == 0 || (voxelData[x - 1][y][z] == null || voxelData[x - 1][y][z].voxelType.voxelId < 0 || voxelData[x - 1][y][z].voxelType.transparent)) || (x == VoxelWorld.chunkWidth - 1 || ((voxelData[x + 1][y][z] == null || voxelData[x + 1][y][z].voxelType.voxelId < 0 || voxelData[x + 1][y][z].voxelType.transparent))) || (y == VoxelWorld.chunkHeight - 1 || ((voxelData[x][y + 1][z] == null || voxelData[x][y + 1][z].voxelType.voxelId < 0 || voxelData[x][y + 1][z].voxelType.transparent))) || (y == 0 || (voxelData[x][y - 1][z] == null || voxelData[x][y - 1][z].voxelType.voxelId < 0 || voxelData[x][y - 1][z].voxelType.transparent)) || (z == 0 || (voxelData[x][y][z - 1] == null || voxelData[x][y][z - 1].voxelType.voxelId < 0 || voxelData[x][y][z - 1].voxelType.transparent)) || (z == VoxelWorld.chunkDepth - 1 || ((voxelData[x][y][z + 1] == null || voxelData[x][y][z + 1].voxelType.voxelId < 0 || voxelData[x][y][z + 1].voxelType.transparent)))))
+									leftSideVisible || rightSideVisible || topSideVisible || bottomSideVisible || backSideVisible || frontSideVisible))
 							{
 								// Model rendering
 								Model m = this.voxelData[x][y][z].voxelType.getModel();
@@ -449,26 +489,13 @@ public class VoxelChunk implements Disposable
 							{
 								// Normal voxel rendering
 								VoxelFace[] faceMappings = ROTATION_MAPPINGS[voxelData[x][y][z].rotation];
-								Vector3 absolutePos = this.getAbsoluteBlockPosition(x, y, z);
-								int absX = (int)absolutePos.x;
-								int absY = (int)absolutePos.y;
-								int absZ = (int)absolutePos.z;
 								
-								// Check which sites are visible and which not.
-								boolean leftSideVisible = x == 0 || (voxelData[x - 1][y][z] == null || voxelData[x - 1][y][z].voxelType == null || voxelData[x - 1][y][z].voxelType.voxelId < 0 || voxelData[x - 1][y][z].voxelType.transparent);
-								boolean rightSideVisible = x == VoxelWorld.chunkWidth - 1 || ((voxelData[x + 1][y][z] == null || voxelData[x + 1][y][z].voxelType == null || voxelData[x + 1][y][z].voxelType.voxelId < 0 || voxelData[x + 1][y][z].voxelType.transparent));
-								boolean topSideVisible = y == VoxelWorld.chunkHeight - 1 || ((voxelData[x][y + 1][z] == null || voxelData[x][y + 1][z].voxelType == null || voxelData[x][y + 1][z].voxelType.voxelId < 0 || voxelData[x][y + 1][z].voxelType.transparent));
-								boolean bottomSideVisible = y == 0 || (voxelData[x][y - 1][z] == null || voxelData[x][y - 1][z].voxelType == null || voxelData[x][y - 1][z].voxelType.voxelId < 0 || voxelData[x][y - 1][z].voxelType.transparent);
-								boolean backSideVisible = z == 0 || (voxelData[x][y][z - 1] == null || voxelData[x][y][z - 1].voxelType == null || voxelData[x][y][z - 1].voxelType.voxelId < 0 || voxelData[x][y][z - 1].voxelType.transparent);
-								boolean frontSideVisible = z == VoxelWorld.chunkDepth - 1 || ((voxelData[x][y][z + 1] == null || this.voxelData[x][y][z+1].voxelType == null || voxelData[x][y][z + 1].voxelType.voxelId < 0 || voxelData[x][y][z + 1].voxelType.transparent));
-								
-								// Variables for lighting
-								byte leftLighting = (leftSideVisible ? this.master.getLightLevel(absX+1, absY, absZ) : -1);
-								byte rightLighting = (rightSideVisible ? this.master.getLightLevel(absX-1, absY, absZ) : -1);
-								byte topLighting = (topSideVisible ? this.master.getLightLevel(absX, absY+1, absZ) : -1);
-								byte bottomLighting = (bottomSideVisible ? this.master.getLightLevel(absX, absY-1, absZ) : -1);
-								byte backLighting = (backSideVisible ? this.master.getLightLevel(absX, absY, absZ-1) : -1);
-								byte frontLighting = (frontSideVisible ? this.master.getLightLevel(absX, absY, absZ+1) : -1);
+								byte leftLighting = leftVoxel == null ? 0 : leftVoxel.lightLevel;
+								byte rightLighting = rightVoxel == null ? 0 : rightVoxel.lightLevel;
+								byte topLighting = topVoxel == null ? 0 : topVoxel.lightLevel;
+								byte bottomLighting = bottomVoxel == null ? 0 : bottomVoxel.lightLevel;
+								byte backLighting = backVoxel == null ? 0 : backVoxel.lightLevel;
+								byte frontLighting = frontVoxel == null ? 0 : frontVoxel.lightLevel;
 								
 								// Write mesh data
 								if (leftSideVisible)
@@ -513,6 +540,7 @@ public class VoxelChunk implements Disposable
 			this.newColors = colors;
 			this.newIndices = indices;
 			this.newModels = modelList;
+			this.newBoundingBox = new BoundingBox(this.getAbsoluteBlockPosition(0, 0, 0), this.getAbsoluteBlockPosition(VoxelWorld.chunkWidth, VoxelWorld.chunkHeight, VoxelWorld.chunkDepth));
 
 			this.newMeshDataReady = true;
 		}
@@ -696,34 +724,10 @@ public class VoxelChunk implements Disposable
 	}
 
 	/**
-	 * Calculates an absolute position from a local blockspace position.
-	 * 
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
-	 */
-	public Vector3 localToAbsolutePosition(int x, int y, int z)
-	{
-		return new Vector3((this.chunkX * VoxelWorld.chunkWidth) + x, (this.chunkY * VoxelWorld.chunkHeight) + y, (this.chunkZ * VoxelWorld.chunkDepth) + z);
-	}
-
-	/**
-	 * The last frame id when render() was called.
-	 * Used to limit chunk updates per frame for lag reduction.
-	 */
-	private static long lastRenderFrameId = -1;
-
-	/**
 	 * The last call id when update() was called.
 	 * Used to limit chunk updates per frame for lag reduction.
 	 */
 	private static long lastUpdateCallId = -1;
-
-	/**
-	 * Contains the number of createNewMesh() calls this frame.
-	 */
-	private static int creationProcessedThisFrame = -1;
 	
 	/**
 	 * Contains the number of generateMesh() calls this frame.
@@ -738,22 +742,10 @@ public class VoxelChunk implements Disposable
 	 */
 	public void render(Camera cam, ShaderProgram shader)
 	{
-		boolean frameMismatch = lastRenderFrameId != Gdx.graphics.getFrameId();
 		
-		if (this.voxelMeshDirty && this.newMeshDataReady && (CubicWorldConfiguration.meshCreationPerFrameLimit == -1 || lastRenderFrameId == -1 || 
-				frameMismatch || creationProcessedThisFrame <= CubicWorldConfiguration.meshCreationPerFrameLimit))
-		{
-			// If the frame ids mismatch
-			if (frameMismatch)
-			{
-				// Update frame id and reset counter
-				lastRenderFrameId = Gdx.graphics.getFrameId();
-				creationProcessedThisFrame = 0;
-			}
-			
-			this.createNewMesh();
-			creationProcessedThisFrame++;
-			
+		if (this.voxelMeshDirty && this.newMeshDataReady)
+		{	
+			this.createNewMesh();	
 		}
 
 		synchronized (this.meshLockObject)
@@ -861,6 +853,7 @@ public class VoxelChunk implements Disposable
 
 	/**
 	 * Sets the voxel data at the given x|y|z position.
+	 * Pass in null or just new VoxelData() as voxel for setting air.
 	 * 
 	 * @param x
 	 * @param y
@@ -873,6 +866,10 @@ public class VoxelChunk implements Disposable
 		{
 			if (this.voxelData == null)
 				return;
+			
+			// if voxel is null, create air voxel
+			if (voxel == null)
+				voxel = new VoxelData();
 
 			// Remove update handler if existing
 			Vector3 voxelPos = new Vector3(x, y, z);
@@ -892,7 +889,7 @@ public class VoxelChunk implements Disposable
 			// notify about update
 			if (this.master.getVoxelDataUpdateHandler() != null)
 			{
-				Vector3 absolutePos = this.localToAbsolutePosition(x, y, z);
+				Vector3 absolutePos = this.getAbsoluteBlockPosition(x, y, z);
 				this.master.getVoxelDataUpdateHandler().handleVoxelDataUpdate((int) absolutePos.x, (int) absolutePos.y, (int) absolutePos.z, voxel);
 			}
 
@@ -917,6 +914,13 @@ public class VoxelChunk implements Disposable
 	{
 		synchronized (this.voxelDataLockObject)
 		{
+			// Iterate through all voxel datas and set null voxels to air voxels
+			for (int x = 0; x < voxelData.length; x++)
+				for (int y = 0; y < voxelData[x].length; y++)
+					for (int z = 0; z < voxelData[x][y].length; z++)
+						if (voxelData[x][y][z] == null)
+							voxelData[x][y][z] = new VoxelData();
+			
 			this.voxelData = voxelData;
 			this.setInventoryUpdateHandlerAll();
 			this.chunkDataWasModified();
@@ -989,7 +993,7 @@ public class VoxelChunk implements Disposable
 
 		// Lighting check
 		// The lighting algorithm needs all chunks around this chunk to be ready.
-		if (this.lightingDirty && this.isInitialized() &&
+		if (!ClientChunkRequest.areRequestsPending() && this.lightingDirty && this.isInitialized() &&
 				(this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLightingReady(new ChunkKey(this.chunkX, this.chunkY+1, this.chunkZ))))
 		{
 			this.recalculateLighting();
@@ -1019,8 +1023,21 @@ public class VoxelChunk implements Disposable
 			
 			boolean frameMismatch = (lastUpdateCallId != this.master.updateCallId);
 			
+			if (frameMismatch && !ClientChunkRequest.areRequestsPending() && !this.lightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() )
+			{
+				int jk = 123;
+				jk *= jk + 123;
+			}
+			
 			if (!ClientChunkRequest.areRequestsPending() && !this.lightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() && 
-					(CubicWorldConfiguration.meshGenerationsPerFrameLimit == -1 || lastUpdateCallId == -1 || 
+					// Check all neighbours if lighting is ready
+					this.master.chunkLightingReady(this.chunkX+1, this.chunkY, this.chunkZ) && 
+					this.master.chunkLightingReady(this.chunkX-1, this.chunkY, this.chunkZ) && 
+					this.master.chunkLightingReady(this.chunkX, this.chunkY+1, this.chunkZ) && 
+					this.master.chunkLightingReady(this.chunkX, this.chunkY-1, this.chunkZ) && 
+					this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ+1) && 
+					this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ-1) && 
+					(CubicWorldConfiguration.meshGenerationsPerFrameLimit == -1 || 
 					frameMismatch || generationsProcessedThisFrame <= CubicWorldConfiguration.meshGenerationsPerFrameLimit))
 			{
 				// If the frame ids mismatch
@@ -1062,7 +1079,7 @@ public class VoxelChunk implements Disposable
 							}
 							else
 							{
-								byte topLightLevel = this.master.getLightLevel(absX, absY+1, absZ);
+								byte topLightLevel = (y == VoxelWorld.chunkHeight - 1 ? this.master.getLightLevel(absX, absY+1, absZ) : this.voxelData[x][y+1][z].lightLevel);
 								
 								// Forward light through air and transparent blocks
 								if (v.voxelType == null || v.voxelType.transparent)
