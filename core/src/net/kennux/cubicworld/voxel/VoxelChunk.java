@@ -715,6 +715,12 @@ public class VoxelChunk implements Disposable
 	private static long lastRenderFrameId = -1;
 
 	/**
+	 * The last call id when update() was called.
+	 * Used to limit chunk updates per frame for lag reduction.
+	 */
+	private static long lastUpdateCallId = -1;
+
+	/**
 	 * Contains the number of createNewMesh() calls this frame.
 	 */
 	private static int creationProcessedThisFrame = -1;
@@ -891,7 +897,7 @@ public class VoxelChunk implements Disposable
 			}
 
 			// Update voxel handlers map
-			if (voxel != null)
+			if (voxel != null && voxel.voxelType != null)
 			{
 				IVoxelUpdateHandler updateHandler = voxel.voxelType.getUpdateHandler();
 				if (updateHandler != null)
@@ -1011,17 +1017,17 @@ public class VoxelChunk implements Disposable
 				entry.getValue().handleUpdate(voxelData, absoluteX, absoluteY, absoluteZ, this.master.isServer(), voxelData.dataModel);
 			}
 			
-			boolean frameMismatch = (lastRenderFrameId != this.master.updateCallId);
+			boolean frameMismatch = (lastUpdateCallId != this.master.updateCallId);
 			
 			if (!ClientChunkRequest.areRequestsPending() && !this.lightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() && 
-					(CubicWorldConfiguration.meshGenerationsPerFrameLimit == -1 || lastRenderFrameId == -1 || 
+					(CubicWorldConfiguration.meshGenerationsPerFrameLimit == -1 || lastUpdateCallId == -1 || 
 					frameMismatch || generationsProcessedThisFrame <= CubicWorldConfiguration.meshGenerationsPerFrameLimit))
 			{
 				// If the frame ids mismatch
 				if (frameMismatch)
 				{
 					// Update frame id and reset counter
-					lastRenderFrameId = this.master.updateCallId;
+					lastUpdateCallId = this.master.updateCallId;
 					generationsProcessedThisFrame = 0;
 				}
 				

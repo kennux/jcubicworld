@@ -45,6 +45,7 @@ public class ClientChunkRequest extends APacketModel
 	public static void recievedChunkData(int x, int y, int z)
 	{
 		Vector3 vector = new Vector3(x,y,z);
+		// System.out.println("Recieved: " + vector);
 		pendingRequests.remove(vector);
 	}
 	
@@ -56,6 +57,7 @@ public class ClientChunkRequest extends APacketModel
 	 */
 	public static void requestedChunkData(int chunkX, int chunkY, int chunkZ)
 	{
+		// System.out.println("Requested: " + new Vector3(chunkX, chunkY, chunkZ));
 		pendingRequests.add(new Vector3(chunkX, chunkY, chunkZ));
 	}
 	
