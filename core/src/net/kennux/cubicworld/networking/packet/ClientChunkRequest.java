@@ -48,6 +48,15 @@ public class ClientChunkRequest extends APacketModel
 		// System.out.println("Recieved: " + vector);
 		pendingRequests.remove(vector);
 	}
+
+	/**
+	 * Returns true if the client is currently waiting for the chunk with given x|y|z coordinates.
+	 * @return
+	 */
+	public static boolean isWaitingFor(Vector3 pos)
+	{
+		return pendingRequests.contains(pos);
+	}
 	
 	/**
 	 * Call this function if a chunk was requested.

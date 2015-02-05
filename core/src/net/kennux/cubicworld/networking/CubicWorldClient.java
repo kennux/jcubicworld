@@ -3,12 +3,14 @@ package net.kennux.cubicworld.networking;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.networking.packet.ClientLogin;
 import net.kennux.cubicworld.networking.packet.ClientPlayerUpdate;
+import net.kennux.cubicworld.networking.packet.ServerChunkData;
 import net.kennux.cubicworld.networking.packet.ServerPlayerSpawn;
 
 import com.badlogic.gdx.Gdx;
@@ -71,6 +73,40 @@ public class CubicWorldClient extends AClientSocket
 	{
 		super.sendPacket(packet);
 	}
+	
+	/**
+	 * Iterates through all packets in processing queue but will only process ServerChunkData packets
+	 */
+	public void waitForChunkPackets()
+	{
+		ArrayList<IPacketModel> packetsList = new ArrayList<IPacketModel>();
+		
+		while (this.hasPacket())
+		{
+			// Get next packet model
+			IPacketModel packet = this.getPacket();
+
+			if (packet == null)
+				break;
+			
+			packetsList.add(packet);
+		}
+		
+		for (IPacketModel packet : packetsList)
+		{
+			if (packet instanceof ServerChunkData)
+			{
+				packet.interpretClientSide(this.cubicWorld);
+			}
+			else
+			{
+				synchronized (this.packetsRecievedLockObject)
+				{
+					this.packetsRecieved.add(packet);
+				}
+			}
+		}
+	}
 
 	/**
 	 * Call this every tick / frame. It will read data from the socket. And
@@ -90,14 +126,18 @@ public class CubicWorldClient extends AClientSocket
 
 			for (Vector3 chunkPos : chunksToRequest)
 			{
-				ClientChunkRequest chunkRequest = new ClientChunkRequest();
-				chunkRequest.chunkX = (int) chunkPos.x;
-				chunkRequest.chunkY = (int) chunkPos.y;
-				chunkRequest.chunkZ = (int) chunkPos.z;
-				
-				ClientChunkRequest.requestedChunkData(chunkRequest.chunkX, chunkRequest.chunkY, chunkRequest.chunkZ);
-
-				this.sendPacket(chunkRequest);
+				// Prevent double-requesting
+				if (!ClientChunkRequest.isWaitingFor(chunkPos))
+				{
+					ClientChunkRequest chunkRequest = new ClientChunkRequest();
+					chunkRequest.chunkX = (int) chunkPos.x;
+					chunkRequest.chunkY = (int) chunkPos.y;
+					chunkRequest.chunkZ = (int) chunkPos.z;
+					
+					ClientChunkRequest.requestedChunkData(chunkRequest.chunkX, chunkRequest.chunkY, chunkRequest.chunkZ);
+	
+					this.sendPacket(chunkRequest);
+				}
 			}
 		}
 

@@ -3,6 +3,8 @@ package net.kennux.cubicworld.voxel;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.kennux.cubicworld.math.Vector3i;
+
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;

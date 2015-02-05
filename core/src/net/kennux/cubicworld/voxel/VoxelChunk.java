@@ -9,6 +9,7 @@ import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.inventory.IInventoryUpdateHandler;
+import net.kennux.cubicworld.math.Vector3i;
 import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.networking.packet.inventory.ServerBlockInventoryUpdate;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
@@ -238,6 +239,8 @@ public class VoxelChunk implements Disposable
 	private ArrayList<Vector2> newUvs = new ArrayList<Vector2>();
 	private ArrayList<Short> newIndices = new ArrayList<Short>();
 	private ArrayList<Color> newColors = new ArrayList<Color>();
+	
+	private Vector3i absoluteChunkPosition;
 
 	public VoxelChunk(int chunkX, int chunkY, int chunkZ, VoxelWorld master)
 	{
@@ -254,10 +257,13 @@ public class VoxelChunk implements Disposable
 				// Facing left
 				new Quaternion(0, 0, 0, 0).setEulerAngles(270, 0, 0) };
 
-		// Set chunk size.
+		// Set chunkspae position
 		this.chunkX = chunkX;
 		this.chunkY = chunkY;
 		this.chunkZ = chunkZ;
+		
+		// Set absolute chunk position
+		this.absoluteChunkPosition = new Vector3i(this.chunkX * VoxelWorld.chunkWidth, this.chunkY * VoxelWorld.chunkHeight, this.chunkZ * VoxelWorld.chunkDepth);
 
 		this.master = master;
 	}
@@ -429,11 +435,12 @@ public class VoxelChunk implements Disposable
 				return;
 
 			// the vertices array list
-			ArrayList<Vector3> vertices = new ArrayList<Vector3>();
-			ArrayList<Vector3> normals = new ArrayList<Vector3>();
-			ArrayList<Vector2> uvs = new ArrayList<Vector2>();
-			ArrayList<Short> indices = new ArrayList<Short>();
-			ArrayList<Color> colors = new ArrayList<Color>();
+			final int initListLength = 10000; // Start with a length of 10000 to avoid re-allocation
+			ArrayList<Vector3> vertices = new ArrayList<Vector3>(initListLength);
+			ArrayList<Vector3> normals = new ArrayList<Vector3>(initListLength);
+			ArrayList<Vector2> uvs = new ArrayList<Vector2>(initListLength);
+			ArrayList<Short> indices = new ArrayList<Short>(initListLength);
+			ArrayList<Color> colors = new ArrayList<Color>(initListLength);
 			ArrayList<ModelInstance> modelList = new ArrayList<ModelInstance>();
 			short indicesCounter = 0;
 
@@ -449,10 +456,10 @@ public class VoxelChunk implements Disposable
 							if (voxelData[x][y][z] == null || voxelData[x][y][z].voxelType == null)
 								continue;
 							
-							Vector3 absolutePos = this.getAbsoluteBlockPosition(x, y, z);
-							int absX = (int)absolutePos.x;
-							int absY = (int)absolutePos.y;
-							int absZ = (int)absolutePos.z;
+							Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
+							int absX = absolutePos.x;
+							int absY = absolutePos.y;
+							int absZ = absolutePos.z;
 
 							VoxelData leftVoxel = (x == 0 ? this.master.getVoxel(absX-1, absY, absZ) : this.voxelData[x-1][y][z]);
 							VoxelData rightVoxel = (x == VoxelWorld.chunkWidth-1 ? this.master.getVoxel(absX+1, absY, absZ) : this.voxelData[x+1][y][z]);
@@ -541,15 +548,15 @@ public class VoxelChunk implements Disposable
 			this.newColors = colors;
 			this.newIndices = indices;
 			this.newModels = modelList;
-			this.newBoundingBox = new BoundingBox(this.getAbsoluteBlockPosition(0, 0, 0), this.getAbsoluteBlockPosition(VoxelWorld.chunkWidth, VoxelWorld.chunkHeight, VoxelWorld.chunkDepth));
+			this.newBoundingBox = new BoundingBox(this.getAbsoluteVoxelPosition(0, 0, 0).toFloatVector(), this.getAbsoluteVoxelPosition(VoxelWorld.chunkWidth, VoxelWorld.chunkHeight, VoxelWorld.chunkDepth).toFloatVector());
 
 			this.newMeshDataReady = true;
 		}
 	}
 
-	public Vector3 getAbsoluteBlockPosition(int x, int y, int z)
+	public Vector3i getAbsoluteVoxelPosition(int x, int y, int z)
 	{
-		return new Vector3(x + (this.chunkX * VoxelWorld.chunkWidth), y + (this.chunkY * VoxelWorld.chunkHeight), z + (this.chunkZ * VoxelWorld.chunkDepth));
+		return new Vector3i(x + this.absoluteChunkPosition.x, y + this.absoluteChunkPosition.y, z + this.absoluteChunkPosition.z);
 	}
 
 	/**
@@ -847,8 +854,8 @@ public class VoxelChunk implements Disposable
 				for (int z = 0; z < VoxelWorld.chunkDepth; z++)
 					if (this.voxelData[x][y][z] != null && this.voxelData[x][y][z].blockInventory != null)
 					{
-						Vector3 absolutePos = this.getAbsoluteBlockPosition(x, y, z);
-						this.setInventoryUpdateHandler((int) absolutePos.x, (int) absolutePos.y, (int) absolutePos.z, this.voxelData[x][y][z]);
+						Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
+						this.setInventoryUpdateHandler(absolutePos.x, absolutePos.y, absolutePos.z, this.voxelData[x][y][z]);
 					}
 	}
 
@@ -881,8 +888,8 @@ public class VoxelChunk implements Disposable
 			// Inventory
 			if (voxel != null && voxel.blockInventory != null)
 			{
-				Vector3 absolutePos = this.getAbsoluteBlockPosition(x, y, z);
-				this.setInventoryUpdateHandler((int) absolutePos.x, (int) absolutePos.y, (int) absolutePos.z, voxel);
+				Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
+				this.setInventoryUpdateHandler(absolutePos.x, absolutePos.y, absolutePos.z, voxel);
 			}
 
 			this.chunkDataWasModified();
@@ -890,8 +897,8 @@ public class VoxelChunk implements Disposable
 			// notify about update
 			if (this.master.getVoxelDataUpdateHandler() != null)
 			{
-				Vector3 absolutePos = this.getAbsoluteBlockPosition(x, y, z);
-				this.master.getVoxelDataUpdateHandler().handleVoxelDataUpdate((int) absolutePos.x, (int) absolutePos.y, (int) absolutePos.z, voxel);
+				Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
+				this.master.getVoxelDataUpdateHandler().handleVoxelDataUpdate(absolutePos.x, absolutePos.y, absolutePos.z, voxel);
 			}
 
 			// Update voxel handlers map
@@ -1013,15 +1020,11 @@ public class VoxelChunk implements Disposable
 				int y = (int) entry.getKey().y;
 				int z = (int) entry.getKey().z;
 
-				Vector3 absolutePosition = this.getAbsoluteBlockPosition((int) entry.getKey().x, (int) entry.getKey().y, (int) entry.getKey().z);
+				Vector3i absolutePosition = this.getAbsoluteVoxelPosition((int) entry.getKey().x, (int) entry.getKey().y, (int) entry.getKey().z);
 
-				int absoluteX = (int) absolutePosition.x;
-				int absoluteY = (int) absolutePosition.y;
-				int absoluteZ = (int) absolutePosition.z;
-				
 				VoxelData voxelData = this.getVoxel(x, y, z);
 				
-				entry.getValue().handleUpdate(voxelData, absoluteX, absoluteY, absoluteZ, this.master.isServer());
+				entry.getValue().handleUpdate(voxelData, absolutePosition.x, absolutePosition.y, absolutePosition.z, this.master.isServer());
 			}
 			
 			boolean frameMismatch = (lastUpdateCallId != this.master.updateCallId);
@@ -1065,10 +1068,10 @@ public class VoxelChunk implements Disposable
 						if (this.voxelData[x][y][z] != null)
 						{
 							VoxelData v = this.voxelData[x][y][z];
-							Vector3 absolutePos = this.getAbsoluteBlockPosition(x, y, z);
-							int absX = (int)absolutePos.x;
-							int absY = (int)absolutePos.y;
-							int absZ = (int)absolutePos.z;
+							Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
+							int absX = absolutePos.x;
+							int absY = absolutePos.y;
+							int absZ = absolutePos.z;
 							
 							if (y == VoxelWorld.chunkHeight-1 && (v.voxelType == null || v.voxelType.transparent))
 							{
@@ -1108,41 +1111,27 @@ public class VoxelChunk implements Disposable
 	/**
 	 * Writes mesh data to the given lists.
 	 * 
-	 * @param vertices
-	 *            Main vertex list.
-	 * @param indices
-	 *            Main index list.
-	 * @param uvs
-	 *            Main uvs list.
-	 * @param colors
-	 *            Main colors list.
-	 * @param sideVertices
-	 *            Vertex array from the side vertices array.
-	 * @param sideIndices
-	 *            Side indices from the side indices array.
-	 * @param indicesCounter
-	 *            The current index counter.
-	 * @param x
-	 *            The current voxel worldspace position.
-	 * @param y
-	 *            The current voxel worldspace position.
-	 * @param z
-	 *            The current voxel worldspace position.
-	 * @param color
-	 *            The voxel color.
-	 * @param blockId
-	 *            The voxel type id.
-	 * @param face
-	 *            The foxel face to use for getting uv coordinates.
+	 * @param vertices Main vertex list.
+	 * @param indices Main index list.
+	 * @param uvs Main uvs list.
+	 * @param colors Main colors list.
+	 * @param sideVertices Vertex array from the side vertices array.
+	 * @param sideIndices Side indices from the side indices array.
+	 * @param indicesCounter The current index counter.
+	 * @param x The current voxel worldspace position.
+	 * @param y The current voxel worldspace position.
+	 * @param z The current voxel worldspace position.
+	 * @param color The voxel color.
+	 * @param blockId The voxel type id.
+	 * @param face The foxel face to use for getting uv coordinates.
 	 */
 	private void WriteSideData(ArrayList<Vector3> vertices, ArrayList<Short> indices, ArrayList<Vector2> uvs, ArrayList<Color> colors, ArrayList<Vector3> normals, Vector3[] sideVertices, Vector3[] sideNormals, short[] sideIndices, short indicesCounter, int x, int y, int z, VoxelData voxelData, VoxelFace face, byte lightLevel)
 	{
-		short blockId = voxelData.voxelType.voxelId;
+		// short blockId = voxelData.voxelType.voxelId;
 
 		Vector2[] uv = voxelData.getRenderState().getUvsForFace(face);
 
-		@SuppressWarnings("unused")
-		boolean transparent = VoxelEngine.getVoxelType(blockId).transparent;
+		// boolean transparent = VoxelEngine.getVoxelType(blockId).transparent;
 
 		// Calculate absolute vertex index count.
 		for (int i = 0; i < sideIndices.length; i++)

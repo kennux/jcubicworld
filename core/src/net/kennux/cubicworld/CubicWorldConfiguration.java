@@ -70,7 +70,7 @@ public class CubicWorldConfiguration
 	/**
 	 * The maximum light level a block can have.
 	 */
-	public static final int maxLightLevel = 16;
+	public static final int maxLightLevel = 15;
 
 	/**
 	 * The distance used to cull entity update packets.

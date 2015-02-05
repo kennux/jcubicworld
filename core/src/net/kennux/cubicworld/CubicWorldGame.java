@@ -249,7 +249,7 @@ public class CubicWorldGame extends ApplicationAdapter
 		// Wait till all chunk requests are processed
 		while(ClientChunkRequest.areRequestsPending())
 		{
-			this.client.update(this.playerController.getPosition());
+			this.client.waitForChunkPackets();
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
