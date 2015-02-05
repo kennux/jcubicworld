@@ -756,15 +756,12 @@ public class VoxelChunk implements Disposable
 			this.createNewMesh();	
 		}
 
-		synchronized (this.meshLockObject)
+		if (this.voxelMesh != null && this.boundingBox != null && cam.frustum.boundsInFrustum(this.boundingBox))
 		{
-			if (this.voxelMesh != null && this.boundingBox != null && cam.frustum.boundsInFrustum(this.boundingBox))
+			synchronized (this.meshLockObject)
 			{
-				synchronized (this.meshLockObject)
-				{
-					// Render chunk mesh
-					this.voxelMesh.render(shader, GL20.GL_TRIANGLES);
-				}
+				// Render chunk mesh
+				this.voxelMesh.render(shader, GL20.GL_TRIANGLES);
 			}
 		}
 	}

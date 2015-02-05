@@ -30,12 +30,15 @@ public class DesktopLauncher
 			// TODO Auto-generated caHashMap<K, V>ck
 			e1.printStackTrace();
 		}*/
-		/*try {
+		try
+		{
 			System.in.read();
-		} catch (IOException e1) {
+		}
+		catch (IOException e1)
+		{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}*/
+		}
 		
 		// Pre-init
 		try

@@ -55,7 +55,7 @@ public class CubicWorldConfiguration
 	 * This gets used to check if the player needs to request any new chunks
 	 * from the server.
 	 */
-	public static final int chunkLoadDistance = 6;
+	public static final int chunkLoadDistance = 12;
 
 	/**
 	 * The distance used to cull chunk update packets.
@@ -97,7 +97,7 @@ public class CubicWorldConfiguration
 	 * The standard packet cull distance.
 	 * Will get returned by getCullDistance() in APacketModel by standard.
 	 */
-	public static final float standardDistanceCullDistance = entityCullDistance;
+	public static final float standardCullDistance = entityCullDistance;
 
 	/**
 	 * Limits the voxel mesh creations (calls to VoxelChunk.generateMesh()) for chunks per frame.

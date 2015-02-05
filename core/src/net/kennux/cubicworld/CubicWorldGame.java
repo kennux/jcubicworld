@@ -12,6 +12,7 @@ import net.kennux.cubicworld.input.InputManager;
 import net.kennux.cubicworld.networking.CubicWorldClient;
 import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.profiler.Profiler;
+import net.kennux.cubicworld.profiler.ProfilerResult;
 import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.util.DebugHelper;
 import net.kennux.cubicworld.util.ShaderLoader;
@@ -463,6 +464,13 @@ public class CubicWorldGame extends ApplicationAdapter
 		this.frameBufferBatch.begin();
 		this.frameBufferBatch.draw(this.finalFrameTexture.getColorBufferTexture(), 0, 0);
 		this.frameBufferBatch.end();
+		
+		if (Gdx.graphics.getDeltaTime() > 3f)
+		{
+			ProfilerResult[] results = this.profiler.getResults();
+			System.out.println("Delta time: " + Gdx.graphics.getDeltaTime());
+		}
+		
 		// Reset profiler
 		this.profiler.reset();
 		GLProfiler.reset();

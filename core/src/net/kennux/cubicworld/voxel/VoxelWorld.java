@@ -1082,7 +1082,7 @@ public class VoxelWorld
 	 */
 	public void simulate()
 	{
-		synchronized (this.chunksLockObject)
+		// synchronized (this.chunksLockObject)
 		{
 			this.chunks.simulate();
 		}
@@ -1093,7 +1093,7 @@ public class VoxelWorld
 	 */
 	public void update()
 	{
-		synchronized (this.chunksLockObject)
+		// synchronized (this.chunksLockObject)
 		{
 			this.chunks.update();
 		}

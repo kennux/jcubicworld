@@ -55,7 +55,7 @@ public abstract class APacketModel implements IPacketModel
 	@Override
 	public float getCullDistance()
 	{
-		return CubicWorldConfiguration.standardDistanceCullDistance;
+		return CubicWorldConfiguration.standardCullDistance;
 	}
 
 	/**
