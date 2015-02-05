@@ -778,25 +778,29 @@ public class VoxelWorld
 		VoxelChunk chunk = new VoxelChunk(chunkX, chunkY, chunkZ, this);
 		
 		// Regenerate adjacent chunks meshes
-		VoxelChunk leftChunk = this.getChunk(chunkX-1, chunkY, chunkZ, false);
-		VoxelChunk rightChunk = this.getChunk(chunkX+1, chunkY, chunkZ, false);
-		VoxelChunk topChunk = this.getChunk(chunkX, chunkY+1, chunkZ, false);
-		VoxelChunk bottomChunk = this.getChunk(chunkX, chunkY-1, chunkZ, false);
-		VoxelChunk backChunk = this.getChunk(chunkX, chunkY, chunkZ-1, false);
-		VoxelChunk frontChunk = this.getChunk(chunkX, chunkY, chunkZ+1, false);
-
-		if (leftChunk != null)
-			leftChunk.regenerateChunkMesh();
-		if (rightChunk != null)
-			rightChunk.regenerateChunkMesh();
-		if (topChunk != null)
-			topChunk.regenerateChunkMesh();
-		if (bottomChunk != null)
-			bottomChunk.regenerateChunkMesh();
-		if (backChunk != null)
-			backChunk.regenerateChunkMesh();
-		if (frontChunk != null)
-			frontChunk.regenerateChunkMesh();
+		// Only needed on client
+		if (!this.isServer)
+		{
+			VoxelChunk leftChunk = this.getChunk(chunkX-1, chunkY, chunkZ, false);
+			VoxelChunk rightChunk = this.getChunk(chunkX+1, chunkY, chunkZ, false);
+			VoxelChunk topChunk = this.getChunk(chunkX, chunkY+1, chunkZ, false);
+			VoxelChunk bottomChunk = this.getChunk(chunkX, chunkY-1, chunkZ, false);
+			VoxelChunk backChunk = this.getChunk(chunkX, chunkY, chunkZ-1, false);
+			VoxelChunk frontChunk = this.getChunk(chunkX, chunkY, chunkZ+1, false);
+	
+			if (leftChunk != null)
+				leftChunk.regenerateChunkMesh();
+			if (rightChunk != null)
+				rightChunk.regenerateChunkMesh();
+			if (topChunk != null)
+				topChunk.regenerateChunkMesh();
+			if (bottomChunk != null)
+				bottomChunk.regenerateChunkMesh();
+			if (backChunk != null)
+				backChunk.regenerateChunkMesh();
+			if (frontChunk != null)
+				frontChunk.regenerateChunkMesh();
+		}
 		
 		chunks.put(new ChunkKey(chunkX, chunkY, chunkZ), chunk);
 
