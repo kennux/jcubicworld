@@ -37,7 +37,6 @@ public abstract class MachineUpdateHandler implements IVoxelTileEntityHandler
 	@Override
 	public void handleUpdate(VoxelData voxelData, int x, int y, int z, boolean isServer)
 	{
-		System.out.println("handleUpdate! " + isServer);
 		// Only blocks with inventories are allowed!
 		if (voxelData.blockInventory == null)
 			return;

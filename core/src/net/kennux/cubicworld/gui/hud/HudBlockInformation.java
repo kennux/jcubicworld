@@ -38,6 +38,8 @@ public class HudBlockInformation implements IHudElement
 
 	private CubicWorldGame cubicWorld;
 
+	private byte lightLevel;
+	
 	public HudBlockInformation()
 	{
 		this.cubicWorld = CubicWorld.getClient();
@@ -56,7 +58,7 @@ public class HudBlockInformation implements IHudElement
 			spriteBatch.draw(this.currentBlockTexture, texturePosition.x, texturePosition.y, textureSize.x, textureSize.y);
 
 			// Render text
-			font.draw(spriteBatch, "Block: " + VoxelEngine.getNameByVoxelId(this.currentVoxelType.voxelId), infoTextPosition.x, infoTextPosition.y);
+			font.draw(spriteBatch, "Block: " + VoxelEngine.getNameByVoxelId(this.currentVoxelType.voxelId) + " | Lightlevel: " + this.lightLevel, infoTextPosition.x, infoTextPosition.y);
 		}
 	}
 
@@ -85,6 +87,7 @@ public class HudBlockInformation implements IHudElement
 			// Get current block texture
 			this.currentBlockTexture = selectedVoxel.voxelType.getGuiTexture();
 			this.currentVoxelType = selectedVoxel.voxelType;
+			this.lightLevel = selectedVoxel.lightLevel;
 		}
 	}
 

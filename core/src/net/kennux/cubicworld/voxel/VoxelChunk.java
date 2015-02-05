@@ -1,6 +1,7 @@
 package net.kennux.cubicworld.voxel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -988,17 +989,25 @@ public class VoxelChunk implements Disposable
 		// Lighting check
 		// The lighting algorithm needs all chunks around this chunk to be ready.
 		if (!ClientChunkRequest.areRequestsPending() && this.lightingDirty && this.isInitialized() &&
-				(this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLightingReady(new ChunkKey(this.chunkX, this.chunkY+1, this.chunkZ))))
+				(this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLightingReady(new ChunkKey(this.chunkX, this.chunkY+1, this.chunkZ)))
+				/* NONSENSE?!? &&
+				// Check if this is a edge chunk
+				((!this.master.hasChunk(this.chunkX-1, this.chunkY, this.chunkZ) || !this.master.hasChunk(this.chunkX+1, this.chunkY, this.chunkZ) || 
+				!this.master.hasChunk(this.chunkX, this.chunkY, this.chunkZ-1) || !this.master.hasChunk(this.chunkX, this.chunkY, this.chunkZ+1)) ||
+				// OR Check if lighting on adjacent chunks is ready
+				(this.master.chunkLightingReady(this.chunkX-1, this.chunkY, this.chunkZ) && this.master.chunkLightingReady(this.chunkX-1, this.chunkY, this.chunkZ) &&
+				this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ-1) && this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ+1)))*/
+				)
 		{
 			this.recalculateLighting();
 		}
 
 		synchronized (this.voxelDataLockObject)
 		{
-			HashMap<Vector3, IVoxelTileEntityHandler> updateHandlersClone = (HashMap<Vector3, IVoxelTileEntityHandler>) this.tileEntityHandlers.clone();
+			HashMap<Vector3, IVoxelTileEntityHandler> tileEntitiesClone = (HashMap<Vector3, IVoxelTileEntityHandler>) this.tileEntityHandlers.clone();
 
 			// Exec tile entity updates
-			for (Entry<Vector3, IVoxelTileEntityHandler> entry : updateHandlersClone.entrySet())
+			for (Entry<Vector3, IVoxelTileEntityHandler> entry : tileEntitiesClone.entrySet())
 			{
 				int x = (int) entry.getKey().x;
 				int y = (int) entry.getKey().y;
@@ -1016,12 +1025,6 @@ public class VoxelChunk implements Disposable
 			}
 			
 			boolean frameMismatch = (lastUpdateCallId != this.master.updateCallId);
-			
-			if (frameMismatch && !ClientChunkRequest.areRequestsPending() && !this.lightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() )
-			{
-				int jk = 123;
-				jk *= jk + 123;
-			}
 			
 			if (!ClientChunkRequest.areRequestsPending() && !this.lightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() && 
 					// Check all neighbours if lighting is ready
@@ -1067,9 +1070,9 @@ public class VoxelChunk implements Disposable
 							int absY = (int)absolutePos.y;
 							int absZ = (int)absolutePos.z;
 							
-							if (absY == this.master.worldHeight-1)
+							if (y == VoxelWorld.chunkHeight-1 && (v.voxelType == null || v.voxelType.transparent))
 							{
-								v.lightLevel = CubicWorldConfiguration.maxLightLevel;
+								v.lightLevel = (byte) (CubicWorldConfiguration.maxLightLevel - (this.master.chunksOnYAxis() - this.chunkY));
 							}
 							else
 							{
@@ -1082,8 +1085,17 @@ public class VoxelChunk implements Disposable
 									v.lightLevel = topLightLevel;
 								else
 								{
-									// Divide light by 2 if this is a solid block
-									v.lightLevel = (byte) ((float)topLightLevel / 1.25f);
+									// Get neighbour levels
+									byte leftLightLevel = (x == 0 ? this.master.getLightLevel(absX-1, absY, absZ) : (this.voxelData[x-1][y][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x-1][y][z].lightLevel));
+									byte rightLightLevel = (x == VoxelWorld.chunkWidth - 1 ? this.master.getLightLevel(absX+1, absY, absZ) : (this.voxelData[x+1][y][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x+1][y][z].lightLevel));
+									byte backLightLevel = (z == 0 ? this.master.getLightLevel(absX, absY, absZ-1) : (this.voxelData[x][y][z-1] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y][z-1].lightLevel));
+									byte frontLightLevel = (z == VoxelWorld.chunkDepth - 1 ? this.master.getLightLevel(absX, absY, absZ+1) : (this.voxelData[x][y][z+1] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y][z+1].lightLevel));
+									byte[] adjacentLightLevels = new byte[] { topLightLevel, leftLightLevel, rightLightLevel, backLightLevel, frontLightLevel };
+									
+									Arrays.sort(adjacentLightLevels);
+									byte highestLevel = adjacentLightLevels[adjacentLightLevels.length-1];
+									
+									v.lightLevel = (byte) (highestLevel-1);
 								}
 							}
 							
