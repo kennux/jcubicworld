@@ -65,6 +65,7 @@ import net.kennux.cubicworld.voxel.RaycastHit;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelEngine;
 import net.kennux.cubicworld.voxel.VoxelRenderState;
+import net.kennux.cubicworld.voxel.handlers.ITileEntityHandlerFactory;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 import net.kennux.cubicworld.voxel.handlers.MachineUpdateHandler;
 
@@ -440,42 +441,49 @@ public class BasePlugin extends APlugin
 	public void defineVoxelTypes()
 	{
 		// Furnace action handler
-		MachineUpdateHandler furnaceTileEntityHandler = new MachineUpdateHandler()
+		ITileEntityHandlerFactory furnaceTileEntityHandlerFactory = new ITileEntityHandlerFactory()
 		{
-			@Override
-			protected boolean getWorkingState(IInventory inventory)
-			{
-				ItemStack fuelStack = inventory.getItemStackInSlot(0);
-				return fuelStack != null && fuelStack.getType().getItemId() == BasePlugin.itemCoalId;
-			}
 
 			@Override
-			protected void workTick()
+			public IVoxelTileEntityHandler newInstance()
 			{
-				// System.out.println("Work tick!");
+				return new MachineUpdateHandler() {
+					@Override
+					protected boolean getWorkingState(IInventory inventory)
+					{
+						ItemStack fuelStack = inventory.getItemStackInSlot(0);
+						return fuelStack != null && fuelStack.getType().getItemId() == BasePlugin.itemCoalId;
+					}
+
+					@Override
+					protected void workTick()
+					{
+						// System.out.println("Work tick!");
+					}
+					
+					@Override
+					public void handleAction(VoxelData voxelData, int x, int y, int z)
+					{
+						// Get cubic world game instance.
+						CubicWorldGame cubicWorld = CubicWorld.getClient();
+
+						// Init overlay data
+						OverlayData overlayData = new OverlayData();
+						overlayData.put("inventory", voxelData.blockInventory);
+						overlayData.put("playerInventory", CubicWorld.getClient().playerController.getPlayerInventory());
+						overlayData.put("voxelPos", new Vector3(x,y,z));
+
+						// Activate overlay
+						IGuiOverlay blockOverlay = cubicWorld.guiManager.getOverlayById(BasePlugin.furnaceGuiOverlayId);
+
+						blockOverlay.setOverlayData(overlayData);
+
+						// Now open the overlay
+						cubicWorld.guiManager.openOverlay(BasePlugin.furnaceGuiOverlayId);
+					}
+
+				};
 			}
-			
-			@Override
-			public void handleAction(VoxelData voxelData, int x, int y, int z)
-			{
-				// Get cubic world game instance.
-				CubicWorldGame cubicWorld = CubicWorld.getClient();
-
-				// Init overlay data
-				OverlayData overlayData = new OverlayData();
-				overlayData.put("inventory", voxelData.blockInventory);
-				overlayData.put("playerInventory", CubicWorld.getClient().playerController.getPlayerInventory());
-				overlayData.put("voxelPos", new Vector3(x,y,z));
-
-				// Activate overlay
-				IGuiOverlay blockOverlay = cubicWorld.guiManager.getOverlayById(BasePlugin.furnaceGuiOverlayId);
-
-				blockOverlay.setOverlayData(overlayData);
-
-				// Now open the overlay
-				cubicWorld.guiManager.openOverlay(BasePlugin.furnaceGuiOverlayId);
-			}
-
 		};
 
 		// Register voxels
@@ -497,7 +505,7 @@ public class BasePlugin extends APlugin
 		VoxelRenderState furnaceNormalState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontId, furnaceSideId);
 		VoxelRenderState furnaceWorkingState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontLitId, furnaceSideId);
 
-		voxelFurnaceId = VoxelEngine.registerType("Furnace").setTileEntityHandler(furnaceTileEntityHandler).setRenderState(0, furnaceNormalState).setRenderState(1, furnaceWorkingState).setInventorySize(2).setGuiTexture(furnaceFrontTexture).voxelId;
+		voxelFurnaceId = VoxelEngine.registerType("Furnace").setTileEntityHandlerFactory(furnaceTileEntityHandlerFactory).setRenderState(0, furnaceNormalState).setRenderState(1, furnaceWorkingState).setInventorySize(2).setGuiTexture(furnaceFrontTexture).voxelId;
 	}
 
 	public void initializeGuiManager(GuiManager guiManager)

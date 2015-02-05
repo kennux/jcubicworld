@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import junit.framework.TestCase;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
-import net.kennux.cubicworld.test.voxel.TestDataModel;
 import net.kennux.cubicworld.voxel.RaycastHit;
 import net.kennux.cubicworld.voxel.VoxelChunk;
 import net.kennux.cubicworld.voxel.VoxelData;
@@ -14,6 +13,7 @@ import net.kennux.cubicworld.voxel.VoxelType;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 import net.kennux.cubicworld.voxel.VoxelWorldSave;
 import net.kennux.cubicworld.voxel.generator.AWorldGenerator;
+import net.kennux.cubicworld.voxel.handlers.ITileEntityHandlerFactory;
 import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 
@@ -304,7 +304,17 @@ public class VoxelWorldTest extends TestCase
 	{
 		// Create server mock object
 		CubicWorldServer serverInstance = EasyMock.createMock(CubicWorldServer.class);
-		IVoxelTileEntityHandler voxelUpdateHandler = EasyMock.createStrictMock(IVoxelTileEntityHandler.class);
+		final IVoxelTileEntityHandler tileEntityHandler = EasyMock.createStrictMock(IVoxelTileEntityHandler.class);
+		
+		ITileEntityHandlerFactory tileEntityFactory = new ITileEntityHandlerFactory()
+		{
+			
+			@Override
+			public IVoxelTileEntityHandler newInstance()
+			{
+				return tileEntityHandler;
+			}
+		};
 
 		// Create voxel world object
 		VoxelWorld voxelWorld = new VoxelWorld(serverInstance);
@@ -314,7 +324,7 @@ public class VoxelWorldTest extends TestCase
 
 		// Set the update handler temporary
 		VoxelType dirtType = VoxelEngine.getVoxelType(BasePlugin.voxelDirtId);
-		dirtType.setTileEntityHandler(voxelUpdateHandler);
+		dirtType.setTileEntityHandlerFactory(tileEntityFactory);
 
 		// Generate 0|0|0 chunk
 		voxelWorld.generateChunk(0, 0, 0, true);
@@ -323,19 +333,19 @@ public class VoxelWorldTest extends TestCase
 		VoxelData voxelData = VoxelData.construct(BasePlugin.voxelDirtId);
 		
 		// Record expected update handler behaviour
-		voxelUpdateHandler.handleUpdate(voxelData, 0, 4, 0, true);
+		tileEntityHandler.handleUpdate(voxelData, 0, 4, 0, true);
 
-		EasyMock.replay(voxelUpdateHandler);
+		EasyMock.replay(tileEntityHandler);
 
 		voxelWorld.setVoxel(0, 4, 0, voxelData);
 		voxelWorld.update();
 
 		// Verify update handler
-		EasyMock.verify(voxelUpdateHandler);
+		EasyMock.verify(tileEntityHandler);
 
 		// Restart replay
-		EasyMock.reset(voxelUpdateHandler);
-		EasyMock.replay(voxelUpdateHandler);
+		EasyMock.reset(tileEntityHandler);
+		EasyMock.replay(tileEntityHandler);
 
 		voxelData = VoxelData.construct(BasePlugin.voxelBedrockId);
 
@@ -344,9 +354,9 @@ public class VoxelWorldTest extends TestCase
 		voxelWorld.update();
 
 		// Verify update handler
-		EasyMock.verify(voxelUpdateHandler);
+		EasyMock.verify(tileEntityHandler);
 
 		// Remove update handler
-		dirtType.setTileEntityHandler(null);
+		dirtType.setTileEntityHandlerFactory(null);
 	}
 }

@@ -15,7 +15,8 @@ import net.kennux.cubicworld.voxel.VoxelData;
  * @author KennuX
  *
  */
-public interface IVoxelTileEntityHandler {
+public interface IVoxelTileEntityHandler extends Cloneable
+{
 	/**
 	 * x y and z are in worldspace coordinates
 	 * 
@@ -25,8 +26,7 @@ public interface IVoxelTileEntityHandler {
 	 * @param z
 	 * @param isServer
 	 */
-	public void handleUpdate(VoxelData voxelData, int x, int y, int z,
-			boolean isServer);
+	public void handleUpdate(VoxelData voxelData, int x, int y, int z, boolean isServer);
 
 	/**
 	 * Gets called if the block action (clientside, on clicking it / opening

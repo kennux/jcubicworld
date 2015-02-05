@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import net.kennux.cubicworld.inventory.InventoryFilterRuleSet;
+import net.kennux.cubicworld.voxel.handlers.ITileEntityHandlerFactory;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 
 import com.badlogic.gdx.audio.Sound;
@@ -78,7 +79,7 @@ public class VoxelType
 	/**
 	 * The voxel type's update handler.
 	 */
-	private IVoxelTileEntityHandler tileEntityHandler;
+	private ITileEntityHandlerFactory tileEntityHandlerFactory;
 
 	/**
 	 * The filter rule set instance for this voxel type.
@@ -180,15 +181,15 @@ public class VoxelType
 
 	public boolean isTileEntity()
 	{
-		return this.tileEntityHandler != null;
+		return this.tileEntityHandlerFactory != null;
 	}
 	
 	/**
 	 * @return the updateHandler
 	 */
-	public IVoxelTileEntityHandler getTileEntityHandler()
+	public ITileEntityHandlerFactory getTileEntityHandlerFactory()
 	{
-		return tileEntityHandler;
+		return tileEntityHandlerFactory;
 	}
 
 	/**
@@ -326,9 +327,9 @@ public class VoxelType
 	/**
 	 * @param updateHandler the updateHandler to set
 	 */
-	public VoxelType setTileEntityHandler(IVoxelTileEntityHandler tileEntityHandler)
+	public VoxelType setTileEntityHandlerFactory(ITileEntityHandlerFactory tileEntityHandlerFactory)
 	{
-		this.tileEntityHandler = tileEntityHandler;
+		this.tileEntityHandlerFactory = tileEntityHandlerFactory;
 		return this;
 	}
 }

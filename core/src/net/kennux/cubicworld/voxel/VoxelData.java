@@ -1,5 +1,7 @@
 package net.kennux.cubicworld.voxel;
 
+import java.lang.reflect.InvocationTargetException;
+
 import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.inventory.BlockInventory;
 import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
@@ -47,7 +49,7 @@ public class VoxelData
 		// Tile entity instantiation
 		if (data.voxelType.isTileEntity())
 		{
-			
+			data.tileEntity = data.voxelType.getTileEntityHandlerFactory().newInstance();
 		}
 
 		return data;

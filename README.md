@@ -93,19 +93,22 @@ Current Features
 - Input system
 - Pathfinder (A*)
 - GUI System
-- Inventory/Item System (WIP)
-- Plugin API (WIP)
-- Enemy AI System (WIP)
+- Inventory/Item System
+- Plugin API
+- Enemy AI System
+- Simple lighting system
 
 Planned Features
 ==============
 
+- Light sources
+- Gravity blocks
 - Better physics implementation
-- Fluid simulation (Maybe like the one of minecraft?)
-- Minecraft like world generation (Caves and so on)
+- Fluid system / simulation (Maybe like the one of minecraft?)
 - Weapons (Swords, Bows, Guns)
 - Tools (Pickaxe, Shovel, ...)
-- Trading System with either direct trading (Player to Player) or shops.
+- Multiple Dimensions
+- Minecraft like world generation (Caves and so on)
 
 
 Screenshots

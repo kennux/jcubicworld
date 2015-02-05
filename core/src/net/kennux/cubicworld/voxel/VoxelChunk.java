@@ -896,9 +896,9 @@ public class VoxelChunk implements Disposable
 			// Update voxel handlers map
 			if (voxel != null && voxel.voxelType != null)
 			{
-				if (voxel.voxelType.isTileEntity())
+				if (voxel.voxelType.isTileEntity() && voxel.tileEntity != null)
 				{
-					this.tileEntityHandlers.put(voxelPos, voxel.voxelType.getTileEntityHandler());
+					this.tileEntityHandlers.put(voxelPos, voxel.tileEntity);
 				}
 			}
 		}
@@ -937,18 +937,15 @@ public class VoxelChunk implements Disposable
 		{
 			this.tileEntityHandlers.clear();
 
+			// Iterate through all voxel data instances
 			for (int x = 0; x < this.voxelData.length; x++)
 				for (int y = 0; y < this.voxelData[x].length; y++)
 					for (int z = 0; z < this.voxelData[x][y].length; z++)
-					{
-						if (this.voxelData[x][y][z] != null && this.voxelData[x][y][z].voxelType != null)
-						{
-							if (this.voxelData[x][y][z].voxelType.isLightSource())
-							{
-								this.tileEntityHandlers.put(new Vector3(x, y, z), this.voxelData[x][y][z].voxelType.getTileEntityHandler());
-							}
-						}
-					}
+						// Check if the voxel at the given position is not null, not air and a tile entity
+						if (this.voxelData[x][y][z] != null && this.voxelData[x][y][z].voxelType != null && this.voxelData[x][y][z].voxelType.isTileEntity())
+							// Add to tile entity handlers
+							this.tileEntityHandlers.put(new Vector3(x, y, z), this.voxelData[x][y][z].tileEntity);
+					
 		}
 	}
 
@@ -1076,7 +1073,9 @@ public class VoxelChunk implements Disposable
 							}
 							else
 							{
-								byte topLightLevel = (y == VoxelWorld.chunkHeight - 1 ? this.master.getLightLevel(absX, absY+1, absZ) : this.voxelData[x][y+1][z].lightLevel);
+								// Simplified:
+								// (y == chunkHeight-1 [last block on y-axis top] ? get light level from master in global space : (voxel data in local space is not set ? max light level : get from local space))
+								byte topLightLevel = (y == VoxelWorld.chunkHeight - 1 ? this.master.getLightLevel(absX, absY+1, absZ) : (this.voxelData[x][y+1][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y+1][z].lightLevel));
 								
 								// Forward light through air and transparent blocks
 								if (v.voxelType == null || v.voxelType.transparent)
