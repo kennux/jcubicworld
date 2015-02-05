@@ -1093,7 +1093,7 @@ public class VoxelChunk implements Disposable
 									byte[] adjacentLightLevels = new byte[] { topLightLevel, leftLightLevel, rightLightLevel, backLightLevel, frontLightLevel };
 									
 									Arrays.sort(adjacentLightLevels);
-									byte highestLevel = adjacentLightLevels[adjacentLightLevels.length-1];
+									byte highestLevel = adjacentLightLevels[4];
 									
 									v.lightLevel = (byte) (highestLevel-1);
 								}
