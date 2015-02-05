@@ -81,6 +81,7 @@ jCubicWorld uses the following libraries:
 - Sqlite-JDBC - https://bitbucket.org/xerial/sqlite-jdbc - Apache 2.0 license
 - MapDB - http://www.mapdb.org/ - Apache 2.0 license
 - dain's java snappy implementation - https://github.com/dain/snappy - Apache 2.0 license
+
 Current Features
 ==============
 

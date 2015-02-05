@@ -65,8 +65,7 @@ import net.kennux.cubicworld.voxel.RaycastHit;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelEngine;
 import net.kennux.cubicworld.voxel.VoxelRenderState;
-import net.kennux.cubicworld.voxel.datamodels.IVoxelDataModel;
-import net.kennux.cubicworld.voxel.handlers.IVoxelActionHandler;
+import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 import net.kennux.cubicworld.voxel.handlers.MachineUpdateHandler;
 
 import com.badlogic.gdx.Gdx;
@@ -394,14 +393,9 @@ public class BasePlugin extends APlugin
 				VoxelData voxelData = cubicWorld.voxelWorld.getVoxel((int) blockPos.x, (int) blockPos.y, (int) blockPos.z);
 
 				// Execute voxel action handler if there is one
-				if (voxelData != null)
+				if (voxelData != null && voxelData.voxelType != null && voxelData.voxelType.isTileEntity())
 				{
-					IVoxelActionHandler voxelActionHandler = voxelData.voxelType.getActionHandler();
-
-					if (voxelActionHandler != null)
-					{
-						voxelActionHandler.handleAction(voxelData, blockPos, voxelData.dataModel);
-					}
+					voxelData.tileEntity.handleAction(voxelData, (int)blockPos.x, (int)blockPos.y, (int)blockPos.z);
 				}
 			}
 
@@ -445,35 +439,8 @@ public class BasePlugin extends APlugin
 	@Override
 	public void defineVoxelTypes()
 	{
-		// Create action handlers
-		IVoxelActionHandler blockInventoryHandler = new IVoxelActionHandler()
-		{
-
-			@Override
-			public void handleAction(VoxelData voxelData, Vector3 voxelPosition, IVoxelDataModel dataModel)
-			{
-				// Get cubic world game instance.
-				CubicWorldGame cubicWorld = CubicWorld.getClient();
-
-				// Init overlay data
-				OverlayData overlayData = new OverlayData();
-				overlayData.put("inventory", voxelData.blockInventory);
-				overlayData.put("playerInventory", CubicWorld.getClient().playerController.getPlayerInventory());
-				overlayData.put("voxelPos", voxelPosition);
-
-				// Activate overlay
-				IGuiOverlay blockOverlay = cubicWorld.guiManager.getOverlayById(BasePlugin.furnaceGuiOverlayId);
-
-				blockOverlay.setOverlayData(overlayData);
-
-				// Now open the overlay
-				cubicWorld.guiManager.openOverlay(BasePlugin.furnaceGuiOverlayId);
-			}
-
-		};
-
 		// Furnace action handler
-		MachineUpdateHandler furnaceUpdateHandler = new MachineUpdateHandler()
+		MachineUpdateHandler furnaceTileEntityHandler = new MachineUpdateHandler()
 		{
 			@Override
 			protected boolean getWorkingState(IInventory inventory)
@@ -486,6 +453,27 @@ public class BasePlugin extends APlugin
 			protected void workTick()
 			{
 				// System.out.println("Work tick!");
+			}
+			
+			@Override
+			public void handleAction(VoxelData voxelData, int x, int y, int z)
+			{
+				// Get cubic world game instance.
+				CubicWorldGame cubicWorld = CubicWorld.getClient();
+
+				// Init overlay data
+				OverlayData overlayData = new OverlayData();
+				overlayData.put("inventory", voxelData.blockInventory);
+				overlayData.put("playerInventory", CubicWorld.getClient().playerController.getPlayerInventory());
+				overlayData.put("voxelPos", new Vector3(x,y,z));
+
+				// Activate overlay
+				IGuiOverlay blockOverlay = cubicWorld.guiManager.getOverlayById(BasePlugin.furnaceGuiOverlayId);
+
+				blockOverlay.setOverlayData(overlayData);
+
+				// Now open the overlay
+				cubicWorld.guiManager.openOverlay(BasePlugin.furnaceGuiOverlayId);
 			}
 
 		};
@@ -509,7 +497,7 @@ public class BasePlugin extends APlugin
 		VoxelRenderState furnaceNormalState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontId, furnaceSideId);
 		VoxelRenderState furnaceWorkingState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontLitId, furnaceSideId);
 
-		voxelFurnaceId = VoxelEngine.registerType("Furnace").setUpdateHandler(furnaceUpdateHandler).setRenderState(0, furnaceNormalState).setRenderState(1, furnaceWorkingState).setActionHandler(blockInventoryHandler).setInventorySize(2).setGuiTexture(furnaceFrontTexture).voxelId;
+		voxelFurnaceId = VoxelEngine.registerType("Furnace").setTileEntityHandler(furnaceTileEntityHandler).setRenderState(0, furnaceNormalState).setRenderState(1, furnaceWorkingState).setInventorySize(2).setGuiTexture(furnaceFrontTexture).voxelId;
 	}
 
 	public void initializeGuiManager(GuiManager guiManager)

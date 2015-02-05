@@ -10,7 +10,7 @@ import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.inventory.IInventoryUpdateHandler;
 import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.networking.packet.inventory.ServerBlockInventoryUpdate;
-import net.kennux.cubicworld.voxel.handlers.IVoxelUpdateHandler;
+import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
@@ -225,7 +225,7 @@ public class VoxelChunk implements Disposable
 	/**
 	 * The voxel update handlers list.
 	 */
-	private HashMap<Vector3, IVoxelUpdateHandler> voxelUpdateHandlers = new HashMap<Vector3, IVoxelUpdateHandler>();
+	private HashMap<Vector3, IVoxelTileEntityHandler> tileEntityHandlers = new HashMap<Vector3, IVoxelTileEntityHandler>();
 
 	private Object generationLockObject = new Object();
 
@@ -718,7 +718,7 @@ public class VoxelChunk implements Disposable
 				this.setInventoryUpdateHandlerAll();
 				this.chunkDataWasLoaded();
 				this.setGenerationDone(true);
-				this.setVoxelUpdateHandlerAll();
+				this.setTileEntityHandlerAll();
 			}
 		}
 	}
@@ -873,7 +873,7 @@ public class VoxelChunk implements Disposable
 
 			// Remove update handler if existing
 			Vector3 voxelPos = new Vector3(x, y, z);
-			this.voxelUpdateHandlers.remove(voxelPos);
+			this.tileEntityHandlers.remove(voxelPos);
 
 			this.voxelData[x][y][z] = voxel;
 
@@ -896,10 +896,9 @@ public class VoxelChunk implements Disposable
 			// Update voxel handlers map
 			if (voxel != null && voxel.voxelType != null)
 			{
-				IVoxelUpdateHandler updateHandler = voxel.voxelType.getUpdateHandler();
-				if (updateHandler != null)
+				if (voxel.voxelType.isTileEntity())
 				{
-					this.voxelUpdateHandlers.put(voxelPos, updateHandler);
+					this.tileEntityHandlers.put(voxelPos, voxel.voxelType.getTileEntityHandler());
 				}
 			}
 		}
@@ -925,18 +924,18 @@ public class VoxelChunk implements Disposable
 			this.setInventoryUpdateHandlerAll();
 			this.chunkDataWasModified();
 			this.setGenerationDone(true);
-			this.setVoxelUpdateHandlerAll();
+			this.setTileEntityHandlerAll();
 		}
 	}
 
 	/**
 	 * Iterates through every voxel data in this instance and collects all update handler.
 	 */
-	private void setVoxelUpdateHandlerAll()
+	private void setTileEntityHandlerAll()
 	{
 		synchronized (this.voxelDataLockObject)
 		{
-			this.voxelUpdateHandlers.clear();
+			this.tileEntityHandlers.clear();
 
 			for (int x = 0; x < this.voxelData.length; x++)
 				for (int y = 0; y < this.voxelData[x].length; y++)
@@ -944,11 +943,9 @@ public class VoxelChunk implements Disposable
 					{
 						if (this.voxelData[x][y][z] != null && this.voxelData[x][y][z].voxelType != null)
 						{
-							// Update voxel handlers map
-							IVoxelUpdateHandler updateHandler = this.voxelData[x][y][z].voxelType.getUpdateHandler();
-							if (updateHandler != null)
+							if (this.voxelData[x][y][z].voxelType.isLightSource())
 							{
-								this.voxelUpdateHandlers.put(new Vector3(x, y, z), updateHandler);
+								this.tileEntityHandlers.put(new Vector3(x, y, z), this.voxelData[x][y][z].voxelType.getTileEntityHandler());
 							}
 						}
 					}
@@ -1001,10 +998,10 @@ public class VoxelChunk implements Disposable
 
 		synchronized (this.voxelDataLockObject)
 		{
-			HashMap<Vector3, IVoxelUpdateHandler> updateHandlersClone = (HashMap<Vector3, IVoxelUpdateHandler>) this.voxelUpdateHandlers.clone();
+			HashMap<Vector3, IVoxelTileEntityHandler> updateHandlersClone = (HashMap<Vector3, IVoxelTileEntityHandler>) this.tileEntityHandlers.clone();
 
-			// Exec voxel updates
-			for (Entry<Vector3, IVoxelUpdateHandler> entry : updateHandlersClone.entrySet())
+			// Exec tile entity updates
+			for (Entry<Vector3, IVoxelTileEntityHandler> entry : updateHandlersClone.entrySet())
 			{
 				int x = (int) entry.getKey().x;
 				int y = (int) entry.getKey().y;
@@ -1018,7 +1015,7 @@ public class VoxelChunk implements Disposable
 				
 				VoxelData voxelData = this.getVoxel(x, y, z);
 				
-				entry.getValue().handleUpdate(voxelData, absoluteX, absoluteY, absoluteZ, this.master.isServer(), voxelData.dataModel);
+				entry.getValue().handleUpdate(voxelData, absoluteX, absoluteY, absoluteZ, this.master.isServer());
 			}
 			
 			boolean frameMismatch = (lastUpdateCallId != this.master.updateCallId);

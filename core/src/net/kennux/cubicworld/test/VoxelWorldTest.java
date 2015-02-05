@@ -15,7 +15,7 @@ import net.kennux.cubicworld.voxel.VoxelWorld;
 import net.kennux.cubicworld.voxel.VoxelWorldSave;
 import net.kennux.cubicworld.voxel.generator.AWorldGenerator;
 import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;
-import net.kennux.cubicworld.voxel.handlers.IVoxelUpdateHandler;
+import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -304,7 +304,7 @@ public class VoxelWorldTest extends TestCase
 	{
 		// Create server mock object
 		CubicWorldServer serverInstance = EasyMock.createMock(CubicWorldServer.class);
-		IVoxelUpdateHandler voxelUpdateHandler = EasyMock.createStrictMock(IVoxelUpdateHandler.class);
+		IVoxelTileEntityHandler voxelUpdateHandler = EasyMock.createStrictMock(IVoxelTileEntityHandler.class);
 
 		// Create voxel world object
 		VoxelWorld voxelWorld = new VoxelWorld(serverInstance);
@@ -314,8 +314,7 @@ public class VoxelWorldTest extends TestCase
 
 		// Set the update handler temporary
 		VoxelType dirtType = VoxelEngine.getVoxelType(BasePlugin.voxelDirtId);
-		dirtType.setUpdateHandler(voxelUpdateHandler);
-		dirtType.setDataModelClass(TestDataModel.class);
+		dirtType.setTileEntityHandler(voxelUpdateHandler);
 
 		// Generate 0|0|0 chunk
 		voxelWorld.generateChunk(0, 0, 0, true);
@@ -323,10 +322,8 @@ public class VoxelWorldTest extends TestCase
 		// Create the voxel data for testing
 		VoxelData voxelData = VoxelData.construct(BasePlugin.voxelDirtId);
 		
-		assertEquals(voxelData.dataModel.getClass(), TestDataModel.class);
-		
 		// Record expected update handler behaviour
-		voxelUpdateHandler.handleUpdate(voxelData, 0, 4, 0, true, voxelData.dataModel);
+		voxelUpdateHandler.handleUpdate(voxelData, 0, 4, 0, true);
 
 		EasyMock.replay(voxelUpdateHandler);
 
@@ -350,7 +347,6 @@ public class VoxelWorldTest extends TestCase
 		EasyMock.verify(voxelUpdateHandler);
 
 		// Remove update handler
-		dirtType.setUpdateHandler(null);
-		dirtType.setDataModelClass(null);
+		dirtType.setTileEntityHandler(null);
 	}
 }

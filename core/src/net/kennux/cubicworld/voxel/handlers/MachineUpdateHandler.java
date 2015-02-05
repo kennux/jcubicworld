@@ -2,8 +2,9 @@ package net.kennux.cubicworld.voxel.handlers;
 
 import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.inventory.IInventory;
+import net.kennux.cubicworld.serialization.BitReader;
+import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelData;
-import net.kennux.cubicworld.voxel.datamodels.IVoxelDataModel;
 
 /**
  * <pre>
@@ -24,7 +25,7 @@ import net.kennux.cubicworld.voxel.datamodels.IVoxelDataModel;
  * @author KennuX
  *
  */
-public abstract class MachineUpdateHandler implements IVoxelUpdateHandler<IVoxelDataModel>
+public abstract class MachineUpdateHandler implements IVoxelTileEntityHandler
 {
 	/**
 	 * Return true in here if the machine's conditions for starting working are met.
@@ -34,7 +35,7 @@ public abstract class MachineUpdateHandler implements IVoxelUpdateHandler<IVoxel
 	protected abstract boolean getWorkingState(IInventory inventory);
 
 	@Override
-	public void handleUpdate(VoxelData voxelData, int x, int y, int z, boolean isServer, IVoxelDataModel dataModel)
+	public void handleUpdate(VoxelData voxelData, int x, int y, int z, boolean isServer)
 	{
 		// Only blocks with inventories are allowed!
 		if (voxelData.blockInventory == null)
@@ -77,4 +78,13 @@ public abstract class MachineUpdateHandler implements IVoxelUpdateHandler<IVoxel
 	 */
 	protected abstract void workTick();
 
+	public void serialize(BitWriter writer)
+	{
+		
+	}
+	
+	public void deserialize(BitReader reader)
+	{
+		
+	}
 }

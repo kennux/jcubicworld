@@ -4,9 +4,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import net.kennux.cubicworld.inventory.InventoryFilterRuleSet;
-import net.kennux.cubicworld.voxel.datamodels.IVoxelDataModel;
-import net.kennux.cubicworld.voxel.handlers.IVoxelActionHandler;
-import net.kennux.cubicworld.voxel.handlers.IVoxelUpdateHandler;
+import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
@@ -78,14 +76,9 @@ public class VoxelType
 	private int lightEmittingLevel = 0;
 
 	/**
-	 * The action handler of this voxel type.
-	 */
-	private IVoxelActionHandler actionHandler;
-
-	/**
 	 * The voxel type's update handler.
 	 */
-	private IVoxelUpdateHandler updateHandler;
+	private IVoxelTileEntityHandler tileEntityHandler;
 
 	/**
 	 * The filter rule set instance for this voxel type.
@@ -100,11 +93,6 @@ public class VoxelType
 	private HashMap<Integer, VoxelRenderState> renderStates = new HashMap<Integer, VoxelRenderState>();
 	
 	/**
-	 * The data model class of this voxel type.
-	 */
-	private Class<? extends IVoxelDataModel> dataModelClass;
-
-	/**
 	 * Returns true if this voxel type is able to physically collide with other objects.
 	 * 
 	 * @return
@@ -112,14 +100,6 @@ public class VoxelType
 	public boolean canCollide()
 	{
 		return canCollide;
-	}
-
-	/**
-	 * @return the actionHandler
-	 */
-	public IVoxelActionHandler getActionHandler()
-	{
-		return actionHandler;
 	}
 
 	/**
@@ -198,12 +178,17 @@ public class VoxelType
 		return this.renderStates.get(new Integer(stateId));
 	}
 
+	public boolean isTileEntity()
+	{
+		return this.tileEntityHandler != null;
+	}
+	
 	/**
 	 * @return the updateHandler
 	 */
-	public IVoxelUpdateHandler getUpdateHandler()
+	public IVoxelTileEntityHandler getTileEntityHandler()
 	{
-		return updateHandler;
+		return tileEntityHandler;
 	}
 
 	/**
@@ -234,16 +219,6 @@ public class VoxelType
 	public boolean isModelRendering()
 	{
 		return this.model != null;
-	}
-
-	/**
-	 * @param actionHandler
-	 *            the actionHandler to set
-	 */
-	public VoxelType setActionHandler(IVoxelActionHandler actionHandler)
-	{
-		this.actionHandler = actionHandler;
-		return this;
 	}
 
 	/**
@@ -351,26 +326,9 @@ public class VoxelType
 	/**
 	 * @param updateHandler the updateHandler to set
 	 */
-	public VoxelType setUpdateHandler(IVoxelUpdateHandler updateHandler)
+	public VoxelType setTileEntityHandler(IVoxelTileEntityHandler tileEntityHandler)
 	{
-		this.updateHandler = updateHandler;
-		return this;
-	}
-
-	/**
-	 * @return the dataModelClass
-	 */
-	public Class<? extends IVoxelDataModel> getDataModelClass()
-	{
-		return dataModelClass;
-	}
-
-	/**
-	 * @param dataModelClass the dataModelClass to set
-	 */
-	public VoxelType setDataModelClass(Class<? extends IVoxelDataModel> dataModelClass)
-	{
-		this.dataModelClass = dataModelClass;
+		this.tileEntityHandler = tileEntityHandler;
 		return this;
 	}
 }

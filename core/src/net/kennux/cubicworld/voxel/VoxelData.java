@@ -6,7 +6,7 @@ import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.util.ConsoleHelper;
-import net.kennux.cubicworld.voxel.datamodels.IVoxelDataModel;
+import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -44,19 +44,10 @@ public class VoxelData
 			data.blockInventory.addItemsToStack(1, 10, BasePlugin.itemCoalId);
 		}
 		
-		// Data model instantiation
-		Class<? extends IVoxelDataModel> dataModelClass = data.voxelType.getDataModelClass();
-		if (dataModelClass != null)
+		// Tile entity instantiation
+		if (data.voxelType.isTileEntity())
 		{
-			try
-			{
-				data.dataModel = dataModelClass.newInstance();
-			}
-			catch (InstantiationException | IllegalAccessException e)
-			{
-				ConsoleHelper.writeLog("ERROR", "Error instantiating a voxel data model!", "VoxelData.construct");
-				ConsoleHelper.logError(e);
-			}
+			
 		}
 
 		return data;
@@ -96,9 +87,9 @@ public class VoxelData
 			v.blockInventory.deserializeInventory(reader);
 		}
 		
-		if (v.dataModel != null)
+		if (v.tileEntity != null)
 		{
-			v.dataModel.deserialize(reader);
+			v.tileEntity.deserialize(reader);
 		}
 
 		return v;
@@ -128,9 +119,9 @@ public class VoxelData
 			}
 			
 			// Write data model
-			if (voxelDataObject.dataModel != null)
+			if (voxelDataObject.tileEntity != null)
 			{
-				voxelDataObject.dataModel.serialize(writer);
+				voxelDataObject.tileEntity.serialize(writer);
 			}
 		}
 	}
@@ -159,7 +150,7 @@ public class VoxelData
 	/**
 	 * The voxel data model.
 	 */
-	public IVoxelDataModel dataModel;
+	public IVoxelTileEntityHandler tileEntity;
 
 	/**
 	 * Gets created in the construct() methods.
