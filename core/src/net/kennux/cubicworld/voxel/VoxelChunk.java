@@ -1057,7 +1057,7 @@ public class VoxelChunk implements Disposable
 	 */
 	private void recalculateLighting()
 	{
-		synchronized (this.voxelDataLockObject)
+		// synchronized (this.voxelDataLockObject)
 		{
 			for (int x = VoxelWorld.chunkWidth-1; x >= 0; x--)
 				for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)

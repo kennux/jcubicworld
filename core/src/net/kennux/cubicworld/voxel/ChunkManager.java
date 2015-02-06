@@ -1,6 +1,7 @@
 package net.kennux.cubicworld.voxel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 import net.kennux.cubicworld.math.Vector3i;
@@ -166,67 +167,56 @@ public class ChunkManager
 	}
 
 	/**
-	 * Calls the render method on all chunk objects.
+	 * Calls the render and renderModels method on all chunk objects.
 	 * 
 	 * @param cam
 	 * @param shader
 	 */
-	public void render(Camera cam, ShaderProgram shader)
+	public void render(Camera cam, ShaderProgram shader, ModelBatch modelBatch)
 	{
+		// Create chunks copy
+		VoxelChunk[] chunksCopy = null;
 		synchronized (this.lockObject)
 		{
-			for (VoxelChunk c : this.chunks.values())
-			{
-				if (c != null)
-					c.render(cam, shader);
-			}
+			chunksCopy = this.chunks.values().toArray(new VoxelChunk[this.chunks.values().size()]);
 		}
+		
+		// Voxel render pass
+		for (VoxelChunk c : chunksCopy)
+		{
+			if (c != null)
+				c.render(cam, shader);
+		}
+		
+		// Model render pass
+		modelBatch.begin(cam);
+		for (VoxelChunk c : chunksCopy)
+		{
+			if (c != null)
+				c.renderModels(cam, modelBatch);
+		}
+		
+		modelBatch.end();
 	}
 
 	/**
-	 * Calls the renderModels method on all chunk objects.
-	 * 
-	 * @param cam
-	 * @param modelBatch
-	 */
-	public void renderModels(Camera cam, ModelBatch modelBatch)
-	{
-		synchronized (this.lockObject)
-		{
-			for (VoxelChunk c : this.chunks.values())
-			{
-				if (c != null)
-					c.renderModels(cam, modelBatch);
-			}
-		}
-	}
-
-	/**
-	 * Simulates all chunks in the grid.
-	 */
-	public void simulate()
-	{
-		synchronized (this.lockObject)
-		{
-			for (VoxelChunk c : this.chunks.values())
-			{
-				if (c != null)
-					c.simulate();
-			}
-		}
-	}
-
-	/**
-	 * Calls the update method on all chunk objects.
+	 * Calls the update and simulate method on all chunk objects.
 	 */
 	public void update()
 	{
+		// Create chunks copy
+		VoxelChunk[] chunksCopy = null;
 		synchronized (this.lockObject)
 		{
-			for (VoxelChunk c : this.chunks.values())
+			chunksCopy = this.chunks.values().toArray(new VoxelChunk[this.chunks.values().size()]);
+		}
+		
+		for (VoxelChunk c : chunksCopy)
+		{
+			if (c != null)
 			{
-				if (c != null)
-					c.update();
+				c.simulate();
+				c.update();
 			}
 		}
 	}

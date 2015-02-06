@@ -464,11 +464,22 @@ public class CubicWorldGame extends ApplicationAdapter
 		this.frameBufferBatch.begin();
 		this.frameBufferBatch.draw(this.finalFrameTexture.getColorBufferTexture(), 0, 0);
 		this.frameBufferBatch.end();
+
+		float updateResult = (this.profiler.getProfilerResult("Update") / 1000000.0f);
+		float renderResult = (this.profiler.getProfilerResult("Render") / 1000000.0f);
 		
-		if (Gdx.graphics.getDeltaTime() > 3f)
+		if (updateResult > 100 || renderResult > 100)
 		{
 			ProfilerResult[] results = this.profiler.getResults();
 			System.out.println("Delta time: " + Gdx.graphics.getDeltaTime());
+			System.out.println("Profiler trace: ");
+			
+			for (ProfilerResult result : results)
+			{
+				System.out.println(result.getName() + " - " + result.getMilliseconds() + " ms");
+			}
+			
+			System.out.println("");
 		}
 		
 		// Reset profiler

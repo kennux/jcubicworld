@@ -101,10 +101,6 @@ public class CubicWorldServerUpdateThread implements Runnable
 
 			server.profiler.stopProfiling("Server Client Entity Interpolation");
 
-			server.profiler.startProfiling("Server WorldSimulation", "");
-			// Simulate world
-			server.voxelWorld.simulate();
-			server.profiler.stopProfiling("Server WorldSimulation");
 			server.profiler.startProfiling("Server WorldUpdate", "");
 			server.voxelWorld.update();
 			server.profiler.stopProfiling("Server WorldUpdate");

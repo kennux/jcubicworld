@@ -53,11 +53,6 @@ public class VoxelWorld
 	private ChunkManager chunks;
 
 	/**
-	 * The chunks list lock object.
-	 */
-	private Object chunksLockObject = new Object();
-
-	/**
 	 * The world generator instace.
 	 */
 	private AWorldGenerator worldGenerator;
@@ -176,18 +171,15 @@ public class VoxelWorld
 	 */
 	public void cleanup(Vector3 playerPosition, int chunkRadius)
 	{
-		synchronized (this.chunksLockObject)
-		{
-			// Get chunk keys to identify chunks we don't need any longer.
-			Vector3 chunkPos = this.getChunkspacePosition(playerPosition);
-			ChunkKey[] chunksToDelete = this.chunks.getChunksNotInside(chunkPos, chunkRadius);
+		// Get chunk keys to identify chunks we don't need any longer.
+		Vector3 chunkPos = this.getChunkspacePosition(playerPosition);
+		ChunkKey[] chunksToDelete = this.chunks.getChunksNotInside(chunkPos, chunkRadius);
 
-			for (ChunkKey chunkToDelete : chunksToDelete)
+		for (ChunkKey chunkToDelete : chunksToDelete)
+		{
+			if (this.isChunkInitialized(chunkToDelete.x, chunkToDelete.y, chunkToDelete.z))
 			{
-				if (this.isChunkInitialized(chunkToDelete.x, chunkToDelete.y, chunkToDelete.z))
-				{
-					this.chunks.remove(chunkToDelete);
-				}
+				this.chunks.remove(chunkToDelete);
 			}
 		}
 	}
@@ -276,23 +268,20 @@ public class VoxelWorld
 	 */
 	public void cleanup(Vector3[] playerPositions, int chunkRadius)
 	{
-		synchronized (this.chunksLockObject)
+		// Get chunk keys to identify chunks we don't need any longer.
+		Vector3[] chunkPositions = new Vector3[playerPositions.length];
+		for (int i = 0; i < chunkPositions.length; i++)
 		{
-			// Get chunk keys to identify chunks we don't need any longer.
-			Vector3[] chunkPositions = new Vector3[playerPositions.length];
-			for (int i = 0; i < chunkPositions.length; i++)
-			{
-				chunkPositions[i] = this.getChunkspacePosition(playerPositions[i]);
-			}
+			chunkPositions[i] = this.getChunkspacePosition(playerPositions[i]);
+		}
 
-			ChunkKey[] chunksToDelete = this.chunks.getChunksNotInside(chunkPositions, chunkRadius);
+		ChunkKey[] chunksToDelete = this.chunks.getChunksNotInside(chunkPositions, chunkRadius);
 
-			for (ChunkKey chunkToDelete : chunksToDelete)
+		for (ChunkKey chunkToDelete : chunksToDelete)
+		{
+			if (this.isChunkInitialized(chunkToDelete.x, chunkToDelete.y, chunkToDelete.z))
 			{
-				if (this.isChunkInitialized(chunkToDelete.x, chunkToDelete.y, chunkToDelete.z))
-				{
-					this.chunks.remove(chunkToDelete);
-				}
+				this.chunks.remove(chunkToDelete);
 			}
 		}
 	}
@@ -390,18 +379,15 @@ public class VoxelWorld
 	 */
 	public void generateChunk(int chunkX, int chunkY, int chunkZ, boolean immediately)
 	{
-		synchronized (this.chunksLockObject)
-		{
-			// Instantiate a voxelchunk if non exists
-			VoxelChunk chunk = this.getChunk(chunkX, chunkY, chunkZ, true);
-			// Enquene for generation
-			WorldGenerationTask task = new WorldGenerationTask(chunkX, chunkY, chunkZ, chunk, this.worldGenerator);
+		// Instantiate a voxelchunk if non exists
+		VoxelChunk chunk = this.getChunk(chunkX, chunkY, chunkZ, true);
+		// Enquene for generation
+		WorldGenerationTask task = new WorldGenerationTask(chunkX, chunkY, chunkZ, chunk, this.worldGenerator);
 
-			if (immediately)
-				task.executeTask();
-			else
-				this.worldGeneratorThreadPool.EnqueGenerationJob(task);
-		}
+		if (immediately)
+			task.executeTask();
+		else
+			this.worldGeneratorThreadPool.EnqueGenerationJob(task);
 	}
 
 	/**
@@ -412,18 +398,15 @@ public class VoxelWorld
 	 */
 	public void generateChunksAround(Vector3 position, int chunkRadius, boolean immediately)
 	{
-		synchronized (this.chunksLockObject)
-		{
-			Vector3 chunkPos = this.getChunkspacePosition(position);
+		Vector3 chunkPos = this.getChunkspacePosition(position);
 
-			// Make sure all chunks are getting generated or already
-			// initialized.
-			for (int x = (int) (chunkPos.x - chunkRadius); x <= chunkPos.x + chunkRadius; x++)
-				for (int z = (int) (chunkPos.z - chunkRadius); z <= chunkPos.z + chunkRadius; z++)
-					for (int y = 0; y < this.worldHeight / VoxelWorld.chunkHeight; y++)
-						if (!this.chunks.containsKey(new ChunkKey(x, y, z)) && y <= this.worldHeight / VoxelWorld.chunkHeight && new Vector3(chunkPos).sub(new Vector3(x, chunkPos.y, z)).len() <= chunkRadius)
-							this.generateChunk(x, y, z, false);
-		}
+		// Make sure all chunks are getting generated or already
+		// initialized.
+		for (int x = (int) (chunkPos.x - chunkRadius); x <= chunkPos.x + chunkRadius; x++)
+			for (int z = (int) (chunkPos.z - chunkRadius); z <= chunkPos.z + chunkRadius; z++)
+				for (int y = 0; y < this.worldHeight / VoxelWorld.chunkHeight; y++)
+					if (!this.chunks.containsKey(new ChunkKey(x, y, z)) && y <= this.worldHeight / VoxelWorld.chunkHeight && new Vector3(chunkPos).sub(new Vector3(x, chunkPos.y, z)).len() <= chunkRadius)
+						this.generateChunk(x, y, z, false);
 
 		// Wait for all threads ready
 		this.worldGeneratorThreadPool.waitForGenerationFinished();
@@ -453,17 +436,14 @@ public class VoxelWorld
 
 		BoundingBox boundingBox = null;
 
-		synchronized (this.chunksLockObject)
+		VoxelChunk chunk = this.chunks.get(chunkKey);
+		if (chunk == null)
 		{
-			VoxelChunk chunk = this.chunks.get(chunkKey);
-			if (chunk == null)
-			{
-				return null;
-			}
-
-			// Offset the bounding box
-			boundingBox = chunk.getBoundingBox(x, y, z);
+			return null;
 		}
+
+		// Offset the bounding box
+		boundingBox = chunk.getBoundingBox(x, y, z);
 
 		if (boundingBox == null)
 			return null;
@@ -492,25 +472,22 @@ public class VoxelWorld
 	 */
 	public VoxelChunk getChunk(int chunkX, int chunkY, int chunkZ, boolean createChunk)
 	{
-		synchronized (this.chunksLockObject)
+		VoxelChunk chunk = this.chunks.get(new ChunkKey(chunkX, chunkY, chunkZ));
+
+		if (chunk == null)
 		{
-			VoxelChunk chunk = this.chunks.get(new ChunkKey(chunkX, chunkY, chunkZ));
-
-			if (chunk == null)
+			if (createChunk)
 			{
-				if (createChunk)
-				{
-					// Create chunk
-					return this.instantiateChunk(chunkX, chunkY, chunkZ);
-				}
-
-				// Nothing to return here, not found and i should not create it.
-				return null;
+				// Create chunk
+				return this.instantiateChunk(chunkX, chunkY, chunkZ);
 			}
 
-			// We found it! :-)
-			return chunk;
+			// Nothing to return here, not found and i should not create it.
+			return null;
 		}
+
+		// We found it! :-)
+		return chunk;
 	}
 
 	/**
@@ -553,17 +530,14 @@ public class VoxelWorld
 		y -= (int) (chunkPos.y * VoxelWorld.chunkHeight);
 		z -= (int) (chunkPos.z * VoxelWorld.chunkDepth);
 
-		synchronized (this.chunksLockObject)
+		VoxelChunk chunk = this.getChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z, false);
+		if (chunk == null)
 		{
-			VoxelChunk chunk = this.getChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z, false);
-			if (chunk == null)
-			{
-				// ConsoleHelper.writeLog("error", "Tried to get voxel light level from non existing chunk: " + chunkPos + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
-				return 0;
-			}
-
-			return chunk.getLightLevel(x, y, z);
+			// ConsoleHelper.writeLog("error", "Tried to get voxel light level from non existing chunk: " + chunkPos + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
+			return 0;
 		}
+
+		return chunk.getLightLevel(x, y, z);
 	}
 
 	/**
@@ -578,25 +552,22 @@ public class VoxelWorld
 	 */
 	public Vector3[] getNeededChunks(Vector3 position, int chunkRadius, boolean create)
 	{
-		synchronized (this.chunksLockObject)
-		{
-			ArrayList<Vector3> positions = new ArrayList<Vector3>();
+		ArrayList<Vector3> positions = new ArrayList<Vector3>();
 
-			Vector3 chunkPos = this.getChunkspacePosition(position);
+		Vector3 chunkPos = this.getChunkspacePosition(position);
 
-			for (int x = (int) (chunkPos.x - chunkRadius); x <= chunkPos.x + chunkRadius; x++)
-				for (int z = (int) (chunkPos.z - chunkRadius); z <= chunkPos.z + chunkRadius; z++)
-					for (int y = 0; y < this.worldHeight / VoxelWorld.chunkHeight; y++)
-						if (y <= this.worldHeight / VoxelWorld.chunkHeight && new Vector3(new Vector3(chunkPos.x, 0, chunkPos.z)).sub(new Vector3(x, 0, z)).len() <= chunkRadius && !this.chunks.containsKey(new ChunkKey(x, y, z)))
-						{
-							positions.add(new Vector3(x, y, z));
+		for (int x = (int) (chunkPos.x - chunkRadius); x <= chunkPos.x + chunkRadius; x++)
+			for (int z = (int) (chunkPos.z - chunkRadius); z <= chunkPos.z + chunkRadius; z++)
+				for (int y = 0; y < this.worldHeight / VoxelWorld.chunkHeight; y++)
+					if (y <= this.worldHeight / VoxelWorld.chunkHeight && new Vector3(new Vector3(chunkPos.x, 0, chunkPos.z)).sub(new Vector3(x, 0, z)).len() <= chunkRadius && !this.chunks.containsKey(new ChunkKey(x, y, z)))
+					{
+						positions.add(new Vector3(x, y, z));
 
-							if (create)
-								this.instantiateChunk(x, y, z);
-						}
+						if (create)
+							this.instantiateChunk(x, y, z);
+					}
 
-			return positions.toArray(new Vector3[positions.size()]);
-		}
+		return positions.toArray(new Vector3[positions.size()]);
 	}
 
 	/**
@@ -633,17 +604,14 @@ public class VoxelWorld
 		z -= (int) (chunkPos.z * VoxelWorld.chunkDepth);
 		ChunkKey chunkKey = new ChunkKey((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z);
 
-		synchronized (this.chunksLockObject)
+		VoxelChunk chunk = this.chunks.get(chunkKey);
+		if (chunk == null)
 		{
-			VoxelChunk chunk = this.chunks.get(chunkKey);
-			if (chunk == null)
-			{
-				// ConsoleHelper.writeLog("error", "Tried to get voxel from non existing chunk: " + chunk + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
-				return null;
-			}
-
-			return chunk.getVoxel(x, y, z);
+			// ConsoleHelper.writeLog("error", "Tried to get voxel from non existing chunk: " + chunk + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
+			return null;
 		}
+
+		return chunk.getVoxel(x, y, z);
 	}
 
 	/**
@@ -695,14 +663,11 @@ public class VoxelWorld
 		z -= (int) (chunkPos.z * VoxelWorld.chunkDepth);
 		ChunkKey chunkKey = new ChunkKey((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z);
 
-		synchronized (this.chunksLockObject)
-		{
-			VoxelChunk chunk = this.chunks.get(chunkKey);
-			if (chunk == null)
-				return false;
+		VoxelChunk chunk = this.chunks.get(chunkKey);
+		if (chunk == null)
+			return false;
 
-			return chunk.hasVoxel(x, y, z);
-		}
+		return chunk.hasVoxel(x, y, z);
 	}
 
 	/**
@@ -742,11 +707,8 @@ public class VoxelWorld
 			{
 				while (true)
 				{
-					synchronized (chunksLockObject)
-					{
-						// Fire updates
-						world.update();
-					}
+					// Fire updates
+					world.update();
 
 					// Wait some time
 					try
@@ -867,13 +829,10 @@ public class VoxelWorld
 	 */
 	public boolean isChunkInitialized(int chunkX, int chunkY, int chunkZ)
 	{
-		synchronized (this.chunksLockObject)
-		{
-			VoxelChunk chunk = this.chunks.get(new ChunkKey(chunkX, chunkY, chunkZ));
-			if (chunk == null)
-				return false;
-			return chunk.isInitialized();
-		}
+		VoxelChunk chunk = this.chunks.get(new ChunkKey(chunkX, chunkY, chunkZ));
+		if (chunk == null)
+			return false;
+		return chunk.isInitialized();
 	}
 
 	/**
@@ -994,21 +953,9 @@ public class VoxelWorld
 		VoxelEngine.textureAtlas.atlasTexture.bind(0);
 		this.worldShader.setUniformi("r_textureAtlas", 0);
 
-		synchronized (this.chunksLockObject)
-		{
-			this.chunks.render(cam, this.worldShader);
-		}
+		this.chunks.render(cam, this.worldShader, this.chunkModelBatch);
 
 		this.worldShader.end();
-
-		// Model rendering pass
-
-		synchronized (this.chunksLockObject)
-		{
-			this.chunkModelBatch.begin(this.camera);
-			this.chunks.renderModels(cam, this.chunkModelBatch);
-			this.chunkModelBatch.end();
-		}
 	}
 
 	/**
@@ -1030,17 +977,14 @@ public class VoxelWorld
 		z -= (int) (chunkPos.z * VoxelWorld.chunkDepth);
 		ChunkKey chunkKey = new ChunkKey((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z);
 
-		synchronized (this.chunksLockObject)
+		VoxelChunk chunk = this.chunks.get(chunkKey);
+		if (chunk == null)
 		{
-			VoxelChunk chunk = this.chunks.get(chunkKey);
-			if (chunk == null)
-			{
-				ConsoleHelper.writeLog("error", "Tried to set voxel from non existing chunk: " + chunk + " at position " + x + "|" + y + "|" + z + ", isServer: " + this.isServer, "VoxelWorld");
-				return;
-			}
-
-			chunk.setVoxel(x, y, z, voxel);
+			ConsoleHelper.writeLog("error", "Tried to set voxel from non existing chunk: " + chunk + " at position " + x + "|" + y + "|" + z + ", isServer: " + this.isServer, "VoxelWorld");
+			return;
 		}
+
+		chunk.setVoxel(x, y, z, voxel);
 	}
 
 	/**
@@ -1078,25 +1022,11 @@ public class VoxelWorld
 	}
 
 	/**
-	 * Simulate the world, calls the simulate() function on all chunks.
-	 */
-	public void simulate()
-	{
-		// synchronized (this.chunksLockObject)
-		{
-			this.chunks.simulate();
-		}
-	}
-
-	/**
-	 * Updates the world, calls the update() function on all chunks.
+	 * Updates the world, calls the update() and simulate() function on all chunks.
 	 */
 	public void update()
 	{
-		// synchronized (this.chunksLockObject)
-		{
-			this.chunks.update();
-		}
+		this.chunks.update();
 		updateCallId++;
 	}
 }
