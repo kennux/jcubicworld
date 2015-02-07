@@ -100,10 +100,16 @@ public class CubicWorldConfiguration
 	public static final float standardCullDistance = entityCullDistance;
 
 	/**
-	 * Limits the voxel mesh creations (calls to VoxelChunk.generateMesh()) for chunks per frame.
+	 * Limits the voxel mesh generations (calls to VoxelChunk.generateMesh()) for chunks per frame.
 	 * -1 means there is no limit.
 	 */
 	public static int meshGenerationsPerFrameLimit = 2;
+
+	/**
+	 * Limits the voxel mesh creations (calls to VoxelChunk.createNewMesh()) for chunks per frame.
+	 * -1 means there is no limit.
+	 */
+	public static int meshCreationsPerFrameLimit = 1;
 	
 	/**
 	 * All plugin classpaths are stored in here after load() was called.

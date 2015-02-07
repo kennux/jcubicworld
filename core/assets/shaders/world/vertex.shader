@@ -1,11 +1,11 @@
 attribute vec4 v_Position;
 attribute vec2 v_Uv;
-attribute vec4 v_Light;
+attribute float v_Light;
 
 uniform mat4 m_cameraProj;
 
 varying vec2 v_texCoords;
-varying vec4 v_LightCol;
+varying float v_LightCol;
 
 void main()
 {

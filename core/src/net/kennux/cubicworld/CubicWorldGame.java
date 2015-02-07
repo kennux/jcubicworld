@@ -261,7 +261,9 @@ public class CubicWorldGame extends ApplicationAdapter
 		
 		// Generate all chunk meshes
 		int generationPerFrameLimit = CubicWorldConfiguration.meshGenerationsPerFrameLimit;
+		int creationPerFrameLimit = CubicWorldConfiguration.meshCreationsPerFrameLimit;
 		CubicWorldConfiguration.meshGenerationsPerFrameLimit = -1;
+		CubicWorldConfiguration.meshCreationsPerFrameLimit = -1;
 		
 		// Wait till all chunks are ready
 		while(!this.voxelWorld.allChunksReady())
@@ -275,8 +277,9 @@ public class CubicWorldGame extends ApplicationAdapter
 				e.printStackTrace();
 			}
 		}
-		
+
 		CubicWorldConfiguration.meshGenerationsPerFrameLimit = generationPerFrameLimit;
+		CubicWorldConfiguration.meshGenerationsPerFrameLimit = creationPerFrameLimit;
 		
 		// System.exit(1);
 		
@@ -465,7 +468,7 @@ public class CubicWorldGame extends ApplicationAdapter
 		this.frameBufferBatch.draw(this.finalFrameTexture.getColorBufferTexture(), 0, 0);
 		this.frameBufferBatch.end();
 
-		float updateResult = (this.profiler.getProfilerResult("Update") / 1000000.0f);
+		/*float updateResult = (this.profiler.getProfilerResult("Update") / 1000000.0f);
 		float renderResult = (this.profiler.getProfilerResult("Render") / 1000000.0f);
 		
 		if (updateResult > 100 || renderResult > 100)
@@ -480,7 +483,7 @@ public class CubicWorldGame extends ApplicationAdapter
 			}
 			
 			System.out.println("");
-		}
+		}*/
 		
 		// Reset profiler
 		this.profiler.reset();

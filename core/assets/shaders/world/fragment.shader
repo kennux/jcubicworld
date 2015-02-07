@@ -1,5 +1,5 @@
 varying vec2 v_texCoords;
-varying vec4 v_LightCol;
+varying float v_LightCol;
 
 uniform sampler2D r_textureAtlas;
 uniform int m_baseLightLevel;
@@ -14,6 +14,6 @@ void main()
 	// Alpha testing
 	if(fragColor.a < 0.1) { discard; }
 	
-	fragColor.rgb = fragColor.rgb * v_LightCol.rgb;
+	fragColor.rgb = fragColor.rgb * vec3(v_LightCol,v_LightCol,v_LightCol);
     gl_FragColor = fragColor;
 }

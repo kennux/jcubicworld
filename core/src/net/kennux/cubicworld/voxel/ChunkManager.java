@@ -3,7 +3,9 @@ package net.kennux.cubicworld.voxel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
+import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.math.Vector3i;
 
 import com.badlogic.gdx.graphics.Camera;
@@ -142,14 +144,8 @@ public class ChunkManager
 	{
 		synchronized (this.lockObject)
 		{
-			ArrayList<ChunkKey> keys = new ArrayList<ChunkKey>();
-			for (ChunkKey key : this.chunks.keySet())
-			{
-				if (key != null)
-					keys.add(key);
-			}
-
-			return keys.toArray(new ChunkKey[keys.size()]);
+			Set<ChunkKey> keySet = this.chunks.keySet();
+			return keySet.toArray(new ChunkKey[keySet.size()]);
 		}
 	}
 
@@ -162,7 +158,11 @@ public class ChunkManager
 	{
 		synchronized (this.lockObject)
 		{
+			VoxelChunk chunk = this.chunks.get(key);
 			this.chunks.remove(key);
+			
+			if (chunk != null)
+				chunk.dispose();
 		}
 	}
 
@@ -204,7 +204,6 @@ public class ChunkManager
 	 */
 	public void update()
 	{
-		// Create chunks copy
 		VoxelChunk[] chunksCopy = null;
 		synchronized (this.lockObject)
 		{
