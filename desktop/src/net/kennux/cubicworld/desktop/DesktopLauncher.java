@@ -56,11 +56,11 @@ public class DesktopLauncher
 		ServerBootstrap.preInitialize();
 		
 		//if (arg.length == 1 && arg[0].equals("-server"))
-		//{
+		{
 			server = new CubicWorldServer((short)13371, "0.1", 6);
-		//}
+		}
 		//else
-		//{
+		{
 			final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 			
 			config.foregroundFPS = 60;
@@ -71,6 +71,6 @@ public class DesktopLauncher
 			config.depth = 32;
 			
 			new LwjglApplication(new CubicWorldGame(), config);
-		//} 
+		} 
 	}
 }

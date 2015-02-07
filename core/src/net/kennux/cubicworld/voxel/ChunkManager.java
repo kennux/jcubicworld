@@ -180,7 +180,7 @@ public class ChunkManager
 		{
 			chunksCopy = this.chunks.values().toArray(new VoxelChunk[this.chunks.values().size()]);
 		}
-		
+
 		// Voxel render pass
 		for (VoxelChunk c : chunksCopy)
 		{

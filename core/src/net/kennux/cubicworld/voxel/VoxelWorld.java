@@ -713,7 +713,7 @@ public class VoxelWorld
 					// Wait some time
 					try
 					{
-						Thread.sleep(10);
+						Thread.sleep(16);
 					}
 					catch (InterruptedException e)
 					{ // No interrupt is expected here.

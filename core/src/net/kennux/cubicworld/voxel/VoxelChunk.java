@@ -168,7 +168,7 @@ public class VoxelChunk implements Disposable
 	 * voxelDataLockObject when you are writing to this field. After direct
 	 * writing to this you must call setDirty().
 	 */
-	private VoxelData[][][] voxelData;
+	private volatile VoxelData[][][] voxelData;
 
 	/**
 	 * The chunk x-position.
@@ -239,9 +239,42 @@ public class VoxelChunk implements Disposable
 	 */
 	private int vertexCount;
 	
+	/**
+	 * The absolute chunk position vector.
+	 */
 	private Vector3i absoluteChunkPosition;
 	
+	/**
+	 * The mesh pool fifo stack.
+	 */
 	private static LinkedList<Mesh> meshPool = new LinkedList<Mesh>();
+
+	/**
+	 * The last call id when update() was called.
+	 * Used to limit chunk updates per frame for lag reduction.
+	 */
+	private static long lastUpdateCallId = -1;
+	
+	/**
+	 * Contains the number of generateMesh() calls this frame.
+	 */
+	private static int generationsProcessedThisFrame = -1;
+
+	/**
+	 * The last frame id when render() was called.
+	 * Used to limit chunk updates per frame for lag reduction.
+	 */
+	private static long lastRenderFrameId = -1;
+	
+	/**
+	 * Contains the number of generateMesh() calls this frame.
+	 */
+	private static int creationsProcessedThisFrame = -1;
+	
+	private static Mesh newMesh()
+	{
+		return new Mesh(Mesh.VertexDataType.VertexBufferObject, false, 16000, 16000, new VertexAttribute(Usage.Position, 3, "v_Position"), new VertexAttribute(Usage.TextureCoordinates, 2, "v_Uv"), /*new VertexAttribute(Usage.Normal, 3, "v_Normal"),*/ new VertexAttribute(Usage.ColorUnpacked, 1, "v_Light"));
+	}
 
 	public VoxelChunk(int chunkX, int chunkY, int chunkZ, VoxelWorld master)
 	{
@@ -326,13 +359,11 @@ public class VoxelChunk implements Disposable
 					
 					if (this.voxelMesh == null)
 					{
-						this.voxelMesh = new Mesh(false, 65000, 65000, new VertexAttribute(Usage.Position, 3, "v_Position"), new VertexAttribute(Usage.TextureCoordinates, 2, "v_Uv"), /*new VertexAttribute(Usage.Normal, 3, "v_Normal"),*/ new VertexAttribute(Usage.ColorUnpacked, 1, "v_Light"));
+						this.voxelMesh = newMesh();
 						newlyCreated = true;
 					}
 				}
 				
-				//this.voxelMesh.setVertices(this.newVertices);
-	
 				// If the mesh got newly created...
 				if (newlyCreated)
 				{
@@ -397,124 +428,118 @@ public class VoxelChunk implements Disposable
 	 */
 	private void generateMesh()
 	{
-		ArrayList<Vector3> vertices = null;
-		ArrayList<Vector3> normals = null;
-		ArrayList<Vector2> uvs = null;
-		ArrayList<Short> indices = null;
-		ArrayList<Color> colors = null;
-		ArrayList<ModelInstance> modelList = null;
-		
 		synchronized (this.generationLockObject)
 		{
-			synchronized(this.voxelDataLockObject)
+			// The local copy of the voxel data object
+			VoxelData[][][] voxelData = this.getVoxelData();
+			
+			if (this.lightingDirty || this.voxelData == null)
+				return;
+
+			// the vertices array list
+			final int initListLength = 10000; // Start with a length of 10000 to avoid re-allocation
+			ArrayList<Vector3> vertices = new ArrayList<Vector3>(initListLength);
+			ArrayList<Vector3> normals = new ArrayList<Vector3>(initListLength);
+			ArrayList<Vector2> uvs = new ArrayList<Vector2>(initListLength);
+			ArrayList<Short> indices = new ArrayList<Short>(initListLength);
+			ArrayList<Color> colors = new ArrayList<Color>(initListLength);
+			ArrayList<ModelInstance> modelList = new ArrayList<ModelInstance>();
+			short indicesCounter = 0;
+			
+			for (int x = 0; x < VoxelWorld.chunkWidth; x++)
 			{
-				if (this.lightingDirty || this.voxelData == null)
-					return;
-	
-				// the vertices array list
-				final int initListLength = 10000; // Start with a length of 10000 to avoid re-allocation
-				vertices = new ArrayList<Vector3>(initListLength);
-				normals = new ArrayList<Vector3>(initListLength);
-				uvs = new ArrayList<Vector2>(initListLength);
-				indices = new ArrayList<Short>(initListLength);
-				colors = new ArrayList<Color>(initListLength);
-				modelList = new ArrayList<ModelInstance>();
-				short indicesCounter = 0;
-				
-				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
+				for (int z = 0; z < VoxelWorld.chunkDepth; z++)
 				{
-					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
+					for (int y = 0; y < VoxelWorld.chunkHeight; y++)
 					{
-						for (int y = 0; y < VoxelWorld.chunkHeight; y++)
-						{
-							// Voxel in my position?
-							if (voxelData[x][y][z] == null || voxelData[x][y][z].voxelType == null)
-								continue;
-							
-							Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
-							int absX = absolutePos.x;
-							int absY = absolutePos.y;
-							int absZ = absolutePos.z;
-	
-							VoxelData leftVoxel = (x == 0 ? this.master.getVoxel(absX-1, absY, absZ) : this.voxelData[x-1][y][z]);
-							VoxelData rightVoxel = (x == VoxelWorld.chunkWidth-1 ? this.master.getVoxel(absX+1, absY, absZ) : this.voxelData[x+1][y][z]);
-							VoxelData topVoxel = (y == VoxelWorld.chunkHeight-1 ? this.master.getVoxel(absX, absY+1, absZ) : this.voxelData[x][y+1][z]);
-							VoxelData bottomVoxel = (y == 0 ? this.master.getVoxel(absX, absY-1, absZ) : this.voxelData[x][y-1][z]);
-							VoxelData backVoxel = (z == 0 ? this.master.getVoxel(absX, absY, absZ-1) : this.voxelData[x][y][z-1]);
-							VoxelData frontVoxel = (z == VoxelWorld.chunkDepth-1 ? this.master.getVoxel(absX, absY, absZ+1) : this.voxelData[x][y][z+1]);
-							
-							boolean leftSideVisible = x != 0 ? (leftVoxel == null || leftVoxel.voxelType == null || leftVoxel.voxelType.voxelId < 0 || leftVoxel.voxelType.transparent) : true;
-							boolean rightSideVisible = x != VoxelWorld.chunkWidth-1 ? (rightVoxel == null || rightVoxel.voxelType == null || rightVoxel.voxelType.voxelId < 0 || rightVoxel.voxelType.transparent) : true;
-							boolean topSideVisible = y != VoxelWorld.chunkHeight-1 ? (topVoxel == null || topVoxel.voxelType == null || topVoxel.voxelType.voxelId < 0 || topVoxel.voxelType.transparent) : true;
-							boolean bottomSideVisible = y != 0 ? (bottomVoxel == null || bottomVoxel.voxelType == null || bottomVoxel.voxelType.voxelId < 0 || bottomVoxel.voxelType.transparent) : true;
-							boolean backSideVisible = z != 0 ? (backVoxel == null || backVoxel.voxelType == null || backVoxel.voxelType.voxelId < 0 || backVoxel.voxelType.transparent) : true;
-							boolean frontSideVisible = z != VoxelWorld.chunkDepth-1 ? (frontVoxel == null || frontVoxel.voxelType == null || frontVoxel.voxelType.voxelId < 0 || frontVoxel.voxelType.transparent) : true;
-							
-							// Model or normal voxel rendering?
-							if (this.voxelData[x][y][z].voxelType.isModelRendering() && (
+						// Voxel in my position?
+						if (voxelData[x][y][z] == null || voxelData[x][y][z].voxelType == null)
+							continue;
+						
+						Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
+						int absX = absolutePos.x;
+						int absY = absolutePos.y;
+						int absZ = absolutePos.z;
+
+						VoxelData leftVoxel = (x == 0 ? this.master.getVoxel(absX-1, absY, absZ) : voxelData[x-1][y][z]);
+						VoxelData rightVoxel = (x == VoxelWorld.chunkWidth-1 ? this.master.getVoxel(absX+1, absY, absZ) : voxelData[x+1][y][z]);
+						VoxelData topVoxel = (y == VoxelWorld.chunkHeight-1 ? this.master.getVoxel(absX, absY+1, absZ) : voxelData[x][y+1][z]);
+						VoxelData bottomVoxel = (y == 0 ? this.master.getVoxel(absX, absY-1, absZ) : voxelData[x][y-1][z]);
+						VoxelData backVoxel = (z == 0 ? this.master.getVoxel(absX, absY, absZ-1) : voxelData[x][y][z-1]);
+						VoxelData frontVoxel = (z == VoxelWorld.chunkDepth-1 ? this.master.getVoxel(absX, absY, absZ+1) : voxelData[x][y][z+1]);
+						
+						boolean leftSideVisible = x != 0 ? (leftVoxel == null || leftVoxel.voxelType == null || leftVoxel.voxelType.voxelId < 0 || leftVoxel.voxelType.transparent) : true;
+						boolean rightSideVisible = x != VoxelWorld.chunkWidth-1 ? (rightVoxel == null || rightVoxel.voxelType == null || rightVoxel.voxelType.voxelId < 0 || rightVoxel.voxelType.transparent) : true;
+						boolean topSideVisible = y != VoxelWorld.chunkHeight-1 ? (topVoxel == null || topVoxel.voxelType == null || topVoxel.voxelType.voxelId < 0 || topVoxel.voxelType.transparent) : true;
+						boolean bottomSideVisible = y != 0 ? (bottomVoxel == null || bottomVoxel.voxelType == null || bottomVoxel.voxelType.voxelId < 0 || bottomVoxel.voxelType.transparent) : true;
+						boolean backSideVisible = z != 0 ? (backVoxel == null || backVoxel.voxelType == null || backVoxel.voxelType.voxelId < 0 || backVoxel.voxelType.transparent) : true;
+						boolean frontSideVisible = z != VoxelWorld.chunkDepth-1 ? (frontVoxel == null || frontVoxel.voxelType == null || frontVoxel.voxelType.voxelId < 0 || frontVoxel.voxelType.transparent) : true;
+						
+						// Model or normal voxel rendering?
+						if (voxelData[x][y][z].voxelType.isModelRendering() && 
 							// Atleast any side visible?
-									leftSideVisible || rightSideVisible || topSideVisible || bottomSideVisible || backSideVisible || frontSideVisible))
+							(leftSideVisible || rightSideVisible || topSideVisible || bottomSideVisible || backSideVisible || frontSideVisible))
+						{
+							// Model rendering
+							Model m = voxelData[x][y][z].voxelType.getModel();
+							ModelInstance mInstance = new ModelInstance(m);
+
+							Vector3 vert = new Vector3(x, y, z);
+							vert.x += 0.5f + ((float) this.chunkX * (float) VoxelWorld.chunkWidth);
+							vert.y += 0.5f + ((float) this.chunkY * (float) VoxelWorld.chunkHeight);
+							vert.z += 0.5f + ((float) this.chunkZ * (float) VoxelWorld.chunkDepth);
+
+							// Set model transformation
+							mInstance.transform.set(vert, VoxelChunk.rotationTransformMappings[voxelData[x][y][z].rotation]);
+							modelList.add(mInstance);
+						}
+						else
+						{
+							// Normal voxel rendering
+							VoxelFace[] faceMappings = ROTATION_MAPPINGS[voxelData[x][y][z].rotation];
+							
+							byte leftLighting = leftVoxel == null ? 0 : leftVoxel.lightLevel;
+							byte rightLighting = rightVoxel == null ? 0 : rightVoxel.lightLevel;
+							byte topLighting = topVoxel == null ? 0 : topVoxel.lightLevel;
+							byte bottomLighting = bottomVoxel == null ? 0 : bottomVoxel.lightLevel;
+							byte backLighting = backVoxel == null ? 0 : backVoxel.lightLevel;
+							byte frontLighting = frontVoxel == null ? 0 : frontVoxel.lightLevel;
+							
+							// Write mesh data
+							if (leftSideVisible)
 							{
-								// Model rendering
-								Model m = this.voxelData[x][y][z].voxelType.getModel();
-								ModelInstance mInstance = new ModelInstance(m);
-	
-								Vector3 vert = new Vector3(x, y, z);
-								vert.x += 0.5f + ((float) this.chunkX * (float) VoxelWorld.chunkWidth);
-								vert.y += 0.5f + ((float) this.chunkY * (float) VoxelWorld.chunkHeight);
-								vert.z += 0.5f + ((float) this.chunkZ * (float) VoxelWorld.chunkDepth);
-	
-								// Set model transformation
-								mInstance.transform.set(vert, VoxelChunk.rotationTransformMappings[this.voxelData[x][y][z].rotation]);
-								modelList.add(mInstance);
+								this.WriteSideData(vertices, indices, uvs, colors, normals, LEFT_SIDE_VERTICES, LEFT_SIDE_NORMALS, LEFT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[0], leftLighting);
+								indicesCounter += LEFT_SIDE_VERTICES.length;
 							}
-							else
+							if (rightSideVisible)
 							{
-								// Normal voxel rendering
-								VoxelFace[] faceMappings = ROTATION_MAPPINGS[voxelData[x][y][z].rotation];
-								
-								byte leftLighting = leftVoxel == null ? 0 : leftVoxel.lightLevel;
-								byte rightLighting = rightVoxel == null ? 0 : rightVoxel.lightLevel;
-								byte topLighting = topVoxel == null ? 0 : topVoxel.lightLevel;
-								byte bottomLighting = bottomVoxel == null ? 0 : bottomVoxel.lightLevel;
-								byte backLighting = backVoxel == null ? 0 : backVoxel.lightLevel;
-								byte frontLighting = frontVoxel == null ? 0 : frontVoxel.lightLevel;
-									// Write mesh data
-									if (leftSideVisible)
-									{
-										this.WriteSideData(vertices, indices, uvs, colors, normals, LEFT_SIDE_VERTICES, LEFT_SIDE_NORMALS, LEFT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[0], leftLighting);
-										indicesCounter += LEFT_SIDE_VERTICES.length;
-									}
-									if (rightSideVisible)
-									{
-										this.WriteSideData(vertices, indices, uvs, colors, normals, RIGHT_SIDE_VERTICES, RIGHT_SIDE_NORMALS, RIGHT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[1], rightLighting);
-										indicesCounter += RIGHT_SIDE_VERTICES.length;
-									}
-									if (topSideVisible)
-									{
-										this.WriteSideData(vertices, indices, uvs, colors, normals, TOP_SIDE_VERTICES, TOP_SIDE_NORMALS, TOP_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[2], topLighting);
-										indicesCounter += TOP_SIDE_VERTICES.length;
-									}
-									if (bottomSideVisible)
-									{
-										this.WriteSideData(vertices, indices, uvs, colors, normals, BOTTOM_SIDE_VERTICES, BOTTOM_SIDE_NORMALS, BOTTOM_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[3], bottomLighting);
-										indicesCounter += BOTTOM_SIDE_VERTICES.length;
-									}
-									if (backSideVisible)
-									{
-										this.WriteSideData(vertices, indices, uvs, colors, normals, BACK_SIDE_VERTICES, BACK_SIDE_NORMALS, BACK_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[4], backLighting);
-										indicesCounter += BACK_SIDE_VERTICES.length;
-									}
-									if (frontSideVisible)
-									{
-										this.WriteSideData(vertices, indices, uvs, colors, normals, FRON_SIDE_VERTICES, FRONT_SIDE_NORMALS, FRONT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[5], frontLighting);
-										indicesCounter += FRON_SIDE_VERTICES.length;
-									}
-								}
+								this.WriteSideData(vertices, indices, uvs, colors, normals, RIGHT_SIDE_VERTICES, RIGHT_SIDE_NORMALS, RIGHT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[1], rightLighting);
+								indicesCounter += RIGHT_SIDE_VERTICES.length;
+							}
+							if (topSideVisible)
+							{
+								this.WriteSideData(vertices, indices, uvs, colors, normals, TOP_SIDE_VERTICES, TOP_SIDE_NORMALS, TOP_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[2], topLighting);
+								indicesCounter += TOP_SIDE_VERTICES.length;
+							}
+							if (bottomSideVisible)
+							{
+								this.WriteSideData(vertices, indices, uvs, colors, normals, BOTTOM_SIDE_VERTICES, BOTTOM_SIDE_NORMALS, BOTTOM_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[3], bottomLighting);
+								indicesCounter += BOTTOM_SIDE_VERTICES.length;
+							}
+							if (backSideVisible)
+							{
+								this.WriteSideData(vertices, indices, uvs, colors, normals, BACK_SIDE_VERTICES, BACK_SIDE_NORMALS, BACK_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[4], backLighting);
+								indicesCounter += BACK_SIDE_VERTICES.length;
+							}
+							if (frontSideVisible)
+							{
+								this.WriteSideData(vertices, indices, uvs, colors, normals, FRON_SIDE_VERTICES, FRONT_SIDE_NORMALS, FRONT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[5], frontLighting);
+								indicesCounter += FRON_SIDE_VERTICES.length;
 							}
 						}
 					}
 				}
+			}
 
 			// Set new models list and bounding box
 			this.newModels = modelList;
@@ -610,7 +635,7 @@ public class VoxelChunk implements Disposable
 			synchronized (this.voxelDataLockObject)
 			{
 				if (this.voxelData[x][y][z] != null)
-				return this.voxelData[x][y][z].lightLevel;
+					return this.voxelData[x][y][z].lightLevel;
 			}
 		}
 
@@ -740,34 +765,16 @@ public class VoxelChunk implements Disposable
 			}
 		}
 	}
-
-	/**
-	 * The last call id when update() was called.
-	 * Used to limit chunk updates per frame for lag reduction.
-	 */
-	private static long lastUpdateCallId = -1;
 	
 	/**
-	 * Contains the number of generateMesh() calls this frame.
-	 */
-	private static int generationsProcessedThisFrame = -1;
-
-	/**
-	 * The last frame id when render() was called.
-	 * Used to limit chunk updates per frame for lag reduction.
-	 */
-	private static long lastRenderFrameId = -1;
-	
-	/**
-	 * Contains the number of generateMesh() calls this frame.
-	 */
-	private static int creationsProcessedThisFrame = -1;
-	
-	/**
+	 * <pre>
 	 * Renders this chunk. Will do nothing if the current voxel mesh is not
 	 * available yet.
 	 * 
 	 * Otherwise it will just call the render() method of the chunk mesh object.
+	 * 
+	 * This method is <b>NOT</b> thread-safe.
+	 * </pre>
 	 */
 	public void render(Camera cam, ShaderProgram shader)
 	{
@@ -786,20 +793,22 @@ public class VoxelChunk implements Disposable
 
 			this.createNewMesh();
 			creationsProcessedThisFrame++;
-			
 		}
 
 		if (this.voxelMesh != null && this.boundingBox != null && cam.frustum.boundsInFrustum(this.boundingBox))
 		{
 			// Render chunk mesh
-			this.voxelMesh.render(shader, GL20.GL_TRIANGLES, 0, this.vertexCount);
+			this.voxelMesh.render(shader, GL20.GL_TRIANGLES); // , 0, this.vertexCount);
 		}
 	}
 
 	/**
+	 * <pre>
 	 * Renders all voxels on this chunk which are model rendered.
 	 * This is part of the second rendering pass of the voxel world.
 	 * 
+	 * This method is <b>NOT</b> thread-safe.
+	 * </pre>
 	 * 
 	 * @param modelBatch
 	 */
@@ -1020,15 +1029,7 @@ public class VoxelChunk implements Disposable
 		// Lighting check
 		// The lighting algorithm needs all chunks around this chunk to be ready.
 		if (!ClientChunkRequest.areRequestsPending() && this.lightingDirty && this.isInitialized() &&
-				(this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLightingReady(new ChunkKey(this.chunkX, this.chunkY+1, this.chunkZ)))
-				/* NONSENSE?!? &&
-				// Check if this is a edge chunk
-				((!this.master.hasChunk(this.chunkX-1, this.chunkY, this.chunkZ) || !this.master.hasChunk(this.chunkX+1, this.chunkY, this.chunkZ) || 
-				!this.master.hasChunk(this.chunkX, this.chunkY, this.chunkZ-1) || !this.master.hasChunk(this.chunkX, this.chunkY, this.chunkZ+1)) ||
-				// OR Check if lighting on adjacent chunks is ready
-				(this.master.chunkLightingReady(this.chunkX-1, this.chunkY, this.chunkZ) && this.master.chunkLightingReady(this.chunkX-1, this.chunkY, this.chunkZ) &&
-				this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ-1) && this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ+1)))*/
-				)
+			(this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLightingReady(new ChunkKey(this.chunkX, this.chunkY+1, this.chunkZ))))
 		{
 			this.recalculateLighting();
 		}
@@ -1075,7 +1076,6 @@ public class VoxelChunk implements Disposable
 			
 			this.generateMesh();
 			generationsProcessedThisFrame++;
-			
 		}
 	}
 	
@@ -1124,8 +1124,14 @@ public class VoxelChunk implements Disposable
 									
 									Arrays.sort(adjacentLightLevels);
 									byte highestLevel = adjacentLightLevels[4];
+									byte lightLevel = (byte) (highestLevel-1);
 									
-									v.lightLevel = (byte) (highestLevel-1);
+									if (lightLevel <= 0)
+									{
+										lightLevel = 1;
+									}
+									
+									v.lightLevel = lightLevel;
 								}
 							}
 							

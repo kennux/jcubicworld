@@ -103,7 +103,7 @@ public class CubicWorldConfiguration
 	 * Limits the voxel mesh generations (calls to VoxelChunk.generateMesh()) for chunks per frame.
 	 * -1 means there is no limit.
 	 */
-	public static int meshGenerationsPerFrameLimit = 2;
+	public static int meshGenerationsPerFrameLimit = 1;
 
 	/**
 	 * Limits the voxel mesh creations (calls to VoxelChunk.createNewMesh()) for chunks per frame.
