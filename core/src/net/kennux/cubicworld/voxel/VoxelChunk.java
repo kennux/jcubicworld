@@ -350,8 +350,6 @@ public class VoxelChunk implements Disposable
 			}
 			else
 			{
-				boolean newlyCreated = false;
-				
 				// Construct new mesh
 				if (this.voxelMesh == null)
 				{
@@ -360,22 +358,11 @@ public class VoxelChunk implements Disposable
 					if (this.voxelMesh == null)
 					{
 						this.voxelMesh = newMesh();
-						newlyCreated = true;
 					}
 				}
 				
-				// If the mesh got newly created...
-				if (newlyCreated)
-				{
-					// Set the vertices by using the setter...
-					this.voxelMesh.setVertices(this.newVertices);
-				}
-				else
-				{
-					// ... otherwise use the update function.
-					this.voxelMesh.updateVertices(0, this.newVertices);
-				}
-				
+				// Set the vertices
+				this.voxelMesh.setVertices(this.newVertices);
 				this.voxelMesh.setIndices(this.newIndices);
 				
 				// Set vertex count
@@ -778,6 +765,7 @@ public class VoxelChunk implements Disposable
 	 */
 	public void render(Camera cam, ShaderProgram shader)
 	{
+		CubicWorld.getClient().profiler.startProfiling("MeshCreation"+this.chunkX+"|"+this.chunkY+"|"+this.chunkZ, "");
 		boolean frameMismatch = lastRenderFrameId != Gdx.graphics.getFrameId();
 		
 		if (this.voxelMeshDirty && this.newMeshDataReady && (CubicWorldConfiguration.meshCreationsPerFrameLimit == -1 || 
@@ -794,12 +782,15 @@ public class VoxelChunk implements Disposable
 			this.createNewMesh();
 			creationsProcessedThisFrame++;
 		}
+		CubicWorld.getClient().profiler.stopProfiling("MeshCreation"+this.chunkX+"|"+this.chunkY+"|"+this.chunkZ);
 
+		CubicWorld.getClient().profiler.startProfiling("MeshRendering"+this.chunkX+"|"+this.chunkY+"|"+this.chunkZ, "");
 		if (this.voxelMesh != null && this.boundingBox != null && cam.frustum.boundsInFrustum(this.boundingBox))
 		{
 			// Render chunk mesh
-			this.voxelMesh.render(shader, GL20.GL_TRIANGLES); // , 0, this.vertexCount);
+			this.voxelMesh.render(shader, GL20.GL_TRIANGLES);
 		}
+		CubicWorld.getClient().profiler.stopProfiling("MeshRendering"+this.chunkX+"|"+this.chunkY+"|"+this.chunkZ);
 	}
 
 	/**

@@ -175,26 +175,32 @@ public class ChunkManager
 	public void render(Camera cam, ShaderProgram shader, ModelBatch modelBatch)
 	{
 		// Create chunks copy
+		CubicWorld.getClient().profiler.startProfiling("ThreadLock", "");
 		VoxelChunk[] chunksCopy = null;
 		synchronized (this.lockObject)
 		{
 			chunksCopy = this.chunks.values().toArray(new VoxelChunk[this.chunks.values().size()]);
 		}
+		CubicWorld.getClient().profiler.stopProfiling("ThreadLock");
 
 		// Voxel render pass
+		CubicWorld.getClient().profiler.startProfiling("VoxelRender", "");
 		for (VoxelChunk c : chunksCopy)
 		{
 			if (c != null)
 				c.render(cam, shader);
 		}
+		CubicWorld.getClient().profiler.stopProfiling("VoxelRender");
 		
 		// Model render pass
+		CubicWorld.getClient().profiler.startProfiling("ModelRender", "");
 		modelBatch.begin(cam);
 		for (VoxelChunk c : chunksCopy)
 		{
 			if (c != null)
 				c.renderModels(cam, modelBatch);
 		}
+		CubicWorld.getClient().profiler.stopProfiling("ModelRender");
 		
 		modelBatch.end();
 	}

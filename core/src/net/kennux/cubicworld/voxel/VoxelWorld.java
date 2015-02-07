@@ -2,6 +2,7 @@ package net.kennux.cubicworld.voxel;
 
 import java.util.ArrayList;
 
+import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.pathfinder.Path;
 import net.kennux.cubicworld.pathfinder.Pathfinder;
@@ -10,6 +11,7 @@ import net.kennux.cubicworld.util.Mathf;
 import net.kennux.cubicworld.voxel.generator.AWorldGenerator;
 import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -953,7 +955,9 @@ public class VoxelWorld
 		VoxelEngine.textureAtlas.atlasTexture.bind(0);
 		this.worldShader.setUniformi("r_textureAtlas", 0);
 
+		CubicWorld.getClient().profiler.startProfiling("RenderWorld", "");
 		this.chunks.render(cam, this.worldShader, this.chunkModelBatch);
+		CubicWorld.getClient().profiler.stopProfiling("RenderWorld");
 
 		this.worldShader.end();
 	}

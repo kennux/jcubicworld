@@ -20,6 +20,7 @@ import net.kennux.cubicworld.voxel.RaycastHit;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
@@ -42,7 +43,7 @@ import com.badlogic.gdx.math.Quaternion;
  * @author kennux
  *
  */
-public class CubicWorldGame extends ApplicationAdapter
+public class CubicWorldGame implements ApplicationListener
 {
 	/**
 	 * The perspective camera used for rendering.
@@ -318,7 +319,9 @@ public class CubicWorldGame extends ApplicationAdapter
 		this.profiler.stopProfiling("Init()");
 		this.profiler.reset();
 	}
-
+	
+	private float lastTime;
+	
 	/**
 	 * <pre>
 	 * This is the cubic world main routine.
@@ -347,6 +350,7 @@ public class CubicWorldGame extends ApplicationAdapter
 	@Override
 	public void render()
 	{
+		long nanos = System.nanoTime();
 		this.profiler.startProfiling("Update", "The whole update part of the render() routine");
 
 		// Raycast
@@ -454,9 +458,14 @@ public class CubicWorldGame extends ApplicationAdapter
 		this.profiler.stopProfiling("Gui render");
 		this.profiler.stopProfiling("Render");
 
+		this.profiler.startProfiling("Other", "");
 		// Render debug info
 		if (this.debugActive)
+		{
+			this.profiler.startProfiling("Debug Render", "");
 			DebugHelper.renderDebugInformation(this.cam, this.client);
+			this.profiler.stopProfiling("Debug Render");
+		}
 
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 
@@ -468,22 +477,28 @@ public class CubicWorldGame extends ApplicationAdapter
 		this.frameBufferBatch.draw(this.finalFrameTexture.getColorBufferTexture(), 0, 0);
 		this.frameBufferBatch.end();
 
-		/*float updateResult = (this.profiler.getProfilerResult("Update") / 1000000.0f);
-		float renderResult = (this.profiler.getProfilerResult("Render") / 1000000.0f);
+		this.profiler.stopProfiling("Other");
 		
-		if (updateResult > 100 || renderResult > 100)
+		float frameResult = ((System.nanoTime() - nanos) / 1000000.0f);
+		
+		if (frameResult > 50 || Gdx.graphics.getDeltaTime() > 1)
 		{
 			ProfilerResult[] results = this.profiler.getResults();
 			System.out.println("Delta time: " + Gdx.graphics.getDeltaTime());
+			System.out.println("frame time: " + frameResult);
+			System.out.println("last frame time: " + this.lastTime);
 			System.out.println("Profiler trace: ");
 			
 			for (ProfilerResult result : results)
 			{
-				System.out.println(result.getName() + " - " + result.getMilliseconds() + " ms");
+				if (result.getMilliseconds() > 20)
+					System.out.println(result.getName() + " - " + result.getMilliseconds() + " ms");
 			}
 			
 			System.out.println("");
-		}*/
+		}
+		
+		this.lastTime = frameResult;
 		
 		// Reset profiler
 		this.profiler.reset();
@@ -503,5 +518,32 @@ public class CubicWorldGame extends ApplicationAdapter
 
 		// this.cam.translate(new Vector3(0, 130, 10));
 		this.cam.update(true);
+	}
+
+	@Override
+	public void resize(int width, int height)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void pause()
+	{
+		
+	}
+
+	@Override
+	public void resume()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dispose()
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }

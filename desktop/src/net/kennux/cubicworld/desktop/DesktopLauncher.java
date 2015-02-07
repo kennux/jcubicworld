@@ -62,7 +62,7 @@ public class DesktopLauncher
 		//else
 		{
 			final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-			
+
 			config.foregroundFPS = 60;
 			config.vSyncEnabled = true;
 			config.resizable = false;
