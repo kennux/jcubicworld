@@ -277,7 +277,7 @@ public class VoxelChunk implements Disposable
 	
 	private static Mesh newMesh()
 	{
-		return new Mesh(Mesh.VertexDataType.VertexBufferObject, false, 16368, 16368, new VertexAttribute(Usage.Position, 3, "v_Position"), new VertexAttribute(Usage.TextureCoordinates, 2, "v_Uv"), /*new VertexAttribute(Usage.Normal, 3, "v_Normal"),*/ new VertexAttribute(Usage.ColorUnpacked, 1, "v_Light"));
+		return new Mesh(Mesh.VertexDataType.VertexArray, false, 16368, 16368, new VertexAttribute(Usage.Position, 3, "v_Position"), new VertexAttribute(Usage.TextureCoordinates, 2, "v_Uv"), /*new VertexAttribute(Usage.Normal, 3, "v_Normal"),*/ new VertexAttribute(Usage.ColorUnpacked, 1, "v_Light"));
 	}
 
 	public VoxelChunk(int chunkX, int chunkY, int chunkZ, VoxelWorld master)
