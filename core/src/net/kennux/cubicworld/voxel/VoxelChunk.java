@@ -42,7 +42,7 @@ import com.badlogic.gdx.utils.Pool;
  * @author KennuX
  *
  */
-public class VoxelChunk implements Disposable
+public class VoxelChunk
 {
 	// STATIC DATA
 
@@ -277,7 +277,7 @@ public class VoxelChunk implements Disposable
 	
 	private static Mesh newMesh()
 	{
-		return new Mesh(Mesh.VertexDataType.VertexArray, false, 16368, 16368, new VertexAttribute(Usage.Position, 3, "v_Position"), new VertexAttribute(Usage.TextureCoordinates, 2, "v_Uv"), /*new VertexAttribute(Usage.Normal, 3, "v_Normal"),*/ new VertexAttribute(Usage.ColorUnpacked, 1, "v_Light"));
+		return new Mesh(Mesh.VertexDataType.VertexBufferObject, false, 16368, 16368, new VertexAttribute(Usage.Position, 3, "v_Position"), new VertexAttribute(Usage.TextureCoordinates, 2, "v_Uv"), /*new VertexAttribute(Usage.Normal, 3, "v_Normal"),*/ new VertexAttribute(Usage.ColorUnpacked, 1, "v_Light"));
 	}
 
 	public VoxelChunk(int chunkX, int chunkY, int chunkZ, VoxelWorld master)
@@ -405,12 +405,12 @@ public class VoxelChunk implements Disposable
 
 	/**
 	 * This call is not thread-safe, only call this on an object which wont get used anymore.
+	 * 
+	 * This will not get called by the garbage collector as this class does not implement the disposable interface.
+	 * It is only used to add the current mesh to the mesh pool.
 	 */
-	@Override
 	public void dispose()
 	{
-		/*if (this.voxelMesh != null)
-			this.voxelMesh.dispose();*/
 		meshPool.add(this.voxelMesh);
 	}
 
@@ -421,19 +421,16 @@ public class VoxelChunk implements Disposable
 	{
 		synchronized (this.generationLockObject)
 		{
-			// The local copy of the voxel data object
-			VoxelData[][][] voxelData = this.getVoxelData();
-			
 			if (this.lightingDirty || this.voxelData == null)
 				return;
 
+			// The local copy of the voxel data object
+			VoxelData[][][] voxelData = this.getVoxelData();
+			
 			// the vertices array list
-			final int initListLength = 10000; // Start with a length of 10000 to avoid re-allocation
-			ArrayList<Vector3> vertices = new ArrayList<Vector3>(initListLength);
-			ArrayList<Vector3> normals = new ArrayList<Vector3>(initListLength);
-			ArrayList<Vector2> uvs = new ArrayList<Vector2>(initListLength);
+			final int initListLength = 16000; // Start with a length of 16000 to avoid re-allocation
+			ArrayList<Float> vertices = new ArrayList<Float>(initListLength * vertexSize);
 			ArrayList<Short> indices = new ArrayList<Short>(initListLength);
-			ArrayList<Color> colors = new ArrayList<Color>(initListLength);
 			ArrayList<ModelInstance> modelList = new ArrayList<ModelInstance>();
 			short indicesCounter = 0;
 			
@@ -499,32 +496,32 @@ public class VoxelChunk implements Disposable
 							// Write mesh data
 							if (leftSideVisible)
 							{
-								this.WriteSideData(vertices, indices, uvs, colors, normals, LEFT_SIDE_VERTICES, LEFT_SIDE_NORMALS, LEFT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[0], leftLighting);
+								this.WriteSideData(vertices, indices, LEFT_SIDE_VERTICES, LEFT_SIDE_NORMALS, LEFT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[0], leftLighting);
 								indicesCounter += LEFT_SIDE_VERTICES.length;
 							}
 							if (rightSideVisible)
 							{
-								this.WriteSideData(vertices, indices, uvs, colors, normals, RIGHT_SIDE_VERTICES, RIGHT_SIDE_NORMALS, RIGHT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[1], rightLighting);
+								this.WriteSideData(vertices, indices, RIGHT_SIDE_VERTICES, RIGHT_SIDE_NORMALS, RIGHT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[1], rightLighting);
 								indicesCounter += RIGHT_SIDE_VERTICES.length;
 							}
 							if (topSideVisible)
 							{
-								this.WriteSideData(vertices, indices, uvs, colors, normals, TOP_SIDE_VERTICES, TOP_SIDE_NORMALS, TOP_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[2], topLighting);
+								this.WriteSideData(vertices, indices, TOP_SIDE_VERTICES, TOP_SIDE_NORMALS, TOP_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[2], topLighting);
 								indicesCounter += TOP_SIDE_VERTICES.length;
 							}
 							if (bottomSideVisible)
 							{
-								this.WriteSideData(vertices, indices, uvs, colors, normals, BOTTOM_SIDE_VERTICES, BOTTOM_SIDE_NORMALS, BOTTOM_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[3], bottomLighting);
+								this.WriteSideData(vertices, indices, BOTTOM_SIDE_VERTICES, BOTTOM_SIDE_NORMALS, BOTTOM_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[3], bottomLighting);
 								indicesCounter += BOTTOM_SIDE_VERTICES.length;
 							}
 							if (backSideVisible)
 							{
-								this.WriteSideData(vertices, indices, uvs, colors, normals, BACK_SIDE_VERTICES, BACK_SIDE_NORMALS, BACK_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[4], backLighting);
+								this.WriteSideData(vertices, indices, BACK_SIDE_VERTICES, BACK_SIDE_NORMALS, BACK_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[4], backLighting);
 								indicesCounter += BACK_SIDE_VERTICES.length;
 							}
 							if (frontSideVisible)
 							{
-								this.WriteSideData(vertices, indices, uvs, colors, normals, FRON_SIDE_VERTICES, FRONT_SIDE_NORMALS, FRONT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[5], frontLighting);
+								this.WriteSideData(vertices, indices, FRON_SIDE_VERTICES, FRONT_SIDE_NORMALS, FRONT_SIDE_INDICES, indicesCounter, x, y, z, voxelData[x][y][z], faceMappings[5], frontLighting);
 								indicesCounter += FRON_SIDE_VERTICES.length;
 							}
 						}
@@ -537,33 +534,11 @@ public class VoxelChunk implements Disposable
 			this.newBoundingBox = new BoundingBox(this.getAbsoluteVoxelPosition(0, 0, 0).toFloatVector(), this.getAbsoluteVoxelPosition(VoxelWorld.chunkWidth, VoxelWorld.chunkHeight, VoxelWorld.chunkDepth).toFloatVector());
 
 			// Generate vertex data
-			this.newVertices = new float[vertices.size() * vertexSize];
+			this.newVertices = new float[vertices.size()];
 			
-			for (int i = 0; i < this.newVertices.length; i += vertexSize)
+			for (int i = 0; i < this.newVertices.length; i++)
 			{
-				// Calculate the vertex index
-				int index = i / vertexSize;
-
-				// Vertex position and uv coordinates
-				Vector3 position = vertices.get(index);
-				Vector3 normal = normals.get(index);
-				Vector2 uv = uvs.get(index);
-				Color color = colors.get(index);
-
-				// Vertex data
-				this.newVertices[i] = position.x;
-				this.newVertices[i + 1] = position.y;
-				this.newVertices[i + 2] = position.z;
-				this.newVertices[i + 3] = uv.x;
-				this.newVertices[i + 4] = uv.y;
-				this.newVertices[i + 5] = color.r;
-				/*vertexData[i + 5] = normal.x;
-				vertexData[i + 6] = normal.y;
-				vertexData[i + 7] = normal.z;
-				vertexData[i + 8] = color.r;
-				vertexData[i + 9] = color.g;
-				vertexData[i + 10] = color.b;
-				vertexData[i + 11] = color.a;*/
+				this.newVertices[i] = vertices.get(i).floatValue();
 			}
 
 			// Build indices
@@ -1153,7 +1128,7 @@ public class VoxelChunk implements Disposable
 	 * @param blockId The voxel type id.
 	 * @param face The foxel face to use for getting uv coordinates.
 	 */
-	private void WriteSideData(ArrayList<Vector3> vertices, ArrayList<Short> indices, ArrayList<Vector2> uvs, ArrayList<Color> colors, ArrayList<Vector3> normals, Vector3[] sideVertices, Vector3[] sideNormals, short[] sideIndices, short indicesCounter, int x, int y, int z, VoxelData voxelData, VoxelFace face, byte lightLevel)
+	private void WriteSideData(ArrayList<Float> vertices, ArrayList<Short> indices, Vector3[] sideVertices, Vector3[] sideNormals, short[] sideIndices, short indicesCounter, int x, int y, int z, VoxelData voxelData, VoxelFace face, byte lightLevel)
 	{
 		// short blockId = voxelData.voxelType.voxelId;
 
@@ -1168,20 +1143,20 @@ public class VoxelChunk implements Disposable
 		}
 
 		float lightValue = lightLevel / (float) CubicWorldConfiguration.maxLightLevel;
-		Color color = new Color(lightValue, lightValue, lightValue, 1);
 
 		// Transform vertices based on the block's position.
 		for (int i = 0; i < sideVertices.length; i++)
 		{
-			Vector3 vert = new Vector3(sideVertices[i].x, sideVertices[i].y, sideVertices[i].z);
-			vert.x += x + ((float) this.chunkX * (float) VoxelWorld.chunkWidth);
-			vert.y += y + ((float) this.chunkY * (float) VoxelWorld.chunkHeight);
-			vert.z += z + ((float) this.chunkZ * (float) VoxelWorld.chunkDepth);
-
-			normals.add(sideNormals[i]);
-			vertices.add(vert);
-			colors.add(color);
-			uvs.add(uv[i]);
+			float vertX = sideVertices[i].x + x + ((float) this.chunkX * (float) VoxelWorld.chunkWidth);
+			float vertY = sideVertices[i].y + y + ((float) this.chunkY * (float) VoxelWorld.chunkHeight);
+			float vertZ = sideVertices[i].z + z + ((float) this.chunkZ * (float) VoxelWorld.chunkDepth);
+			
+			vertices.add(vertX);
+			vertices.add(vertY);
+			vertices.add(vertZ);
+			vertices.add(uv[i].x);
+			vertices.add(uv[i].y);
+			vertices.add(lightValue);
 		}
 	}
 }

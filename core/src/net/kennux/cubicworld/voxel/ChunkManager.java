@@ -1,12 +1,10 @@
 package net.kennux.cubicworld.voxel;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.kennux.cubicworld.CubicWorld;
-import net.kennux.cubicworld.math.Vector3i;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -25,9 +23,7 @@ public class ChunkManager
 	/**
 	 * This hashmap contains all chunks.
 	 */
-	private HashMap<ChunkKey, VoxelChunk> chunks = new HashMap<ChunkKey, VoxelChunk>();
-
-	private Object lockObject = new Object();
+	private ConcurrentHashMap<ChunkKey, VoxelChunk> chunks = new ConcurrentHashMap<ChunkKey, VoxelChunk>();
 
 	/**
 	 * Adds a chunk to the grid.
@@ -37,10 +33,7 @@ public class ChunkManager
 	 */
 	public void put(ChunkKey key, VoxelChunk chunk)
 	{
-		synchronized (this.lockObject)
-		{
-			this.chunks.put(key, chunk);
-		}
+		this.chunks.put(key, chunk);
 	}
 
 	/**
@@ -52,10 +45,7 @@ public class ChunkManager
 	 */
 	public boolean containsKey(ChunkKey key)
 	{
-		synchronized (this.lockObject)
-		{
-			return this.chunks.containsKey(key);
-		}
+		return this.chunks.containsKey(key);
 	}
 
 	/**
@@ -66,10 +56,7 @@ public class ChunkManager
 	 */
 	public VoxelChunk get(ChunkKey key)
 	{
-		synchronized (this.lockObject)
-		{
-			return this.chunks.get(key);
-		}
+		return this.chunks.get(key);
 	}
 
 	/**
@@ -82,21 +69,18 @@ public class ChunkManager
 	 */
 	public ChunkKey[] getChunksNotInside(Vector3 chunkPos, int radius)
 	{
-		synchronized (this.lockObject)
+		ArrayList<ChunkKey> chunksNotInside = new ArrayList<ChunkKey>();
+
+		for (ChunkKey key : this.chunks.keySet())
 		{
-			ArrayList<ChunkKey> chunksNotInside = new ArrayList<ChunkKey>();
-
-			for (ChunkKey key : this.chunks.keySet())
-			{
-				// Do radius check
-				if (key != null)
-					if (new Vector3(chunkPos).sub(new Vector3(key.x, chunkPos.y, key.z)).len() > radius)
-						chunksNotInside.add(key);
-			}
-
-			// Return the chunks not inside this radius.
-			return chunksNotInside.toArray(new ChunkKey[chunksNotInside.size()]);
+			// Do radius check
+			if (key != null)
+				if (new Vector3(chunkPos).sub(new Vector3(key.x, chunkPos.y, key.z)).len() > radius)
+					chunksNotInside.add(key);
 		}
+
+		// Return the chunks not inside this radius.
+		return chunksNotInside.toArray(new ChunkKey[chunksNotInside.size()]);
 	}
 
 	/**
@@ -110,29 +94,26 @@ public class ChunkManager
 	 */
 	public ChunkKey[] getChunksNotInside(Vector3[] chunkPositions, int radius)
 	{
-		synchronized (this.lockObject)
+		ArrayList<ChunkKey> chunksNotInside = new ArrayList<ChunkKey>();
+
+		for (ChunkKey key : this.chunks.keySet())
 		{
-			ArrayList<ChunkKey> chunksNotInside = new ArrayList<ChunkKey>();
+			boolean isInRadius = true;
 
-			for (ChunkKey key : this.chunks.keySet())
+			// Do radius check
+			if (key != null)
+				for (Vector3 chunkPos : chunkPositions)
+					if (new Vector3(chunkPos).sub(new Vector3(key.x, chunkPos.y, key.z)).len() > radius)
+						isInRadius = false;
+
+			if (!isInRadius)
 			{
-				boolean isInRadius = true;
-
-				// Do radius check
-				if (key != null)
-					for (Vector3 chunkPos : chunkPositions)
-						if (new Vector3(chunkPos).sub(new Vector3(key.x, chunkPos.y, key.z)).len() > radius)
-							isInRadius = false;
-
-				if (!isInRadius)
-				{
-					chunksNotInside.add(key);
-				}
+				chunksNotInside.add(key);
 			}
-
-			// Return the chunks not inside this radius.
-			return chunksNotInside.toArray(new ChunkKey[chunksNotInside.size()]);
 		}
+
+		// Return the chunks not inside this radius.
+		return chunksNotInside.toArray(new ChunkKey[chunksNotInside.size()]);
 	}
 
 	/**
@@ -142,11 +123,8 @@ public class ChunkManager
 	 */
 	public ChunkKey[] getKeys()
 	{
-		synchronized (this.lockObject)
-		{
-			Set<ChunkKey> keySet = this.chunks.keySet();
-			return keySet.toArray(new ChunkKey[keySet.size()]);
-		}
+		Set<ChunkKey> keySet = this.chunks.keySet();
+		return keySet.toArray(new ChunkKey[keySet.size()]);
 	}
 
 	/**
@@ -156,14 +134,11 @@ public class ChunkManager
 	 */
 	public void remove(ChunkKey key)
 	{
-		synchronized (this.lockObject)
-		{
-			VoxelChunk chunk = this.chunks.get(key);
-			this.chunks.remove(key);
-			
-			if (chunk != null)
-				chunk.dispose();
-		}
+		VoxelChunk chunk = this.chunks.get(key);
+		this.chunks.remove(key);
+		
+		if (chunk != null)
+			chunk.dispose();
 	}
 
 	/**
@@ -174,33 +149,20 @@ public class ChunkManager
 	 */
 	public void render(Camera cam, ShaderProgram shader, ModelBatch modelBatch)
 	{
-		// Create chunks copy
-		CubicWorld.getClient().profiler.startProfiling("ThreadLock", "");
-		VoxelChunk[] chunksCopy = null;
-		synchronized (this.lockObject)
-		{
-			chunksCopy = this.chunks.values().toArray(new VoxelChunk[this.chunks.values().size()]);
-		}
-		CubicWorld.getClient().profiler.stopProfiling("ThreadLock");
-
 		// Voxel render pass
-		CubicWorld.getClient().profiler.startProfiling("VoxelRender", "");
-		for (VoxelChunk c : chunksCopy)
+		for (VoxelChunk c : this.chunks.values())
 		{
 			if (c != null)
 				c.render(cam, shader);
 		}
-		CubicWorld.getClient().profiler.stopProfiling("VoxelRender");
 		
 		// Model render pass
-		CubicWorld.getClient().profiler.startProfiling("ModelRender", "");
 		modelBatch.begin(cam);
-		for (VoxelChunk c : chunksCopy)
+		for (VoxelChunk c : this.chunks.values())
 		{
 			if (c != null)
 				c.renderModels(cam, modelBatch);
 		}
-		CubicWorld.getClient().profiler.stopProfiling("ModelRender");
 		
 		modelBatch.end();
 	}
@@ -210,13 +172,7 @@ public class ChunkManager
 	 */
 	public void update()
 	{
-		VoxelChunk[] chunksCopy = null;
-		synchronized (this.lockObject)
-		{
-			chunksCopy = this.chunks.values().toArray(new VoxelChunk[this.chunks.values().size()]);
-		}
-		
-		for (VoxelChunk c : chunksCopy)
+		for (VoxelChunk c : this.chunks.values())
 		{
 			if (c != null)
 			{
@@ -233,13 +189,10 @@ public class ChunkManager
 	{
 		boolean allReady = true;
 
-		synchronized (this.lockObject)
+		for (VoxelChunk c : this.chunks.values())
 		{
-			for (VoxelChunk c : this.chunks.values())
-			{
-				if (c != null && !c.isReadyForRendering())
-					allReady = false;
-			}
+			if (c != null && !c.isReadyForRendering())
+				allReady = false;
 		}
 		
 		return allReady;

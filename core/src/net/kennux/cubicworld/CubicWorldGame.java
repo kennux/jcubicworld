@@ -320,7 +320,7 @@ public class CubicWorldGame implements ApplicationListener
 		this.profiler.reset();
 	}
 	
-	private float lastTime;
+	//private float lastTime;
 	
 	/**
 	 * <pre>
@@ -479,7 +479,7 @@ public class CubicWorldGame implements ApplicationListener
 
 		this.profiler.stopProfiling("Other");
 		
-		float frameResult = ((System.nanoTime() - nanos) / 1000000.0f);
+		/*float frameResult = ((System.nanoTime() - nanos) / 1000000.0f);
 		
 		if (frameResult > 50 || Gdx.graphics.getDeltaTime() > 1)
 		{
@@ -498,7 +498,7 @@ public class CubicWorldGame implements ApplicationListener
 			System.out.println("");
 		}
 		
-		this.lastTime = frameResult;
+		this.lastTime = frameResult;*/
 		
 		// Reset profiler
 		this.profiler.reset();

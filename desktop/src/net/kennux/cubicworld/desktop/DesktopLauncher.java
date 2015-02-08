@@ -55,11 +55,11 @@ public class DesktopLauncher
 		Bootstrap.preInitialize();
 		ServerBootstrap.preInitialize();
 		
-		//if (arg.length == 1 && arg[0].equals("-server"))
+		if (arg.length == 1 && arg[0].equals("-server"))
 		{
 			server = new CubicWorldServer((short)13371, "0.1", 6);
 		}
-		//else
+		else
 		{
 			final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 
