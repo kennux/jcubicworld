@@ -29,7 +29,7 @@ public class DesktopLauncher
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated caHashMap<K, V>ck
 			e1.printStackTrace();
-		}*/
+		}
 		try
 		{
 			System.in.read();
@@ -38,7 +38,7 @@ public class DesktopLauncher
 		{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
+		}*/
 		
 		// Pre-init
 		try
@@ -55,11 +55,11 @@ public class DesktopLauncher
 		Bootstrap.preInitialize();
 		ServerBootstrap.preInitialize();
 		
-		if (arg.length == 1 && arg[0].equals("-server"))
+		//if (arg.length == 1 && arg[0].equals("-server"))
 		{
 			server = new CubicWorldServer((short)13371, "0.1", 6);
 		}
-		else
+		//else
 		{
 			final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 

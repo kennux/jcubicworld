@@ -835,7 +835,7 @@ public class VoxelChunk
 					updatePacket.voxelPositionZ = posZ;
 					updatePacket.setCullPosition(new Vector3(posX, posY, posZ));
 
-					CubicWorld.getServer().addPacket(updatePacket);
+					CubicWorld.getServer().sendPacket(updatePacket);
 					chunkInstance.chunkDataWasModified();
 				}
 			});

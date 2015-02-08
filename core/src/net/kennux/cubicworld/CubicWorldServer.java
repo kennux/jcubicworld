@@ -216,7 +216,7 @@ public class CubicWorldServer implements Runnable
 				voxelUpdate.z = z;
 				voxelUpdate.voxel = newData;
 
-				CubicWorld.getServer().addPacket(voxelUpdate);
+				CubicWorld.getServer().sendPacket(voxelUpdate);
 			}
 
 		});
@@ -292,7 +292,7 @@ public class CubicWorldServer implements Runnable
 	/**
 	 * Adds a packet to the quene to send in the current frame.
 	 */
-	public void addPacket(IPacketModel packet)
+	public void sendPacket(IPacketModel packet)
 	{
 		synchronized (packetStackLockObject)
 		{
@@ -325,7 +325,7 @@ public class CubicWorldServer implements Runnable
 		ServerEntityDestroy destroyPacket = new ServerEntityDestroy();
 		destroyPacket.entityId = entity.getEntityId();
 		destroyPacket.setCullPosition(new Vector3(entity.getPosition()));
-		this.addPacket(destroyPacket);
+		this.sendPacket(destroyPacket);
 
 		// Remove from knows about
 		for (int i = 0; i < this.clients.length; i++)

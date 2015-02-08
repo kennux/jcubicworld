@@ -104,4 +104,10 @@ public abstract class APlugin
 	 * </pre>
 	 */
 	public abstract void loadTextures();
+	
+	/**
+	 * Gets called last after all other methods of this class.
+	 * Prepare anything else you need in here.
+	 */
+	public abstract void postInit(boolean isServer);
 }

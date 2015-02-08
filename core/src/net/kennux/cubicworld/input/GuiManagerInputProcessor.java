@@ -70,7 +70,7 @@ public class GuiManagerInputProcessor implements InputProcessor
 				else
 					cubicWorld.guiManager.openOverlay(BasePlugin.mainMenuOverlayId);
 
-				return false;
+				return true;
 			}
 			else
 			{

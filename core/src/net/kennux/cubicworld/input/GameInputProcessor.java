@@ -60,9 +60,12 @@ public class GameInputProcessor extends InputAdapter
 		// Send the key release
 		IKeyInputHandler keyInputAction = this.cubicWorld.inputManager.getInputActionForKey(keycode);
 		if (keyInputAction != null)
+		{
 			keyInputAction.keyPressed(cubicWorld);
-
-		return true;
+			return true;
+		}
+		
+		return false;
 	}
 
 	@Override
@@ -89,9 +92,13 @@ public class GameInputProcessor extends InputAdapter
 		// Send the key release
 		IKeyInputHandler keyInputAction = this.cubicWorld.inputManager.getInputActionForKey(keycode);
 		if (keyInputAction != null)
+		{
 			keyInputAction.keyReleased(cubicWorld);
-
-		return true;
+	
+			return true;
+		}
+		
+		return false;
 	}
 
 	/**

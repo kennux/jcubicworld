@@ -5,6 +5,7 @@ import java.util.zip.DataFormatException;
 
 import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldGame;
+import net.kennux.cubicworld.admin.AdminSystem;
 import net.kennux.cubicworld.entity.EntitySystem;
 import net.kennux.cubicworld.entity.ItemEntity;
 import net.kennux.cubicworld.entity.PlayerEntity;
@@ -49,6 +50,7 @@ import net.kennux.cubicworld.networking.packet.inventory.ServerPlayerInventoryUp
 import net.kennux.cubicworld.pluginapi.APlugin;
 import net.kennux.cubicworld.pluginapi.annotations.Event;
 import net.kennux.cubicworld.pluginapi.annotations.PluginInfo;
+import net.kennux.cubicworld.plugins.baseplugin.admin.TestCommand;
 import net.kennux.cubicworld.plugins.baseplugin.gui.ChatOverlay;
 import net.kennux.cubicworld.plugins.baseplugin.gui.XMLButtonLoader;
 import net.kennux.cubicworld.plugins.baseplugin.gui.XMLImageLoader;
@@ -522,7 +524,7 @@ public class BasePlugin extends APlugin
 		// Init overlays
 		Overlay furnaceOverlay = null;
 		chatOverlayId = guiManager.registerOverlay(new ChatOverlay());
-
+		
 		try
 		{
 			// Initialize main menu overlay
@@ -635,6 +637,12 @@ public class BasePlugin extends APlugin
 		furnaceSideId = VoxelEngine.registerTexture("FurnaceSide", furnaceSideTexture);
 		furnaceTopId = VoxelEngine.registerTexture("FurnaceTop", furnaceTopTexture);
 		coalId = ItemSystem.registerTexture("Coal", coal);
+	}
+
+	@Override
+	public void postInit(boolean isServer)
+	{
+		AdminSystem.registerCommand("test", new TestCommand());
 	}
 
 	@Event(eventType = "update")

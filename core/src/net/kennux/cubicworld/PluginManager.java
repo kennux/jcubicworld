@@ -192,4 +192,12 @@ public class PluginManager
 			plugin.loadTextures();
 		}
 	}
+	
+	public void postInit(boolean isServer)
+	{
+		for (APlugin plugin : plugins)
+		{
+			plugin.postInit(isServer);
+		}
+	}
 }

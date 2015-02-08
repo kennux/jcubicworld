@@ -84,7 +84,7 @@ public class ClientLogin extends APacketModel
 				model.setPlayerId(playerEntity.getEntityId());
 				model.inventory = playerEntity.playerInventory;
 
-				CubicWorld.getServer().addPacket(model);
+				CubicWorld.getServer().sendPacket(model);
 			}
 		});
 

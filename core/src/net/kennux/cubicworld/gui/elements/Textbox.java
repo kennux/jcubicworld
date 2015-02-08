@@ -37,7 +37,7 @@ public class Textbox extends AGuiElement
 
 	public String getContents()
 	{
-		return this.contents;
+		return this.contents.trim();
 	}
 
 	@Override

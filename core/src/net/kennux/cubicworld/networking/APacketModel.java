@@ -98,6 +98,11 @@ public abstract class APacketModel implements IPacketModel
 		this.cullPosition = cullPos;
 	}
 
+	/**
+	 * Set's the reciever player id.
+	 * The player id is defined in the playerentity, so you can use for example client.playerEntity.getEntityId() for retrieving the id.
+	 * @param id
+	 */
 	public void setPlayerId(int id)
 	{
 		this.playerId = id;

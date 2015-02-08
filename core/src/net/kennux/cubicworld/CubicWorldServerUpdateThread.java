@@ -220,7 +220,7 @@ public class CubicWorldServerUpdateThread implements Runnable
 										entityUpdate.entity = otherClient.playerEntity;
 										entityUpdate.setPlayerId(clientId);
 
-										this.server.addPacket(entityUpdate);
+										this.server.sendPacket(entityUpdate);
 									}
 									else
 									{
@@ -234,7 +234,7 @@ public class CubicWorldServerUpdateThread implements Runnable
 										// Knows about now
 										client.addEntityToKnowsAbout(otherClient.playerEntity);
 
-										this.server.addPacket(spawnPacket);
+										this.server.sendPacket(spawnPacket);
 									}
 								}
 								else
@@ -265,7 +265,7 @@ public class CubicWorldServerUpdateThread implements Runnable
 											entityUpdate.entity = entity;
 											entityUpdate.setPlayerId(clientId);
 
-											this.server.addPacket(entityUpdate);
+											this.server.sendPacket(entityUpdate);
 										}
 										else
 										{
@@ -279,7 +279,7 @@ public class CubicWorldServerUpdateThread implements Runnable
 											// Knows about now
 											client.addEntityToKnowsAbout(entity);
 
-											this.server.addPacket(spawnPacket);
+											this.server.sendPacket(spawnPacket);
 										}
 									}
 								}
@@ -309,7 +309,7 @@ public class CubicWorldServerUpdateThread implements Runnable
 			server.profiler.stopProfiling("Entity Cleanup");
 
 			// Write update packet.
-			this.server.addPacket(this.server.dayNightCycle.getTimeUpdatePacket());
+			this.server.sendPacket(this.server.dayNightCycle.getTimeUpdatePacket());
 
 			this.server.tick++;
 

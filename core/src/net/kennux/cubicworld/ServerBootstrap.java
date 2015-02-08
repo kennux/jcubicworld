@@ -38,6 +38,8 @@ public class ServerBootstrap
 		pluginManager.defineProtocol();
 
 		VoxelEngine.finalization();
+		
+		pluginManager.postInit(true);
 	}
 
 	/**

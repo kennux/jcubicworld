@@ -2,6 +2,8 @@ package net.kennux.cubicworld.networking.packet;
 
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
+import net.kennux.cubicworld.admin.AdminSystem;
+import net.kennux.cubicworld.admin.IChatCommand;
 import net.kennux.cubicworld.gui.hud.Chatbox;
 import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
@@ -24,7 +26,7 @@ public class ChatMessage extends APacketModel
 		messageModel.chatMessage = "Server: " + message;
 
 		// Broadcast
-		server.addPacket(messageModel);
+		server.sendPacket(messageModel);
 	}
 
 	public String chatMessage;
@@ -51,15 +53,40 @@ public class ChatMessage extends APacketModel
 	@Override
 	public void interpretServerSide(CubicWorldServer server, CubicWorldServerClient client)
 	{
-		// Instantiate chat message model
-		ChatMessage messageModel = new ChatMessage();
-
-		if (client.playerEntity != null)
+		// Check if this message was a command
+		if (this.chatMessage.startsWith("/"))
 		{
-			messageModel.chatMessage = client.playerEntity.getEntityName() + ": " + this.chatMessage;
-
-			// Broadcast
-			server.addPacket(messageModel);
+			// Split command into arguments
+			String[] command = this.chatMessage.substring(1).split(" ");
+			
+			// Get command
+			IChatCommand commandInstance = AdminSystem.getCommand(command[0]);
+			
+			// Execute command if available.
+			if (commandInstance != null)
+			{
+				commandInstance.executeCommand(client, command);
+			}
+			else
+			{
+				ChatMessage messageModel = new ChatMessage();
+				messageModel.chatMessage = "Command not found!";
+				messageModel.setPlayerId(client.playerEntity.getEntityId());
+				server.sendPacket(messageModel);
+			}
+		}
+		else
+		{
+			// Instantiate chat message model
+			ChatMessage messageModel = new ChatMessage();
+	
+			if (client.playerEntity != null)
+			{
+				messageModel.chatMessage = client.playerEntity.getEntityName() + ": " + this.chatMessage;
+	
+				// Broadcast
+				server.sendPacket(messageModel);
+			}
 		}
 	}
 

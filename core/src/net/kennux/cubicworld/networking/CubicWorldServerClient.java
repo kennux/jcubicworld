@@ -252,7 +252,7 @@ public class CubicWorldServerClient extends AClientSocket
 
 				chunkData.setPlayerId(this.clientIndex);
 
-				this.master.addPacket(chunkData);
+				this.master.sendPacket(chunkData);
 				requestsHandled.add(qr);
 			}
 			else
@@ -270,5 +270,14 @@ public class CubicWorldServerClient extends AClientSocket
 		{
 			this.chunkRequests.remove(qr);
 		}
+	}
+	
+	/**
+	 * Returns the cubicworld server instance which owns this client.
+	 * @return
+	 */
+	public CubicWorldServer getMaster()
+	{
+		return this.master;
 	}
 }

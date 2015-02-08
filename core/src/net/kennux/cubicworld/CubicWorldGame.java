@@ -350,7 +350,7 @@ public class CubicWorldGame implements ApplicationListener
 	@Override
 	public void render()
 	{
-		long nanos = System.nanoTime();
+		// long nanos = System.nanoTime();
 		this.profiler.startProfiling("Update", "The whole update part of the render() routine");
 
 		// Raycast
