@@ -1,7 +1,8 @@
 package net.kennux.cubicworld.environment;
 
+import net.kennux.cubicworld.CubicWorldConfiguration;
+import net.kennux.cubicworld.math.Mathf;
 import net.kennux.cubicworld.networking.packet.ServerTimeUpdate;
-import net.kennux.cubicworld.util.Mathf;
 
 /**
  * <pre>
@@ -97,5 +98,35 @@ public class DayNightCycle
 			this.hour += Mathf.floorToInt(this.minute / 60.0f);
 			this.minute -= Mathf.floorToInt(this.minute / 60.0f) * 60;
 		}
+	}
+	
+	public String getTimeString()
+	{
+		// Build strings
+		String hourString = Byte.toString(this.hour);
+		String minuteString = Byte.toString(this.minute);
+
+		// Add prefix
+		if (minuteString.length() == 1)
+			minuteString = "0" + minuteString;
+		
+		if (hourString.length() == 1)
+			hourString = "0" + hourString;
+		
+		return hourString + ":" + minuteString;
+	}
+	
+	public byte getLightLevel()
+	{
+		int minutes = (this.hour * 60) + this.minute;
+		
+		if (minutes < 3*60 || minutes > 22*60)
+			return 1;
+		
+		float lightPercentage = ((minutes - (3*60)) / (19f * 60f)) * 2.0f;
+		if (lightPercentage > 1)
+			lightPercentage = 1.0f - Mathf.repeat(lightPercentage, 1.0f);
+		
+		return (byte) ((lightPercentage * (CubicWorldConfiguration.maxLightLevel-1))+1);
 	}
 }

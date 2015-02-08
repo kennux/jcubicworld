@@ -3,7 +3,7 @@ package net.kennux.cubicworld.assets;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import net.kennux.cubicworld.util.Mathf;
+import net.kennux.cubicworld.math.Mathf;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;

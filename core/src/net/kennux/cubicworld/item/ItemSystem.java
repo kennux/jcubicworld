@@ -157,7 +157,7 @@ public class ItemSystem
 	{
 		return textureAtlas.getUvForTexture(textureId);
 	}
-	
+
 	public static ItemType[] getItemTypes()
 	{
 		return itemTypes.values().toArray(new ItemType[itemTypes.size()]);

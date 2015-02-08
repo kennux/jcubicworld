@@ -9,6 +9,7 @@ import net.kennux.cubicworld.serialization.SerializationTypes;
 
 /**
  * Annotation for adding fields for serialization.
+ * 
  * @author KennuX
  *
  */
@@ -18,12 +19,14 @@ public @interface SerializerField
 {
 	/**
 	 * The serialization order.
+	 * 
 	 * @return
 	 */
 	public int order();
-	
+
 	/**
 	 * The type from SerializationTypes.xxx
+	 * 
 	 * @return
 	 */
 	public SerializationTypes type() default SerializationTypes.BOOLEAN;

@@ -17,7 +17,6 @@ import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
@@ -25,16 +24,11 @@ import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.Pool;
 
 /**
  * Voxel chunk implementation.
@@ -104,7 +98,7 @@ public class VoxelChunk
 			new VoxelFace[] { VoxelFace.RIGHT, VoxelFace.LEFT, VoxelFace.TOP, VoxelFace.BOTTOM, VoxelFace.FRONT, VoxelFace.BACK },
 			// Facing left
 			new VoxelFace[] { VoxelFace.BACK, VoxelFace.FRONT, VoxelFace.TOP, VoxelFace.BOTTOM, VoxelFace.RIGHT, VoxelFace.LEFT } };
-	
+
 	/**
 	 * <pre>
 	 * The normal vectors for voxelfaces.
@@ -116,15 +110,7 @@ public class VoxelChunk
 	 * All vectors are 1 unit long!.
 	 * </pre>
 	 */
-	public static final Vector3[] FACE_NORMALS = new Vector3[]
-	{
-		new Vector3(1,0,0),
-		new Vector3(-1,0,0),
-		new Vector3(0,1,0),
-		new Vector3(0,-1,0),
-		new Vector3(0,0,1),
-		new Vector3(0,0,-1),
-	};
+	public static final Vector3[] FACE_NORMALS = new Vector3[] { new Vector3(1, 0, 0), new Vector3(-1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, -1, 0), new Vector3(0, 0, 1), new Vector3(0, 0, -1), };
 	/**
 	 * Rotation quaternion mappings.
 	 * This quaternions will get used to define a voxel model's rendering rotation based on the rotation byte.
@@ -161,7 +147,7 @@ public class VoxelChunk
 	 * The voxel mesh's bounding box.
 	 */
 	private BoundingBox boundingBox;
-	
+
 	/**
 	 * The voxel mesh's new bounding box.
 	 */
@@ -237,17 +223,12 @@ public class VoxelChunk
 	private float[] newVertices;
 	private short[] newIndices;
 	private final int vertexSize = 6;
-	
-	/**
-	 * The vertex count of the current mesh.
-	 */
-	private int vertexCount;
-	
+
 	/**
 	 * The absolute chunk position vector.
 	 */
 	private Vector3i absoluteChunkPosition;
-	
+
 	/**
 	 * The mesh pool fifo stack.
 	 */
@@ -258,7 +239,7 @@ public class VoxelChunk
 	 * Used to limit chunk updates per frame for lag reduction.
 	 */
 	private static long lastUpdateCallId = -1;
-	
+
 	/**
 	 * Contains the number of generateMesh() calls this frame.
 	 */
@@ -269,15 +250,15 @@ public class VoxelChunk
 	 * Used to limit chunk updates per frame for lag reduction.
 	 */
 	private static long lastRenderFrameId = -1;
-	
+
 	/**
 	 * Contains the number of generateMesh() calls this frame.
 	 */
 	private static int creationsProcessedThisFrame = -1;
-	
+
 	private static Mesh newMesh()
 	{
-		return new Mesh(Mesh.VertexDataType.VertexBufferObject, false, 16368, 16368, new VertexAttribute(Usage.Position, 3, "v_Position"), new VertexAttribute(Usage.TextureCoordinates, 2, "v_Uv"), /*new VertexAttribute(Usage.Normal, 3, "v_Normal"),*/ new VertexAttribute(Usage.ColorUnpacked, 1, "v_Light"));
+		return new Mesh(Mesh.VertexDataType.VertexBufferObject, false, 16368, 16368, new VertexAttribute(Usage.Position, 3, "v_Position"), new VertexAttribute(Usage.TextureCoordinates, 2, "v_Uv"), /* new VertexAttribute(Usage.Normal, 3, "v_Normal"), */new VertexAttribute(Usage.ColorUnpacked, 1, "v_Light"));
 	}
 
 	public VoxelChunk(int chunkX, int chunkY, int chunkZ, VoxelWorld master)
@@ -299,7 +280,7 @@ public class VoxelChunk
 		this.chunkX = chunkX;
 		this.chunkY = chunkY;
 		this.chunkZ = chunkZ;
-		
+
 		// Set absolute chunk position
 		this.absoluteChunkPosition = new Vector3i(this.chunkX * VoxelWorld.chunkWidth, this.chunkY * VoxelWorld.chunkHeight, this.chunkZ * VoxelWorld.chunkDepth);
 
@@ -316,12 +297,12 @@ public class VoxelChunk
 		this.voxelMeshDirty = true;
 		this.saveDirty = false;
 	}
-	
+
 	/**
 	 * Causes this chunk to regenerate it's mesh.
 	 * Will only recalculate lighting and the mesh.
 	 */
-	public void regenerateChunkMesh()
+	public void regenerateLightingAndMesh()
 	{
 		this.lightingDirty = true;
 		this.voxelMeshDirty = true;
@@ -358,20 +339,17 @@ public class VoxelChunk
 				if (this.voxelMesh == null)
 				{
 					this.voxelMesh = meshPool.poll();
-					
+
 					if (this.voxelMesh == null)
 					{
 						this.voxelMesh = newMesh();
 					}
 				}
-				
+
 				// Set the vertices
 				this.voxelMesh.setVertices(this.newVertices);
 				this.voxelMesh.setIndices(this.newIndices);
-				
-				// Set vertex count
-				this.vertexCount = this.newVertices.length;
-				
+
 				// Calculate bounding box
 				try
 				{
@@ -385,7 +363,7 @@ public class VoxelChunk
 					// Happens if there are no vertices in this mesh, so just ignore this error.
 				}
 			}
-			
+
 			this.newMeshDataReady = false;
 			this.voxelMeshDirty = false;
 
@@ -395,8 +373,10 @@ public class VoxelChunk
 			this.newIndices = null;
 
 			// Dispose old mesh if available
-			/*if (this.voxelMesh != null)
-				this.voxelMesh.dispose();*/
+			/*
+			 * if (this.voxelMesh != null)
+			 * this.voxelMesh.dispose();
+			 */
 
 			this.models = this.newModels;
 			// this.voxelMesh = newMesh;
@@ -426,14 +406,14 @@ public class VoxelChunk
 
 			// The local copy of the voxel data object
 			VoxelData[][][] voxelData = this.getVoxelData();
-			
+
 			// the vertices array list
 			final int initListLength = 16000; // Start with a length of 16000 to avoid re-allocation
 			ArrayList<Float> vertices = new ArrayList<Float>(initListLength * vertexSize);
 			ArrayList<Short> indices = new ArrayList<Short>(initListLength);
 			ArrayList<ModelInstance> modelList = new ArrayList<ModelInstance>();
 			short indicesCounter = 0;
-			
+
 			for (int x = 0; x < VoxelWorld.chunkWidth; x++)
 			{
 				for (int z = 0; z < VoxelWorld.chunkDepth; z++)
@@ -443,30 +423,30 @@ public class VoxelChunk
 						// Voxel in my position?
 						if (voxelData[x][y][z] == null || voxelData[x][y][z].voxelType == null)
 							continue;
-						
+
 						Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
 						int absX = absolutePos.x;
 						int absY = absolutePos.y;
 						int absZ = absolutePos.z;
 
-						VoxelData leftVoxel = (x == 0 ? this.master.getVoxel(absX-1, absY, absZ) : voxelData[x-1][y][z]);
-						VoxelData rightVoxel = (x == VoxelWorld.chunkWidth-1 ? this.master.getVoxel(absX+1, absY, absZ) : voxelData[x+1][y][z]);
-						VoxelData topVoxel = (y == VoxelWorld.chunkHeight-1 ? this.master.getVoxel(absX, absY+1, absZ) : voxelData[x][y+1][z]);
-						VoxelData bottomVoxel = (y == 0 ? this.master.getVoxel(absX, absY-1, absZ) : voxelData[x][y-1][z]);
-						VoxelData backVoxel = (z == 0 ? this.master.getVoxel(absX, absY, absZ-1) : voxelData[x][y][z-1]);
-						VoxelData frontVoxel = (z == VoxelWorld.chunkDepth-1 ? this.master.getVoxel(absX, absY, absZ+1) : voxelData[x][y][z+1]);
-						
+						VoxelData leftVoxel = (x == 0 ? this.master.getVoxel(absX - 1, absY, absZ) : voxelData[x - 1][y][z]);
+						VoxelData rightVoxel = (x == VoxelWorld.chunkWidth - 1 ? this.master.getVoxel(absX + 1, absY, absZ) : voxelData[x + 1][y][z]);
+						VoxelData topVoxel = (y == VoxelWorld.chunkHeight - 1 ? this.master.getVoxel(absX, absY + 1, absZ) : voxelData[x][y + 1][z]);
+						VoxelData bottomVoxel = (y == 0 ? this.master.getVoxel(absX, absY - 1, absZ) : voxelData[x][y - 1][z]);
+						VoxelData backVoxel = (z == 0 ? this.master.getVoxel(absX, absY, absZ - 1) : voxelData[x][y][z - 1]);
+						VoxelData frontVoxel = (z == VoxelWorld.chunkDepth - 1 ? this.master.getVoxel(absX, absY, absZ + 1) : voxelData[x][y][z + 1]);
+
 						boolean leftSideVisible = x != 0 ? (leftVoxel == null || leftVoxel.voxelType == null || leftVoxel.voxelType.voxelId < 0 || leftVoxel.voxelType.transparent) : true;
-						boolean rightSideVisible = x != VoxelWorld.chunkWidth-1 ? (rightVoxel == null || rightVoxel.voxelType == null || rightVoxel.voxelType.voxelId < 0 || rightVoxel.voxelType.transparent) : true;
-						boolean topSideVisible = y != VoxelWorld.chunkHeight-1 ? (topVoxel == null || topVoxel.voxelType == null || topVoxel.voxelType.voxelId < 0 || topVoxel.voxelType.transparent) : true;
+						boolean rightSideVisible = x != VoxelWorld.chunkWidth - 1 ? (rightVoxel == null || rightVoxel.voxelType == null || rightVoxel.voxelType.voxelId < 0 || rightVoxel.voxelType.transparent) : true;
+						boolean topSideVisible = y != VoxelWorld.chunkHeight - 1 ? (topVoxel == null || topVoxel.voxelType == null || topVoxel.voxelType.voxelId < 0 || topVoxel.voxelType.transparent) : true;
 						boolean bottomSideVisible = y != 0 ? (bottomVoxel == null || bottomVoxel.voxelType == null || bottomVoxel.voxelType.voxelId < 0 || bottomVoxel.voxelType.transparent) : true;
 						boolean backSideVisible = z != 0 ? (backVoxel == null || backVoxel.voxelType == null || backVoxel.voxelType.voxelId < 0 || backVoxel.voxelType.transparent) : true;
-						boolean frontSideVisible = z != VoxelWorld.chunkDepth-1 ? (frontVoxel == null || frontVoxel.voxelType == null || frontVoxel.voxelType.voxelId < 0 || frontVoxel.voxelType.transparent) : true;
-						
+						boolean frontSideVisible = z != VoxelWorld.chunkDepth - 1 ? (frontVoxel == null || frontVoxel.voxelType == null || frontVoxel.voxelType.voxelId < 0 || frontVoxel.voxelType.transparent) : true;
+
 						// Model or normal voxel rendering?
-						if (voxelData[x][y][z].voxelType.isModelRendering() && 
-							// Atleast any side visible?
-							(leftSideVisible || rightSideVisible || topSideVisible || bottomSideVisible || backSideVisible || frontSideVisible))
+						if (voxelData[x][y][z].voxelType.isModelRendering() &&
+						// Atleast any side visible?
+								(leftSideVisible || rightSideVisible || topSideVisible || bottomSideVisible || backSideVisible || frontSideVisible))
 						{
 							// Model rendering
 							Model m = voxelData[x][y][z].voxelType.getModel();
@@ -485,14 +465,14 @@ public class VoxelChunk
 						{
 							// Normal voxel rendering
 							VoxelFace[] faceMappings = ROTATION_MAPPINGS[voxelData[x][y][z].rotation];
-							
+
 							byte leftLighting = leftVoxel == null ? 0 : leftVoxel.lightLevel;
 							byte rightLighting = rightVoxel == null ? 0 : rightVoxel.lightLevel;
 							byte topLighting = topVoxel == null ? 0 : topVoxel.lightLevel;
 							byte bottomLighting = bottomVoxel == null ? 0 : bottomVoxel.lightLevel;
 							byte backLighting = backVoxel == null ? 0 : backVoxel.lightLevel;
 							byte frontLighting = frontVoxel == null ? 0 : frontVoxel.lightLevel;
-							
+
 							// Write mesh data
 							if (leftSideVisible)
 							{
@@ -535,7 +515,7 @@ public class VoxelChunk
 
 			// Generate vertex data
 			this.newVertices = new float[vertices.size()];
-			
+
 			for (int i = 0; i < this.newVertices.length; i++)
 			{
 				this.newVertices[i] = vertices.get(i).floatValue();
@@ -550,7 +530,7 @@ public class VoxelChunk
 				this.newIndices[i] = index.shortValue();
 				i++;
 			}
-			
+
 			this.newMeshDataReady = true;
 		}
 	}
@@ -683,9 +663,10 @@ public class VoxelChunk
 	{
 		return generationDone;
 	}
-	
+
 	/**
 	 * Returns true if this voxel chunk is ready for rendering (this means, lighting is done and mesh is generated).
+	 * 
 	 * @return
 	 */
 	public boolean isReadyForRendering()
@@ -706,13 +687,14 @@ public class VoxelChunk
 
 	/**
 	 * Returns true if this chunk is initialized and it's lighting is not dirty.
+	 * 
 	 * @return
 	 */
 	public boolean isInitializedAndLightingReady()
 	{
 		return this.isInitialized() && !this.lightingDirty;
 	}
-	
+
 	/**
 	 * Loads the voxel data from the voxel chunk file.
 	 */
@@ -731,7 +713,7 @@ public class VoxelChunk
 			}
 		}
 	}
-	
+
 	/**
 	 * <pre>
 	 * Renders this chunk. Will do nothing if the current voxel mesh is not
@@ -744,11 +726,10 @@ public class VoxelChunk
 	 */
 	public void render(Camera cam, ShaderProgram shader)
 	{
-		CubicWorld.getClient().profiler.startProfiling("MeshCreation"+this.chunkX+"|"+this.chunkY+"|"+this.chunkZ, "");
+		CubicWorld.getClient().profiler.startProfiling("MeshCreation" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ, "");
 		boolean frameMismatch = lastRenderFrameId != Gdx.graphics.getFrameId();
-		
-		if (this.voxelMeshDirty && this.newMeshDataReady && (CubicWorldConfiguration.meshCreationsPerFrameLimit == -1 || 
-				frameMismatch || creationsProcessedThisFrame <= CubicWorldConfiguration.meshCreationsPerFrameLimit))
+
+		if (this.voxelMeshDirty && this.newMeshDataReady && (CubicWorldConfiguration.meshCreationsPerFrameLimit == -1 || frameMismatch || creationsProcessedThisFrame <= CubicWorldConfiguration.meshCreationsPerFrameLimit))
 		{
 			// If the frame ids mismatch
 			if (frameMismatch)
@@ -761,15 +742,15 @@ public class VoxelChunk
 			this.createNewMesh();
 			creationsProcessedThisFrame++;
 		}
-		CubicWorld.getClient().profiler.stopProfiling("MeshCreation"+this.chunkX+"|"+this.chunkY+"|"+this.chunkZ);
+		CubicWorld.getClient().profiler.stopProfiling("MeshCreation" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ);
 
-		CubicWorld.getClient().profiler.startProfiling("MeshRendering"+this.chunkX+"|"+this.chunkY+"|"+this.chunkZ, "");
+		CubicWorld.getClient().profiler.startProfiling("MeshRendering" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ, "");
 		if (this.voxelMesh != null && this.boundingBox != null && cam.frustum.boundsInFrustum(this.boundingBox))
 		{
 			// Render chunk mesh
 			this.voxelMesh.render(shader, GL20.GL_TRIANGLES);
 		}
-		CubicWorld.getClient().profiler.stopProfiling("MeshRendering"+this.chunkX+"|"+this.chunkY+"|"+this.chunkZ);
+		CubicWorld.getClient().profiler.stopProfiling("MeshRendering" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ);
 	}
 
 	/**
@@ -877,7 +858,7 @@ public class VoxelChunk
 		{
 			if (this.voxelData == null)
 				return;
-			
+
 			// if voxel is null, create air voxel
 			if (voxel == null)
 				voxel = new VoxelData();
@@ -930,7 +911,7 @@ public class VoxelChunk
 					for (int z = 0; z < voxelData[x][y].length; z++)
 						if (voxelData[x][y][z] == null)
 							voxelData[x][y][z] = new VoxelData();
-			
+
 			this.voxelData = voxelData;
 			this.setInventoryUpdateHandlerAll();
 			this.chunkDataWasModified();
@@ -956,7 +937,7 @@ public class VoxelChunk
 						if (this.voxelData[x][y][z] != null && this.voxelData[x][y][z].voxelType != null && this.voxelData[x][y][z].voxelType.isTileEntity())
 							// Add to tile entity handlers
 							this.tileEntityHandlers.put(new Vector3(x, y, z), this.voxelData[x][y][z].tileEntity);
-					
+
 		}
 	}
 
@@ -984,7 +965,7 @@ public class VoxelChunk
 	 * </pre>
 	 */
 	public void update()
-	{	
+	{
 		// Save needed?
 		if (this.saveDirty && this.master.hasWorldFile() && this.isInitialized())
 		{
@@ -998,8 +979,7 @@ public class VoxelChunk
 
 		// Lighting check
 		// The lighting algorithm needs all chunks around this chunk to be ready.
-		if (!ClientChunkRequest.areRequestsPending() && this.lightingDirty && this.isInitialized() &&
-			(this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLightingReady(new ChunkKey(this.chunkX, this.chunkY+1, this.chunkZ))))
+		if (!ClientChunkRequest.areRequestsPending() && this.lightingDirty && this.isInitialized() && (this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLightingReady(new ChunkKey(this.chunkX, this.chunkY + 1, this.chunkZ))))
 		{
 			this.recalculateLighting();
 		}
@@ -1018,23 +998,16 @@ public class VoxelChunk
 				Vector3i absolutePosition = this.getAbsoluteVoxelPosition((int) entry.getKey().x, (int) entry.getKey().y, (int) entry.getKey().z);
 
 				VoxelData voxelData = this.getVoxel(x, y, z);
-				
+
 				entry.getValue().handleUpdate(voxelData, absolutePosition.x, absolutePosition.y, absolutePosition.z, this.master.isServer());
 			}
 		}
-		
+
 		boolean frameMismatch = (lastUpdateCallId != this.master.updateCallId);
-		
-		if (!ClientChunkRequest.areRequestsPending() && !this.lightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() && 
-				// Check all neighbours if lighting is ready
-				this.master.chunkLightingReady(this.chunkX+1, this.chunkY, this.chunkZ) && 
-				this.master.chunkLightingReady(this.chunkX-1, this.chunkY, this.chunkZ) && 
-				this.master.chunkLightingReady(this.chunkX, this.chunkY+1, this.chunkZ) && 
-				this.master.chunkLightingReady(this.chunkX, this.chunkY-1, this.chunkZ) && 
-				this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ+1) && 
-				this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ-1) && 
-				(CubicWorldConfiguration.meshGenerationsPerFrameLimit == -1 || 
-				frameMismatch || generationsProcessedThisFrame <= CubicWorldConfiguration.meshGenerationsPerFrameLimit))
+
+		if (!ClientChunkRequest.areRequestsPending() && !this.lightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() &&
+		// Check all neighbours if lighting is ready
+				this.master.chunkLightingReady(this.chunkX + 1, this.chunkY, this.chunkZ) && this.master.chunkLightingReady(this.chunkX - 1, this.chunkY, this.chunkZ) && this.master.chunkLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ) && this.master.chunkLightingReady(this.chunkX, this.chunkY - 1, this.chunkZ) && this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ + 1) && this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ - 1) && (CubicWorldConfiguration.meshGenerationsPerFrameLimit == -1 || frameMismatch || generationsProcessedThisFrame <= CubicWorldConfiguration.meshGenerationsPerFrameLimit))
 		{
 			// If the frame ids mismatch
 			if (frameMismatch)
@@ -1043,12 +1016,12 @@ public class VoxelChunk
 				lastUpdateCallId = this.master.updateCallId;
 				generationsProcessedThisFrame = 0;
 			}
-			
+
 			this.generateMesh();
 			generationsProcessedThisFrame++;
 		}
 	}
-	
+
 	/**
 	 * Calculates the light for the given position and face of a voxel.
 	 */
@@ -1058,10 +1031,10 @@ public class VoxelChunk
 		{
 			if (this.voxelData == null)
 				return;
-			
-			for (int x = VoxelWorld.chunkWidth-1; x >= 0; x--)
-				for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
-					for (int z = VoxelWorld.chunkDepth-1; z >= 0; z--)
+
+			for (int x = VoxelWorld.chunkWidth - 1; x >= 0; x--)
+				for (int y = VoxelWorld.chunkHeight - 1; y >= 0; y--)
+					for (int z = VoxelWorld.chunkDepth - 1; z >= 0; z--)
 						if (this.voxelData[x][y][z] != null)
 						{
 							VoxelData v = this.voxelData[x][y][z];
@@ -1069,44 +1042,44 @@ public class VoxelChunk
 							int absX = absolutePos.x;
 							int absY = absolutePos.y;
 							int absZ = absolutePos.z;
-							
-							if (y == VoxelWorld.chunkHeight-1 && (v.voxelType == null || v.voxelType.transparent))
+
+							if (y == VoxelWorld.chunkHeight - 1 && (v.voxelType == null || v.voxelType.transparent))
 							{
-								v.lightLevel = (byte) (CubicWorldConfiguration.maxLightLevel - (this.master.chunksOnYAxis() - this.chunkY));
+								v.lightLevel = (byte) (this.master.getSunLightLevel() - (this.master.chunksOnYAxis() - this.chunkY));
 							}
 							else
 							{
 								// Simplified:
 								// (y == chunkHeight-1 [last block on y-axis top] ? get light level from master in global space : (voxel data in local space is not set ? max light level : get from local space))
-								byte topLightLevel = (y == VoxelWorld.chunkHeight - 1 ? this.master.getLightLevel(absX, absY+1, absZ) : (this.voxelData[x][y+1][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y+1][z].lightLevel));
-								
+								byte topLightLevel = (y == VoxelWorld.chunkHeight - 1 ? this.master.getLightLevel(absX, absY + 1, absZ) : (this.voxelData[x][y + 1][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y + 1][z].lightLevel));
+
 								// Forward light through air and transparent blocks
 								if (v.voxelType == null || v.voxelType.transparent)
 									v.lightLevel = topLightLevel;
 								else
 								{
 									// Get neighbour levels
-									byte leftLightLevel = (x == 0 ? this.master.getLightLevel(absX-1, absY, absZ) : (this.voxelData[x-1][y][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x-1][y][z].lightLevel));
-									byte rightLightLevel = (x == VoxelWorld.chunkWidth - 1 ? this.master.getLightLevel(absX+1, absY, absZ) : (this.voxelData[x+1][y][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x+1][y][z].lightLevel));
-									byte backLightLevel = (z == 0 ? this.master.getLightLevel(absX, absY, absZ-1) : (this.voxelData[x][y][z-1] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y][z-1].lightLevel));
-									byte frontLightLevel = (z == VoxelWorld.chunkDepth - 1 ? this.master.getLightLevel(absX, absY, absZ+1) : (this.voxelData[x][y][z+1] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y][z+1].lightLevel));
+									byte leftLightLevel = (x == 0 ? this.master.getLightLevel(absX - 1, absY, absZ) : (this.voxelData[x - 1][y][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x - 1][y][z].lightLevel));
+									byte rightLightLevel = (x == VoxelWorld.chunkWidth - 1 ? this.master.getLightLevel(absX + 1, absY, absZ) : (this.voxelData[x + 1][y][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x + 1][y][z].lightLevel));
+									byte backLightLevel = (z == 0 ? this.master.getLightLevel(absX, absY, absZ - 1) : (this.voxelData[x][y][z - 1] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y][z - 1].lightLevel));
+									byte frontLightLevel = (z == VoxelWorld.chunkDepth - 1 ? this.master.getLightLevel(absX, absY, absZ + 1) : (this.voxelData[x][y][z + 1] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y][z + 1].lightLevel));
 									byte[] adjacentLightLevels = new byte[] { topLightLevel, leftLightLevel, rightLightLevel, backLightLevel, frontLightLevel };
-									
+
 									Arrays.sort(adjacentLightLevels);
 									byte highestLevel = adjacentLightLevels[4];
-									byte lightLevel = (byte) (highestLevel-1);
-									
+									byte lightLevel = (byte) (highestLevel - 1);
+
 									if (lightLevel <= 0)
 									{
 										lightLevel = 1;
 									}
-									
+
 									v.lightLevel = lightLevel;
 								}
 							}
-							
+
 						}
-			
+
 			this.lightingDirty = false;
 		}
 	}
@@ -1114,19 +1087,32 @@ public class VoxelChunk
 	/**
 	 * Writes mesh data to the given lists.
 	 * 
-	 * @param vertices Main vertex list.
-	 * @param indices Main index list.
-	 * @param uvs Main uvs list.
-	 * @param colors Main colors list.
-	 * @param sideVertices Vertex array from the side vertices array.
-	 * @param sideIndices Side indices from the side indices array.
-	 * @param indicesCounter The current index counter.
-	 * @param x The current voxel worldspace position.
-	 * @param y The current voxel worldspace position.
-	 * @param z The current voxel worldspace position.
-	 * @param color The voxel color.
-	 * @param blockId The voxel type id.
-	 * @param face The foxel face to use for getting uv coordinates.
+	 * @param vertices
+	 *            Main vertex list.
+	 * @param indices
+	 *            Main index list.
+	 * @param uvs
+	 *            Main uvs list.
+	 * @param colors
+	 *            Main colors list.
+	 * @param sideVertices
+	 *            Vertex array from the side vertices array.
+	 * @param sideIndices
+	 *            Side indices from the side indices array.
+	 * @param indicesCounter
+	 *            The current index counter.
+	 * @param x
+	 *            The current voxel worldspace position.
+	 * @param y
+	 *            The current voxel worldspace position.
+	 * @param z
+	 *            The current voxel worldspace position.
+	 * @param color
+	 *            The voxel color.
+	 * @param blockId
+	 *            The voxel type id.
+	 * @param face
+	 *            The foxel face to use for getting uv coordinates.
 	 */
 	private void WriteSideData(ArrayList<Float> vertices, ArrayList<Short> indices, Vector3[] sideVertices, Vector3[] sideNormals, short[] sideIndices, short indicesCounter, int x, int y, int z, VoxelData voxelData, VoxelFace face, byte lightLevel)
 	{
@@ -1150,7 +1136,7 @@ public class VoxelChunk
 			float vertX = sideVertices[i].x + x + ((float) this.chunkX * (float) VoxelWorld.chunkWidth);
 			float vertY = sideVertices[i].y + y + ((float) this.chunkY * (float) VoxelWorld.chunkHeight);
 			float vertZ = sideVertices[i].z + z + ((float) this.chunkZ * (float) VoxelWorld.chunkDepth);
-			
+
 			vertices.add(vertX);
 			vertices.add(vertY);
 			vertices.add(vertZ);

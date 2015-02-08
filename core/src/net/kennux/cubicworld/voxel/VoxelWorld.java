@@ -4,14 +4,13 @@ import java.util.ArrayList;
 
 import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldServer;
+import net.kennux.cubicworld.math.Mathf;
 import net.kennux.cubicworld.pathfinder.Path;
 import net.kennux.cubicworld.pathfinder.Pathfinder;
 import net.kennux.cubicworld.util.ConsoleHelper;
-import net.kennux.cubicworld.util.Mathf;
 import net.kennux.cubicworld.voxel.generator.AWorldGenerator;
 import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -43,6 +42,12 @@ public class VoxelWorld
 	 * chunk on the z-axis.
 	 */
 	public static final int chunkDepth = 16;
+	
+	/**
+	 * The current sun light level.
+	 * If this changes, all chunks will regenerate!
+	 */
+	private int sunLightLevel;
 
 	/**
 	 * The world height controls how much chunks will get stacked on the y-axis.
@@ -102,11 +107,6 @@ public class VoxelWorld
 	private ModelBatch chunkModelBatch;
 
 	/**
-	 * The camer used for model rendering.
-	 */
-	private Camera camera;
-	
-	/**
 	 * Gets incremented after every update call.
 	 */
 	public int updateCallId;
@@ -128,19 +128,18 @@ public class VoxelWorld
 		this.worldGeneratorThreadPool = new WorldGeneratorThreadPool(Runtime.getRuntime().availableProcessors());
 	}
 
-	public VoxelWorld(ShaderProgram shader, Camera camera)
+	public VoxelWorld(ShaderProgram shader)
 	{
 		this.chunks = new ChunkManager();
 
 		// Set references
-		this.camera = camera;
 		this.chunkModelBatch = new ModelBatch();
 		this.worldShader = shader;
 	}
 
-	public VoxelWorld(ShaderProgram shader, Camera camera, int worldHeight)
+	public VoxelWorld(ShaderProgram shader, int worldHeight)
 	{
-		this(shader, camera);
+		this(shader);
 
 		this.worldHeight = worldHeight;
 	}
@@ -152,7 +151,7 @@ public class VoxelWorld
 	{
 		return this.chunks.allChunksReady();
 	}
-	
+
 	/**
 	 * Returns the count of chunks stacked on the y-axis.
 	 * Counting begins at 0!
@@ -185,9 +184,10 @@ public class VoxelWorld
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns true if the chunk at the given position is loaded & initialized.
+	 * 
 	 * @param chunkX
 	 * @param chunkY
 	 * @param chunkZ
@@ -195,11 +195,12 @@ public class VoxelWorld
 	 */
 	public boolean hasChunk(Vector3 chunkPos)
 	{
-		return this.hasChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
+		return this.hasChunk((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z);
 	}
-	
+
 	/**
 	 * Returns true if the chunk at the given position is loaded & initialized.
+	 * 
 	 * @param chunkX
 	 * @param chunkY
 	 * @param chunkZ
@@ -209,22 +210,24 @@ public class VoxelWorld
 	{
 		return this.hasChunk(new ChunkKey(chunkX, chunkY, chunkZ));
 	}
-	
+
 	/**
 	 * Returns true if the chunk at the given position is loaded & initialized.
+	 * 
 	 * @param chunkKey
 	 * @return
 	 */
 	public boolean hasChunk(ChunkKey chunkKey)
 	{
 		VoxelChunk chunk = this.chunks.get(chunkKey);
-		
+
 		return chunk != null && chunk.isInitialized();
 	}
-	
+
 	/**
 	 * Returns true if the chunk at the given position is loaded, initialized and lighting ready.
 	 * If the chunk is non-existing, this function will return true.
+	 * 
 	 * @param chunkX
 	 * @param chunkY
 	 * @param chunkZ
@@ -232,12 +235,13 @@ public class VoxelWorld
 	 */
 	public boolean chunkLightingReady(Vector3 chunkPos)
 	{
-		return this.chunkLightingReady((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z);
+		return this.chunkLightingReady((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z);
 	}
-	
+
 	/**
 	 * Returns true if the chunk at the given position is loaded, initialized and lighting ready.
 	 * If the chunk is non-existing, this function will return true.
+	 * 
 	 * @param chunkX
 	 * @param chunkY
 	 * @param chunkZ
@@ -247,17 +251,18 @@ public class VoxelWorld
 	{
 		return this.chunkLightingReady(new ChunkKey(chunkX, chunkY, chunkZ));
 	}
-	
+
 	/**
 	 * Returns true if the chunk at the given position is loaded, initialized and lighting ready.
 	 * If the chunk is non-existing, this function will return true.
+	 * 
 	 * @param chunkKey
 	 * @return
 	 */
 	public boolean chunkLightingReady(ChunkKey chunkKey)
 	{
 		VoxelChunk chunk = this.chunks.get(chunkKey);
-		
+
 		return chunk == null || chunk.isInitializedAndLightingReady();
 	}
 
@@ -532,7 +537,7 @@ public class VoxelWorld
 		y -= (int) (chunkPos.y * VoxelWorld.chunkHeight);
 		z -= (int) (chunkPos.z * VoxelWorld.chunkDepth);
 
-		VoxelChunk chunk = this.getChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z, false);
+		VoxelChunk chunk = this.getChunk((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z, false);
 		if (chunk == null)
 		{
 			// ConsoleHelper.writeLog("error", "Tried to get voxel light level from non existing chunk: " + chunkPos + " at position " + x + "|" + y + "|" + z + ", isServer:" + this.isServer, "VoxelWorld");
@@ -700,7 +705,7 @@ public class VoxelWorld
 	public void initUpdateThread()
 	{
 		final VoxelWorld world = this;
-		
+
 		// World update handler
 		this.worldUpdateThread = new Thread(new Runnable()
 		{
@@ -740,32 +745,32 @@ public class VoxelWorld
 	private VoxelChunk instantiateChunk(int chunkX, int chunkY, int chunkZ)
 	{
 		VoxelChunk chunk = new VoxelChunk(chunkX, chunkY, chunkZ, this);
-		
+
 		// Regenerate adjacent chunks meshes
 		// Only needed on client
 		if (!this.isServer)
 		{
-			VoxelChunk leftChunk = this.getChunk(chunkX-1, chunkY, chunkZ, false);
-			VoxelChunk rightChunk = this.getChunk(chunkX+1, chunkY, chunkZ, false);
-			VoxelChunk topChunk = this.getChunk(chunkX, chunkY+1, chunkZ, false);
-			VoxelChunk bottomChunk = this.getChunk(chunkX, chunkY-1, chunkZ, false);
-			VoxelChunk backChunk = this.getChunk(chunkX, chunkY, chunkZ-1, false);
-			VoxelChunk frontChunk = this.getChunk(chunkX, chunkY, chunkZ+1, false);
-	
+			VoxelChunk leftChunk = this.getChunk(chunkX - 1, chunkY, chunkZ, false);
+			VoxelChunk rightChunk = this.getChunk(chunkX + 1, chunkY, chunkZ, false);
+			VoxelChunk topChunk = this.getChunk(chunkX, chunkY + 1, chunkZ, false);
+			VoxelChunk bottomChunk = this.getChunk(chunkX, chunkY - 1, chunkZ, false);
+			VoxelChunk backChunk = this.getChunk(chunkX, chunkY, chunkZ - 1, false);
+			VoxelChunk frontChunk = this.getChunk(chunkX, chunkY, chunkZ + 1, false);
+
 			if (leftChunk != null)
-				leftChunk.regenerateChunkMesh();
+				leftChunk.regenerateLightingAndMesh();
 			if (rightChunk != null)
-				rightChunk.regenerateChunkMesh();
+				rightChunk.regenerateLightingAndMesh();
 			if (topChunk != null)
-				topChunk.regenerateChunkMesh();
+				topChunk.regenerateLightingAndMesh();
 			if (bottomChunk != null)
-				bottomChunk.regenerateChunkMesh();
+				bottomChunk.regenerateLightingAndMesh();
 			if (backChunk != null)
-				backChunk.regenerateChunkMesh();
+				backChunk.regenerateLightingAndMesh();
 			if (frontChunk != null)
-				frontChunk.regenerateChunkMesh();
+				frontChunk.regenerateLightingAndMesh();
 		}
-		
+
 		chunks.put(new ChunkKey(chunkX, chunkY, chunkZ), chunk);
 
 		return chunk;
@@ -933,7 +938,7 @@ public class VoxelWorld
 
 				return hitInfo;
 			}
-			
+
 			lastBlockPosition = blockPosition;
 			distanceTraveled += distancePerStep;
 		}
@@ -1032,5 +1037,23 @@ public class VoxelWorld
 	{
 		this.chunks.update();
 		updateCallId++;
+	}
+
+	/**
+	 * @return the sunLightLevel
+	 */
+	public int getSunLightLevel()
+	{
+		return sunLightLevel;
+	}
+
+	/**
+	 * This will regenerate all chunk meshes.
+	 * @param sunLightLevel the sunLightLevel to set
+	 */
+	public void setSunLightLevel(int sunLightLevel)
+	{
+		this.chunks.recalculateLightingAndMeshes();
+		this.sunLightLevel = sunLightLevel;
 	}
 }

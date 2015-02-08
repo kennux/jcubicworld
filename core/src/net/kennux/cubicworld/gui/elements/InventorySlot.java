@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -95,22 +96,17 @@ public class InventorySlot extends AGuiElement
 						{
 							InventorySlot targetInventorySlot = (InventorySlot) guiElement;
 
-							// Get inventories
+							// Get inventory
 							IInventory sourceInventory = (IInventory) draggedSlot.parent.getOverlayData().get(draggedSlot.getInventoryName());
-							IInventory targetInventory = (IInventory) targetInventorySlot.parent.getOverlayData().get(draggedSlot.getInventoryName());
-
+							
 							// Get item stacks
 							ItemStack sourceStack = sourceInventory.getItemStackInSlot(draggedSlot.getSlotId());
-							ItemStack targetStack = targetInventory.getItemStackInSlot(targetInventorySlot.getSlotId());
 
 							// Get item counts
 							int sourceItemCount = 0;
-							int targetItemCount = 0;
 
 							if (sourceStack != null)
 								sourceItemCount = sourceStack.getItemCount();
-							if (targetStack != null)
-								targetItemCount = targetStack.getItemCount();
 
 							// Player inventory transactions
 							if (draggedSlot.getInventoryName().equals("playerInventory"))
@@ -167,7 +163,7 @@ public class InventorySlot extends AGuiElement
 	}
 
 	@Override
-	public void render(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin)
+	public void render(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin, ShapeRenderer shapeRenderer)
 	{
 		// Draw the slot itself
 		Texture inventorySlotTexture = null;

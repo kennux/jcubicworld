@@ -73,14 +73,14 @@ public class CubicWorldClient extends AClientSocket
 	{
 		super.sendPacket(packet);
 	}
-	
+
 	/**
 	 * Iterates through all packets in processing queue but will only process ServerChunkData packets
 	 */
 	public void waitForChunkPackets()
 	{
 		ArrayList<IPacketModel> packetsList = new ArrayList<IPacketModel>();
-		
+
 		while (this.hasPacket())
 		{
 			// Get next packet model
@@ -88,10 +88,10 @@ public class CubicWorldClient extends AClientSocket
 
 			if (packet == null)
 				break;
-			
+
 			packetsList.add(packet);
 		}
-		
+
 		for (IPacketModel packet : packetsList)
 		{
 			if (packet instanceof ServerChunkData)
@@ -133,9 +133,9 @@ public class CubicWorldClient extends AClientSocket
 					chunkRequest.chunkX = (int) chunkPos.x;
 					chunkRequest.chunkY = (int) chunkPos.y;
 					chunkRequest.chunkZ = (int) chunkPos.z;
-					
+
 					ClientChunkRequest.requestedChunkData(chunkRequest.chunkX, chunkRequest.chunkY, chunkRequest.chunkZ);
-	
+
 					this.sendPacket(chunkRequest);
 				}
 			}

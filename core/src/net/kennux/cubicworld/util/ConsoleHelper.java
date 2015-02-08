@@ -14,14 +14,16 @@ import java.util.Date;
 public class ConsoleHelper
 {
 	public static boolean silent = false;
-	
+
 	/**
 	 * Logs an exception to the console.
 	 */
 	public static void logError(Exception e)
 	{
-		/*if (silent)
-			return;*/
+		/*
+		 * if (silent)
+		 * return;
+		 */
 
 		e.printStackTrace();
 	}

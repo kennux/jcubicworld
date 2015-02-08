@@ -15,6 +15,7 @@ import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.ServerBootstrap;
+import net.kennux.cubicworld.math.Mathf;
 import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.voxel.ChunkKey;
 

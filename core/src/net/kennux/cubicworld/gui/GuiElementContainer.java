@@ -9,6 +9,7 @@ import net.kennux.cubicworld.gui.skin.AGuiSkin;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -159,15 +160,15 @@ public class GuiElementContainer
 	 * 
 	 * @param spriteBatch
 	 */
-	public void render(SpriteBatch spriteBatch, BitmapFont font, AGuiSkin skin)
+	public void render(SpriteBatch spriteBatch, BitmapFont font, AGuiSkin skin, ShapeRenderer shapeRenderer)
 	{
 		spriteBatch.setTransformMatrix(new Matrix4().idt().translate(new Vector3(this.getPosition().x, this.getPosition().y, 0))); // Offset
 
 		for (Entry<String, IGuiElement> guiElement : this.guiElements.entrySet())
-			guiElement.getValue().render(spriteBatch, font, this.focusElement == guiElement.getValue(), skin);
+			guiElement.getValue().render(spriteBatch, font, this.focusElement == guiElement.getValue(), skin, shapeRenderer);
 
 		for (Entry<String, IGuiElement> guiElement : this.guiElements.entrySet())
-			guiElement.getValue().renderLast(spriteBatch, font, this.focusElement == guiElement.getValue(), skin);
+			guiElement.getValue().renderLast(spriteBatch, font, this.focusElement == guiElement.getValue(), skin, shapeRenderer);
 
 		spriteBatch.setTransformMatrix(new Matrix4().idt());
 	}

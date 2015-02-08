@@ -22,10 +22,14 @@ public interface IItemView
 	 * Render the itemview.
 	 * An implementation for an assault rifle would render the rifle model in here.
 	 * 
-	 * @param camera The camera used for rendering-
-	 * @param modelBatch The model batch you should render to.
-	 * @param decalBatch The decal batch you should render to if needed.
-	 * @param spriteBatch The sprite batch you should render to.
+	 * @param camera
+	 *            The camera used for rendering-
+	 * @param modelBatch
+	 *            The model batch you should render to.
+	 * @param decalBatch
+	 *            The decal batch you should render to if needed.
+	 * @param spriteBatch
+	 *            The sprite batch you should render to.
 	 */
 	public void render(Camera camera, ModelBatch modelBatch, DecalBatch decalBatch, SpriteBatch spriteBatch);
 

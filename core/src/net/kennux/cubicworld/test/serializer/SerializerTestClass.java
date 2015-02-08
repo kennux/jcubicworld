@@ -12,42 +12,42 @@ public class SerializerTestClass
 {
 	public SerializerTestClass()
 	{
-		
+
 	}
-	
+
 	@SerializerField(order = 0, type = SerializationTypes.BOOLEAN)
 	public boolean bool;
-	
+
 	@SerializerField(order = 1, type = SerializationTypes.BYTE)
 	public byte b;
-	
+
 	@SerializerField(order = 2, type = SerializationTypes.SHORT)
 	public short s;
-	
+
 	@SerializerField(order = 3, type = SerializationTypes.INTEGER)
 	public int i;
-	
+
 	@SerializerField(order = 4, type = SerializationTypes.LONG)
 	public long l;
-	
+
 	@SerializerField(order = 5, type = SerializationTypes.STRING)
 	public String str;
-	
+
 	@SerializerField(order = 6, type = SerializationTypes.VOXELDATA)
 	public VoxelData voxelData;
-	
+
 	@SerializerField(order = 7, type = SerializationTypes.BYTEARRAY)
 	public byte[] bA;
-	
+
 	@SerializerField(order = 8, type = SerializationTypes.FLOAT)
 	public float f;
-	
+
 	@SerializerField(order = 9, type = SerializationTypes.CHAR)
 	public char c;
-	
+
 	@SerializerField(order = 10, type = SerializationTypes.VECTOR3)
 	public Vector3 v3;
-	
+
 	public void serialize(BitWriter writer)
 	{
 		writer.writeBool(this.bool);
@@ -62,7 +62,7 @@ public class SerializerTestClass
 		writer.writeChar(this.c);
 		writer.writeVector3(this.v3);
 	}
-	
+
 	public static SerializerTestClass deserialize(BitReader reader)
 	{
 		SerializerTestClass testClass = new SerializerTestClass();
@@ -78,7 +78,7 @@ public class SerializerTestClass
 		testClass.f = reader.readFloat();
 		testClass.c = reader.readChar();
 		testClass.v3 = reader.readVector3();
-		
+
 		return testClass;
 	}
 }

@@ -22,7 +22,6 @@ import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 import net.kennux.cubicworld.voxel.VoxelWorldSave;
-import net.kennux.cubicworld.voxel.generator.TestGenerator;
 import net.kennux.cubicworld.voxel.generator.WorldGenerator;
 import net.kennux.cubicworld.voxel.generator.noise.SimplexNoise3D;
 import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;

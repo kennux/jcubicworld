@@ -2,13 +2,9 @@ package net.kennux.cubicworld.microbenchmark;
 
 import java.lang.reflect.Field;
 
-import com.badlogic.gdx.math.Vector3;
-
-import net.kennux.cubicworld.serialization.BitReader;
-import net.kennux.cubicworld.serialization.BitWriter;
-import net.kennux.cubicworld.serialization.Serializer;
-import net.kennux.cubicworld.test.SerializerTest;
 import net.kennux.cubicworld.test.serializer.SerializerTestClass;
+
+import com.badlogic.gdx.math.Vector3;
 
 public class ReflectFieldAccess extends AMicroBenchmark
 {
@@ -17,13 +13,13 @@ public class ReflectFieldAccess extends AMicroBenchmark
 		ReflectFieldAccess benchmark = new ReflectFieldAccess();
 		benchmark.benchmark();
 	}
-	
+
 	private SerializerTestClass testClass = new SerializerTestClass();
 	private Field testField;
-	
+
 	public ReflectFieldAccess()
 	{
-		testClass.b = (byte)123;
+		testClass.b = (byte) 123;
 		testClass.bA = new byte[] { 12, 32, 45 };
 		testClass.bool = true;
 		testClass.c = 'a';
@@ -33,14 +29,14 @@ public class ReflectFieldAccess extends AMicroBenchmark
 		testClass.s = (short) 133;
 		testClass.str = "LEET";
 		testClass.v3 = new Vector3(10, 13, 37);
-		
+
 		try
 		{
 			this.testField = this.testClass.getClass().getDeclaredField("b");
 		}
 		catch (NoSuchFieldException | SecurityException e)
 		{
-			
+
 		}
 	}
 

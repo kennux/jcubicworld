@@ -64,7 +64,7 @@ public class GameInputProcessor extends InputAdapter
 			keyInputAction.keyPressed(cubicWorld);
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -94,10 +94,10 @@ public class GameInputProcessor extends InputAdapter
 		if (keyInputAction != null)
 		{
 			keyInputAction.keyReleased(cubicWorld);
-	
+
 			return true;
 		}
-		
+
 		return false;
 	}
 

@@ -68,7 +68,7 @@ public class Bootstrap
 		pluginManager.defineInputHandlers(cubicWorld.inputManager);
 
 		VoxelEngine.finalization();
-		
+
 		pluginManager.postInit(false);
 	}
 

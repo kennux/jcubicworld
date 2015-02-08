@@ -3,8 +3,8 @@ package net.kennux.cubicworld.entity;
 import java.util.Random;
 
 import net.kennux.cubicworld.CubicWorld;
+import net.kennux.cubicworld.math.Mathf;
 import net.kennux.cubicworld.pathfinder.Path;
-import net.kennux.cubicworld.util.Mathf;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 
 import com.badlogic.gdx.math.Vector3;

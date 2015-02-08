@@ -7,6 +7,7 @@ import net.kennux.cubicworld.gui.skin.AGuiSkin;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 /**
  * <pre>
@@ -49,7 +50,7 @@ public interface IGuiElement
 	 * @param parent
 	 *            Null if this element has no parent. (Should actually never happen when using overlays)
 	 */
-	public void render(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin);
+	public void render(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin, ShapeRenderer shapeRenderer);
 
 	/**
 	 * This pass is used for rendering on top of the gui, for example the InventorySlot uses this function for rendering dragged items.
@@ -60,7 +61,7 @@ public interface IGuiElement
 	 * @param hasFocus
 	 * @param skin
 	 */
-	public void renderLast(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin);
+	public void renderLast(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin, ShapeRenderer shapeRenderer);
 
 	/**
 	 * @param clickHandler

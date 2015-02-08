@@ -3,10 +3,11 @@ package net.kennux.cubicworld.gui.elements;
 import net.kennux.cubicworld.gui.GuiHelper;
 import net.kennux.cubicworld.gui.overlay.Overlay;
 import net.kennux.cubicworld.gui.skin.AGuiSkin;
-import net.kennux.cubicworld.util.Mathf;
+import net.kennux.cubicworld.math.Mathf;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -79,7 +80,7 @@ public class InventoryView extends AGuiElement
 	}
 
 	@Override
-	public void render(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin)
+	public void render(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin, ShapeRenderer shapeRenderer)
 	{
 
 	}

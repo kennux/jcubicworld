@@ -201,11 +201,12 @@ public class BitWriter
 	{
 		VoxelData.serialize(v, this);
 	}
-	
+
 	/**
 	 * Reads an object with given type serializationtypes.
 	 * This method uses a switch-case to forward the calls to readInt(), readShort(), etc.
 	 * Returns null in case of an error.
+	 * 
 	 * @param type
 	 * @return
 	 */

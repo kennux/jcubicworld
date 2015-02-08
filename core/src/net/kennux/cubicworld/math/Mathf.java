@@ -1,4 +1,4 @@
-package net.kennux.cubicworld.util;
+package net.kennux.cubicworld.math;
 
 /**
  * Float math helper implementation.
@@ -78,6 +78,16 @@ public class Mathf
 	public static int min(int a, int b)
 	{
 		return Math.min(a, b);
+	}
+	
+	public static float repeat(float v, float r)
+	{
+		if (v > r)
+		{
+			float n = Mathf.floorToInt(v / r);
+			return (v - (n * r));
+		}
+		return v;
 	}
 
 	/**

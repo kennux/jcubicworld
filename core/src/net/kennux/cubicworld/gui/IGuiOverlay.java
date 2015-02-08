@@ -7,6 +7,7 @@ import net.kennux.cubicworld.gui.skin.AGuiSkin;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
 public interface IGuiOverlay
@@ -46,7 +47,7 @@ public interface IGuiOverlay
 	 * 
 	 * @param spriteBatch
 	 */
-	public void render(SpriteBatch spriteBatch, BitmapFont font, AGuiSkin skin);
+	public void render(SpriteBatch spriteBatch, BitmapFont font, AGuiSkin skin, ShapeRenderer shapeRenderer);
 
 	/**
 	 * Sets the current focus element.

@@ -5,6 +5,7 @@ import net.kennux.cubicworld.gui.skin.AGuiSkin;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
 public class GuiImage extends AGuiElement
@@ -28,7 +29,7 @@ public class GuiImage extends AGuiElement
 	}
 
 	@Override
-	public void render(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin)
+	public void render(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin, ShapeRenderer shapeRenderer)
 	{
 		spriteBatch.draw(this.imageTexture, this.relativeRectangle.x, this.relativeRectangle.y, this.relativeRectangle.width, this.relativeRectangle.height);
 	}

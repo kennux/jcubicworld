@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 
 /**
  * <pre>
@@ -39,7 +38,7 @@ public class HudBlockInformation implements IHudElement
 	private CubicWorldGame cubicWorld;
 
 	private byte lightLevel;
-	
+
 	public HudBlockInformation()
 	{
 		this.cubicWorld = CubicWorld.getClient();

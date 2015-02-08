@@ -1,7 +1,7 @@
 package net.kennux.cubicworld.plugins.baseplugin;
 
 import net.kennux.cubicworld.CubicWorld;
-import net.kennux.cubicworld.util.Mathf;
+import net.kennux.cubicworld.math.Mathf;
 
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;

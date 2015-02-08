@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.kennux.cubicworld.CubicWorld;
-
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -136,7 +134,7 @@ public class ChunkManager
 	{
 		VoxelChunk chunk = this.chunks.get(key);
 		this.chunks.remove(key);
-		
+
 		if (chunk != null)
 			chunk.dispose();
 	}
@@ -155,7 +153,7 @@ public class ChunkManager
 			if (c != null)
 				c.render(cam, shader);
 		}
-		
+
 		// Model render pass
 		modelBatch.begin(cam);
 		for (VoxelChunk c : this.chunks.values())
@@ -163,7 +161,7 @@ public class ChunkManager
 			if (c != null)
 				c.renderModels(cam, modelBatch);
 		}
-		
+
 		modelBatch.end();
 	}
 
@@ -181,6 +179,20 @@ public class ChunkManager
 			}
 		}
 	}
+	
+	/**
+	 * Gets called if the skylight value changes, regenerates the lighting and meshes for all chunks
+	 */
+	public void recalculateLightingAndMeshes()
+	{
+		for (VoxelChunk c : this.chunks.values())
+		{
+			if (c != null)
+			{
+				c.regenerateLightingAndMesh();
+			}
+		}
+	}
 
 	/**
 	 * Returns true if all chunks are ready for rendering.
@@ -194,7 +206,7 @@ public class ChunkManager
 			if (c != null && !c.isReadyForRendering())
 				allReady = false;
 		}
-		
+
 		return allReady;
 	}
 }

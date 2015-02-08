@@ -22,7 +22,7 @@ public class ChunkKey implements Comparable<ChunkKey>, Serializable
 	 * 
 	 */
 	private static final long serialVersionUID = -2071141507889353282L;
-	
+
 	public int x, y, z;
 
 	public ChunkKey(int chunkX, int chunkY, int chunkZ)
@@ -53,7 +53,7 @@ public class ChunkKey implements Comparable<ChunkKey>, Serializable
 
 		return false;
 	}
-	
+
 	public int hashCode()
 	{
 		return (this.x ^ this.y ^ this.z);

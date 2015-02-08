@@ -3,12 +3,12 @@ package net.kennux.cubicworld;
 import java.util.ArrayList;
 
 import net.kennux.cubicworld.entity.AEntity;
+import net.kennux.cubicworld.math.Mathf;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
 import net.kennux.cubicworld.networking.IPacketModel;
 import net.kennux.cubicworld.networking.packet.ServerEntitySpawn;
 import net.kennux.cubicworld.networking.packet.ServerEntityUpdate;
 import net.kennux.cubicworld.util.ConsoleHelper;
-import net.kennux.cubicworld.util.Mathf;
 
 import com.badlogic.gdx.math.Vector3;
 

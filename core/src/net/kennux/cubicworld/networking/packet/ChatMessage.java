@@ -58,10 +58,10 @@ public class ChatMessage extends APacketModel
 		{
 			// Split command into arguments
 			String[] command = this.chatMessage.substring(1).split(" ");
-			
+
 			// Get command
 			IChatCommand commandInstance = AdminSystem.getCommand(command[0]);
-			
+
 			// Execute command if available.
 			if (commandInstance != null)
 			{
@@ -79,11 +79,11 @@ public class ChatMessage extends APacketModel
 		{
 			// Instantiate chat message model
 			ChatMessage messageModel = new ChatMessage();
-	
+
 			if (client.playerEntity != null)
 			{
 				messageModel.chatMessage = client.playerEntity.getEntityName() + ": " + this.chatMessage;
-	
+
 				// Broadcast
 				server.sendPacket(messageModel);
 			}

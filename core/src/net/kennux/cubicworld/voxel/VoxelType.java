@@ -5,7 +5,6 @@ import java.util.Map.Entry;
 
 import net.kennux.cubicworld.inventory.InventoryFilterRuleSet;
 import net.kennux.cubicworld.voxel.handlers.ITileEntityHandlerFactory;
-import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
@@ -27,7 +26,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 public class VoxelType
 {
 	public short voxelId;
-	
+
 	/**
 	 * The name used for voxelid -> name and name -> voxelid mapping.
 	 */
@@ -92,7 +91,7 @@ public class VoxelType
 	 * Value = rendering definition
 	 */
 	private HashMap<Integer, VoxelRenderState> renderStates = new HashMap<Integer, VoxelRenderState>();
-	
+
 	/**
 	 * Returns true if this voxel type is able to physically collide with other objects.
 	 * 
@@ -183,7 +182,7 @@ public class VoxelType
 	{
 		return this.tileEntityHandlerFactory != null;
 	}
-	
+
 	/**
 	 * @return the updateHandler
 	 */
@@ -325,7 +324,8 @@ public class VoxelType
 	}
 
 	/**
-	 * @param updateHandler the updateHandler to set
+	 * @param updateHandler
+	 *            the updateHandler to set
 	 */
 	public VoxelType setTileEntityHandlerFactory(ITileEntityHandlerFactory tileEntityHandlerFactory)
 	{

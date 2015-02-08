@@ -9,6 +9,7 @@ import net.kennux.cubicworld.gui.skin.AGuiSkin;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -136,7 +137,7 @@ public abstract class AGuiElement implements IGuiElement
 	 * 
 	 * @see IGuiElement#renderLast(SpriteBatch, BitmapFont, boolean, AGuiSkin)
 	 */
-	public void renderLast(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin)
+	public void renderLast(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin, ShapeRenderer shapeRenderer)
 	{
 
 	}

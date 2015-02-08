@@ -1,6 +1,6 @@
 package net.kennux.cubicworld.entity;
 
-import net.kennux.cubicworld.util.Mathf;
+import net.kennux.cubicworld.math.Mathf;
 import net.kennux.cubicworld.util.Time;
 import net.kennux.cubicworld.voxel.VoxelCollision;
 import net.kennux.cubicworld.voxel.VoxelWorld;

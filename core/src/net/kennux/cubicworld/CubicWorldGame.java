@@ -12,14 +12,12 @@ import net.kennux.cubicworld.input.InputManager;
 import net.kennux.cubicworld.networking.CubicWorldClient;
 import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.profiler.Profiler;
-import net.kennux.cubicworld.profiler.ProfilerResult;
 import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.util.DebugHelper;
 import net.kennux.cubicworld.util.ShaderLoader;
 import net.kennux.cubicworld.voxel.RaycastHit;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -229,7 +227,7 @@ public class CubicWorldGame implements ApplicationListener
 		this.dayNightCycle = new DayNightCycle();
 
 		// Create voxel world
-		this.voxelWorld = new VoxelWorld(ShaderLoader.loadShader("world"), this.cam);
+		this.voxelWorld = new VoxelWorld(ShaderLoader.loadShader("world"));
 
 		// Init player controller, initial position will get set in the
 		// ServerPlayerSpawn packet
@@ -247,33 +245,39 @@ public class CubicWorldGame implements ApplicationListener
 			ConsoleHelper.logError(e);
 			System.exit(-1);
 		}
-		
+
 		// Wait till all chunk requests are processed
-		while(ClientChunkRequest.areRequestsPending())
+		while (ClientChunkRequest.areRequestsPending())
 		{
 			this.client.waitForChunkPackets();
-			try {
+			try
+			{
 				Thread.sleep(10);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e)
+			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		
+
 		// Generate all chunk meshes
 		int generationPerFrameLimit = CubicWorldConfiguration.meshGenerationsPerFrameLimit;
 		int creationPerFrameLimit = CubicWorldConfiguration.meshCreationsPerFrameLimit;
 		CubicWorldConfiguration.meshGenerationsPerFrameLimit = -1;
 		CubicWorldConfiguration.meshCreationsPerFrameLimit = -1;
-		
+
 		// Wait till all chunks are ready
-		while(!this.voxelWorld.allChunksReady())
+		while (!this.voxelWorld.allChunksReady())
 		{
 			this.voxelWorld.update();
 			this.voxelWorld.render(this.cam);
-			try {
+			try
+			{
 				Thread.sleep(10);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e)
+			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -281,9 +285,9 @@ public class CubicWorldGame implements ApplicationListener
 
 		CubicWorldConfiguration.meshGenerationsPerFrameLimit = generationPerFrameLimit;
 		CubicWorldConfiguration.meshGenerationsPerFrameLimit = creationPerFrameLimit;
-		
+
 		// System.exit(1);
-		
+
 		// Start update thread AFTER the client requested all chunks
 		this.voxelWorld.initUpdateThread();
 
@@ -319,9 +323,9 @@ public class CubicWorldGame implements ApplicationListener
 		this.profiler.stopProfiling("Init()");
 		this.profiler.reset();
 	}
-	
-	//private float lastTime;
-	
+
+	// private float lastTime;
+
 	/**
 	 * <pre>
 	 * This is the cubic world main routine.
@@ -352,6 +356,14 @@ public class CubicWorldGame implements ApplicationListener
 	{
 		// long nanos = System.nanoTime();
 		this.profiler.startProfiling("Update", "The whole update part of the render() routine");
+		
+		// Daynight cycle
+		byte sunlightValue = this.dayNightCycle.getLightLevel();
+		if (this.voxelWorld.getSunLightLevel() != sunlightValue)
+		{
+			System.out.println("Sun light level: " + sunlightValue);
+			this.voxelWorld.setSunLightLevel(sunlightValue);
+		}
 
 		// Raycast
 		this.profiler.startProfiling("CurrentLookAtRaycast", this.cam.position.toString() + ", dir: " + this.cam.direction.toString() + ", Distance: " + 5);
@@ -387,7 +399,7 @@ public class CubicWorldGame implements ApplicationListener
 		this.profiler.startProfiling("Plugin updates", "");
 		this.pluginManager.fireEvent("update", false);
 		this.profiler.stopProfiling("Plugin updates");
-		
+
 		this.profiler.stopProfiling("Update");
 
 		this.profiler.startProfiling("Render", "The whole rendering part of the render() routine");
@@ -478,28 +490,30 @@ public class CubicWorldGame implements ApplicationListener
 		this.frameBufferBatch.end();
 
 		this.profiler.stopProfiling("Other");
-		
-		/*float frameResult = ((System.nanoTime() - nanos) / 1000000.0f);
-		
-		if (frameResult > 50 || Gdx.graphics.getDeltaTime() > 1)
-		{
-			ProfilerResult[] results = this.profiler.getResults();
-			System.out.println("Delta time: " + Gdx.graphics.getDeltaTime());
-			System.out.println("frame time: " + frameResult);
-			System.out.println("last frame time: " + this.lastTime);
-			System.out.println("Profiler trace: ");
-			
-			for (ProfilerResult result : results)
-			{
-				if (result.getMilliseconds() > 20)
-					System.out.println(result.getName() + " - " + result.getMilliseconds() + " ms");
-			}
-			
-			System.out.println("");
-		}
-		
-		this.lastTime = frameResult;*/
-		
+
+		/*
+		 * float frameResult = ((System.nanoTime() - nanos) / 1000000.0f);
+		 * 
+		 * if (frameResult > 50 || Gdx.graphics.getDeltaTime() > 1)
+		 * {
+		 * ProfilerResult[] results = this.profiler.getResults();
+		 * System.out.println("Delta time: " + Gdx.graphics.getDeltaTime());
+		 * System.out.println("frame time: " + frameResult);
+		 * System.out.println("last frame time: " + this.lastTime);
+		 * System.out.println("Profiler trace: ");
+		 * 
+		 * for (ProfilerResult result : results)
+		 * {
+		 * if (result.getMilliseconds() > 20)
+		 * System.out.println(result.getName() + " - " + result.getMilliseconds() + " ms");
+		 * }
+		 * 
+		 * System.out.println("");
+		 * }
+		 * 
+		 * this.lastTime = frameResult;
+		 */
+
 		// Reset profiler
 		this.profiler.reset();
 		GLProfiler.reset();
@@ -524,26 +538,26 @@ public class CubicWorldGame implements ApplicationListener
 	public void resize(int width, int height)
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void pause()
 	{
-		
+
 	}
 
 	@Override
 	public void resume()
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void dispose()
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 }

@@ -13,6 +13,7 @@ import net.kennux.cubicworld.networking.packet.ChatMessage;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -66,9 +67,9 @@ public class ChatOverlay extends GuiElementContainer implements IGuiOverlay
 	}
 
 	@Override
-	public void render(SpriteBatch spriteBatch, BitmapFont font, AGuiSkin skin)
+	public void render(SpriteBatch spriteBatch, BitmapFont font, AGuiSkin skin, ShapeRenderer shapeRenderer)
 	{
-		super.render(spriteBatch, font, skin);
+		super.render(spriteBatch, font, skin, shapeRenderer);
 
 		Chatbox.getInstance().render(spriteBatch, font);
 	}

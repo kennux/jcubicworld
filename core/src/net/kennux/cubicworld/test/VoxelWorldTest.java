@@ -250,7 +250,7 @@ public class VoxelWorldTest extends TestCase
 				return true;
 			}
 		}).times(2);
-		
+
 		// Returns a voxel data array with one dirt voxel at 0|0|0
 		EasyMock.expect(saveMock.readChunk(0, 0, 0)).andAnswer(new IAnswer<VoxelData[][][]>()
 		{
@@ -305,10 +305,10 @@ public class VoxelWorldTest extends TestCase
 		// Create server mock object
 		CubicWorldServer serverInstance = EasyMock.createMock(CubicWorldServer.class);
 		final IVoxelTileEntityHandler tileEntityHandler = EasyMock.createStrictMock(IVoxelTileEntityHandler.class);
-		
+
 		ITileEntityHandlerFactory tileEntityFactory = new ITileEntityHandlerFactory()
 		{
-			
+
 			@Override
 			public IVoxelTileEntityHandler newInstance()
 			{
@@ -331,7 +331,7 @@ public class VoxelWorldTest extends TestCase
 
 		// Create the voxel data for testing
 		VoxelData voxelData = VoxelData.construct(BasePlugin.voxelDirtId);
-		
+
 		// Record expected update handler behaviour
 		tileEntityHandler.handleUpdate(voxelData, 0, 4, 0, true);
 

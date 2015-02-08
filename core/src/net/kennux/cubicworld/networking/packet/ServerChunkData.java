@@ -33,7 +33,7 @@ public class ServerChunkData extends APacketModel
 		// Set chunk data
 		VoxelChunk chunk = cubicWorld.voxelWorld.getChunk(this.chunkX, this.chunkY, this.chunkZ, true);
 		chunk.setVoxelData(this.voxelData);
-		
+
 		ClientChunkRequest.recievedChunkData(this.chunkX, this.chunkY, this.chunkZ);
 	}
 

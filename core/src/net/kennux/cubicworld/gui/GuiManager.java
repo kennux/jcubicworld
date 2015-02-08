@@ -9,6 +9,7 @@ import net.kennux.cubicworld.input.GuiManagerInputProcessor;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 /**
  * <pre>
@@ -41,6 +42,11 @@ public class GuiManager
 	 * The spritebatch used to draw the gui.
 	 */
 	private SpriteBatch guiBatch;
+	
+	/**
+	 * The shape render used to render gui elements
+	 */
+	private ShapeRenderer shapeRenderer;
 
 	/**
 	 * Holds the id of the currently active overlay.
@@ -78,6 +84,7 @@ public class GuiManager
 		this.hudElements = new ArrayList<IHudElement>();
 		this.font = new BitmapFont();
 		this.guiBatch = new SpriteBatch();
+		this.shapeRenderer = new ShapeRenderer();
 		this.inputProcessor = new GuiManagerInputProcessor(this);
 		this.skin = skin;
 	}
@@ -216,7 +223,7 @@ public class GuiManager
 		{
 			// Update overlay
 			IGuiOverlay overlay = this.overlays.get(new Integer(this.activeOverlay));
-			overlay.render(this.guiBatch, this.font, this.skin);
+			overlay.render(this.guiBatch, this.font, this.skin, this.shapeRenderer);
 		}
 
 		this.guiBatch.end();

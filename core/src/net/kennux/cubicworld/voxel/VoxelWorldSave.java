@@ -2,11 +2,6 @@ package net.kennux.cubicworld.voxel;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,8 +9,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.zip.DataFormatException;
 
-import net.kennux.cubicworld.item.ItemSystem;
-import net.kennux.cubicworld.item.ItemType;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.util.CompressionUtils;
@@ -23,8 +16,6 @@ import net.kennux.cubicworld.util.ConsoleHelper;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import org.sqlite.SQLiteConfig;
-import org.sqlite.SQLiteConfig.SynchronousMode;
 
 import com.badlogic.gdx.math.Vector3;
 
@@ -80,7 +71,7 @@ public class VoxelWorldSave
 	private LinkedList<AbstractMap.SimpleEntry<Vector3, VoxelData[][][]>> writerQueue;
 
 	private Object writerQueueLock = new Object();
-	
+
 	/**
 	 * Gets initialized in constructor.
 	 * Holds all chunk entry infos.
@@ -109,15 +100,15 @@ public class VoxelWorldSave
 			saveFile.createNewFile();
 			fileWasCreated = true;
 		}
-		
+
 		this.writerQueue = new LinkedList<AbstractMap.SimpleEntry<Vector3, VoxelData[][][]>>();
-		
+
 		// Create db connection
 		this.databaseConnection = DBMaker.newFileDB(saveFile).closeOnJvmShutdown().make();
 
 		// Load data
 		this.chunkEntries = this.databaseConnection.getTreeMap("chunks");
-		
+
 		// TODO voxel and item type check
 		if (fileWasCreated)
 		{
@@ -144,8 +135,8 @@ public class VoxelWorldSave
 		// Write jobs to database
 		synchronized (this.connectionLockObject)
 		{
-			//long startTime = System.currentTimeMillis();
-			
+			// long startTime = System.currentTimeMillis();
+
 			// Iterate through every update job.
 			for (Entry<Vector3, VoxelData[][][]> e : updateJobs.entrySet())
 			{
@@ -167,7 +158,7 @@ public class VoxelWorldSave
 				{
 					// Prepare chunk data
 					byte[] data = CompressionUtils.compress(writer.getPacket());
-					
+
 					this.chunkEntries.put(new ChunkKey(chunkX, chunkY, chunkZ), data);
 				}
 				catch (Exception e1)
@@ -176,11 +167,11 @@ public class VoxelWorldSave
 					ConsoleHelper.logError(e1);
 				}
 			}
-			
+
 			// Commit to db
 			this.databaseConnection.commit();
 
-			//System.out.println("DB Sync done in: " + (System.currentTimeMillis() - startTime) + " ms");
+			// System.out.println("DB Sync done in: " + (System.currentTimeMillis() - startTime) + " ms");
 		}
 	}
 

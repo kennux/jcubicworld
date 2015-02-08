@@ -1,13 +1,9 @@
 package net.kennux.cubicworld.voxel;
 
-import java.lang.reflect.InvocationTargetException;
-
-import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.inventory.BlockInventory;
 import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
-import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 
 import com.badlogic.gdx.audio.Sound;
@@ -45,7 +41,7 @@ public class VoxelData
 			data.blockInventory.setFilterRuleSet(data.voxelType.getFilterRuleSet());
 			data.blockInventory.addItemsToStack(1, 10, BasePlugin.itemCoalId);
 		}
-		
+
 		// Tile entity instantiation
 		if (data.voxelType.isTileEntity())
 		{
@@ -88,7 +84,7 @@ public class VoxelData
 		{
 			v.blockInventory.deserializeInventory(reader);
 		}
-		
+
 		if (v.tileEntity != null)
 		{
 			v.tileEntity.deserialize(reader);
@@ -119,7 +115,7 @@ public class VoxelData
 			{
 				voxelDataObject.blockInventory.serializeInventory(writer);
 			}
-			
+
 			// Write data model
 			if (voxelDataObject.tileEntity != null)
 			{
@@ -148,7 +144,7 @@ public class VoxelData
 	 * This voxeldata's light level.
 	 */
 	public byte lightLevel;
-	
+
 	/**
 	 * The voxel data model.
 	 */
@@ -222,6 +218,6 @@ public class VoxelData
 	 */
 	public void setRenderStateId(int renderStateId)
 	{
-		this.renderStateId = (byte)renderStateId;
+		this.renderStateId = (byte) renderStateId;
 	}
 }

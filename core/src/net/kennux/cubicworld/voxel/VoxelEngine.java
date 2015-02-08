@@ -245,7 +245,7 @@ public class VoxelEngine
 			VoxelType newType = new VoxelType();
 			newType.voxelId = typeIdCounter;
 			newType.voxelName = typeName;
-			
+
 			// Register type
 			typeDictionary.put(typeIdCounter, typeName);
 			voxelTypes.put(typeIdCounter, newType);

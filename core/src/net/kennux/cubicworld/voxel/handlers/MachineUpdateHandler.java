@@ -80,11 +80,11 @@ public abstract class MachineUpdateHandler implements IVoxelTileEntityHandler
 
 	public void serialize(BitWriter writer)
 	{
-		
+
 	}
-	
+
 	public void deserialize(BitReader reader)
 	{
-		
+
 	}
 }

@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 /**
  * <pre>
@@ -55,7 +56,7 @@ public abstract class AGuiOverlay extends GuiElementContainer implements IGuiOve
 	 * 
 	 * @param spriteBatch
 	 */
-	public void render(SpriteBatch spriteBatch, BitmapFont font, AGuiSkin skin)
+	public void render(SpriteBatch spriteBatch, BitmapFont font, AGuiSkin skin, ShapeRenderer shapeRenderer)
 	{
 		// Darken the screen
 		spriteBatch.draw(AGuiOverlay.overlayObscureTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -65,6 +66,6 @@ public abstract class AGuiOverlay extends GuiElementContainer implements IGuiOve
 		spriteBatch.draw(overlayTexture, this.position.x, this.position.y, this.size.x, this.size.y);
 
 		// Render the underlying element container
-		super.render(spriteBatch, font, skin);
+		super.render(spriteBatch, font, skin, shapeRenderer);
 	}
 }

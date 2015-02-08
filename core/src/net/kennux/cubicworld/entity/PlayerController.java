@@ -2,9 +2,9 @@ package net.kennux.cubicworld.entity;
 
 import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.inventory.PlayerInventory;
+import net.kennux.cubicworld.math.Mathf;
 import net.kennux.cubicworld.networking.packet.inventory.ClientDropItem;
 import net.kennux.cubicworld.networking.packet.inventory.ClientItemMove;
-import net.kennux.cubicworld.util.Mathf;
 import net.kennux.cubicworld.util.Time;
 import net.kennux.cubicworld.voxel.VoxelCollision;
 import net.kennux.cubicworld.voxel.VoxelWorld;
@@ -328,7 +328,7 @@ public class PlayerController extends AEntity
 
 		// Collision check for the new player position
 		VoxelCollision collision = this.voxelWorld.collisionCheck(this.getBoundingBox(newPos));
-		
+
 		// Check for collision
 		if (collision != null)
 		{
@@ -339,7 +339,7 @@ public class PlayerController extends AEntity
 				this.velocity.y = 0;
 			else if (collision.collisionZ)
 				this.velocity.z = 0;
-			
+
 			newPos = this.getPosition();
 		}
 

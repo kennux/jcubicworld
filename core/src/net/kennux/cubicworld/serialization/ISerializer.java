@@ -9,14 +9,16 @@ public interface ISerializer
 {
 	/**
 	 * The serialize method.
+	 * 
 	 * @param object
-	 * @return 
+	 * @return
 	 * @return
 	 */
 	public void serialize(BitWriter writer, Object object);
-	
+
 	/**
 	 * The deserialize method.
+	 * 
 	 * @param data
 	 * @return
 	 */

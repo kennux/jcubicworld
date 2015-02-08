@@ -1,12 +1,11 @@
 package net.kennux.cubicworld.microbenchmark;
 
-import com.badlogic.gdx.math.Vector3;
-
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.serialization.Serializer;
-import net.kennux.cubicworld.test.SerializerTest;
 import net.kennux.cubicworld.test.serializer.SerializerTestClass;
+
+import com.badlogic.gdx.math.Vector3;
 
 public class SerializationBenchmark extends AMicroBenchmark
 {
@@ -15,13 +14,13 @@ public class SerializationBenchmark extends AMicroBenchmark
 		SerializationBenchmark benchmark = new SerializationBenchmark();
 		benchmark.benchmark();
 	}
-	
+
 	private SerializerTestClass testClass = new SerializerTestClass();
 	private byte[] data;
-	
+
 	public SerializationBenchmark()
 	{
-		testClass.b = (byte)123;
+		testClass.b = (byte) 123;
 		testClass.bA = new byte[] { 12, 32, 45 };
 		testClass.bool = true;
 		testClass.c = 'a';
@@ -31,11 +30,11 @@ public class SerializationBenchmark extends AMicroBenchmark
 		testClass.s = (short) 133;
 		testClass.str = "LEET";
 		testClass.v3 = new Vector3(10, 13, 37);
-		
+
 		BitWriter writer = new BitWriter();
 		testClass.serialize(writer);
 		this.data = writer.getPacket();
-		
+
 		// Warmup
 		writer = new BitWriter();
 		BitReader reader = new BitReader(data);

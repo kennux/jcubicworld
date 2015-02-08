@@ -116,6 +116,8 @@ public class DebugHelper
 
 		// Render information
 		spriteBatch.begin();
+		font.draw(spriteBatch, CubicWorld.getClient().dayNightCycle.getTimeString(), screenWidth-100, screenHeight);
+		
 		font.draw(spriteBatch, "Position (XYZ): " + camera.position.x + "|" + camera.position.y + "|" + camera.position.z, 10, screenHeight);
 		font.draw(spriteBatch, "LookDir (XYZ): " + camera.direction.x + "|" + camera.direction.y + "|" + camera.direction.z, 10, screenHeight - 20);
 		font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), screenWidth - 100, screenHeight - 20);

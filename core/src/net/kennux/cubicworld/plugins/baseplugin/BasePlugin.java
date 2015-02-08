@@ -398,7 +398,7 @@ public class BasePlugin extends APlugin
 				// Execute voxel action handler if there is one
 				if (voxelData != null && voxelData.voxelType != null && voxelData.voxelType.isTileEntity())
 				{
-					voxelData.tileEntity.handleAction(voxelData, (int)blockPos.x, (int)blockPos.y, (int)blockPos.z);
+					voxelData.tileEntity.handleAction(voxelData, (int) blockPos.x, (int) blockPos.y, (int) blockPos.z);
 				}
 			}
 
@@ -449,7 +449,8 @@ public class BasePlugin extends APlugin
 			@Override
 			public IVoxelTileEntityHandler newInstance()
 			{
-				return new MachineUpdateHandler() {
+				return new MachineUpdateHandler()
+				{
 					@Override
 					protected boolean getWorkingState(IInventory inventory)
 					{
@@ -462,7 +463,7 @@ public class BasePlugin extends APlugin
 					{
 						// System.out.println("Work tick!");
 					}
-					
+
 					@Override
 					public void handleAction(VoxelData voxelData, int x, int y, int z)
 					{
@@ -473,7 +474,7 @@ public class BasePlugin extends APlugin
 						OverlayData overlayData = new OverlayData();
 						overlayData.put("inventory", voxelData.blockInventory);
 						overlayData.put("playerInventory", CubicWorld.getClient().playerController.getPlayerInventory());
-						overlayData.put("voxelPos", new Vector3(x,y,z));
+						overlayData.put("voxelPos", new Vector3(x, y, z));
 
 						// Activate overlay
 						IGuiOverlay blockOverlay = cubicWorld.guiManager.getOverlayById(BasePlugin.furnaceGuiOverlayId);
@@ -524,7 +525,7 @@ public class BasePlugin extends APlugin
 		// Init overlays
 		Overlay furnaceOverlay = null;
 		chatOverlayId = guiManager.registerOverlay(new ChatOverlay());
-		
+
 		try
 		{
 			// Initialize main menu overlay

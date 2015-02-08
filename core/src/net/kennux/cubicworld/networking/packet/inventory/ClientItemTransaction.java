@@ -32,12 +32,12 @@ public class ClientItemTransaction extends APacketModel
 	public static ClientItemTransaction create(int playerItemSlotId, TransactionType transactionType, int voxelPositionX, int voxelPositionY, int voxelPositionZ, int voxelItemSlotId, int itemCount)
 	{
 		ClientItemTransaction transaction = new ClientItemTransaction();
-		transaction.playerItemSlotId = playerItemSlotId;
+		transaction.sourceItemSlotId = playerItemSlotId;
 		transaction.transactionType = transactionType;
 		transaction.voxelPositionX = voxelPositionX;
 		transaction.voxelPositionY = voxelPositionY;
 		transaction.voxelPositionZ = voxelPositionZ;
-		transaction.voxelItemSlotId = voxelItemSlotId;
+		transaction.targetItemSlotId = voxelItemSlotId;
 		transaction.itemCount = itemCount;
 
 		return transaction;
@@ -46,7 +46,7 @@ public class ClientItemTransaction extends APacketModel
 	/**
 	 * The item slot id in the player inventory.
 	 */
-	public int playerItemSlotId;
+	public int sourceItemSlotId;
 
 	/**
 	 * The transaction type.
@@ -69,7 +69,7 @@ public class ClientItemTransaction extends APacketModel
 	/**
 	 * The item slot in the inventory.
 	 */
-	public int voxelItemSlotId;
+	public int targetItemSlotId;
 
 	/**
 	 * The count of items to move.
@@ -92,8 +92,8 @@ public class ClientItemTransaction extends APacketModel
 			if (inventoryVoxel != null && inventoryVoxel.blockInventory != null)
 			{
 				// Read stack info
-				ItemStack playerItemStack = client.playerEntity.playerInventory.getItemStackInSlot(this.playerItemSlotId);
-				ItemStack voxelItemStack = inventoryVoxel.blockInventory.getItemStackInSlot(this.voxelItemSlotId);
+				ItemStack playerItemStack = client.playerEntity.playerInventory.getItemStackInSlot(this.sourceItemSlotId);
+				ItemStack voxelItemStack = inventoryVoxel.blockInventory.getItemStackInSlot(this.targetItemSlotId);
 
 				ItemType voxelItemType = null;
 				ItemType playerItemType = null;
@@ -111,34 +111,34 @@ public class ClientItemTransaction extends APacketModel
 					{
 						case INVENTORY_TO_PLAYER:
 							// Validity checks
-							if (voxelItemStack.getItemCount() >= this.itemCount && client.playerEntity.playerInventory.getFreeSpaceInSlot(this.playerItemSlotId) >= this.itemCount)
+							if (voxelItemStack.getItemCount() >= this.itemCount && client.playerEntity.playerInventory.getFreeSpaceInSlot(this.sourceItemSlotId) >= this.itemCount)
 							{
 								// Perform inventory -> player transaction
 								// Remove from voxel
-								if (inventoryVoxel.blockInventory.removeItemsFromStack(this.voxelItemSlotId, this.itemCount))
+								if (inventoryVoxel.blockInventory.removeItemsFromStack(this.targetItemSlotId, this.itemCount))
 								{
 									// Add items to player
-									if (!client.playerEntity.playerInventory.addItemsToStack(this.playerItemSlotId, this.itemCount))
+									if (!client.playerEntity.playerInventory.addItemsToStack(this.sourceItemSlotId, this.itemCount))
 									{
 										// Rollback if the changes weren't successfull
-										inventoryVoxel.blockInventory.addItemsToStack(this.voxelItemSlotId, this.itemCount, voxelItemType.getItemId());
+										inventoryVoxel.blockInventory.addItemsToStack(this.targetItemSlotId, this.itemCount, voxelItemType.getItemId());
 									}
 								}
 							}
 							break;
 						case PLAYER_TO_INVENTORY:
 							// Validity checks
-							if (playerItemStack.getItemCount() >= this.itemCount && inventoryVoxel.blockInventory.getFreeSpaceInSlot(this.voxelItemSlotId) >= this.itemCount)
+							if (playerItemStack.getItemCount() >= this.itemCount && inventoryVoxel.blockInventory.getFreeSpaceInSlot(this.targetItemSlotId) >= this.itemCount)
 							{
 								// Perform inventory -> player transaction
 								// Remove from player
-								if (client.playerEntity.playerInventory.removeItemsFromStack(this.playerItemSlotId, this.itemCount))
+								if (client.playerEntity.playerInventory.removeItemsFromStack(this.sourceItemSlotId, this.itemCount))
 								{
 									// Add items to voxel
-									if (!inventoryVoxel.blockInventory.addItemsToStack(this.voxelItemSlotId, this.itemCount))
+									if (!inventoryVoxel.blockInventory.addItemsToStack(this.targetItemSlotId, this.itemCount))
 									{
 										// Rollback if the changes weren't successfull
-										client.playerEntity.playerInventory.addItemsToStack(this.playerItemSlotId, this.itemCount, voxelItemType.getItemId());
+										client.playerEntity.playerInventory.addItemsToStack(this.sourceItemSlotId, this.itemCount, voxelItemType.getItemId());
 									}
 								}
 							}
@@ -152,32 +152,32 @@ public class ClientItemTransaction extends APacketModel
 					{
 						case INVENTORY_TO_PLAYER:
 							// Validity check
-							if (!client.playerEntity.playerInventory.hasItemStackInSlot(this.playerItemSlotId) && inventoryVoxel.blockInventory.getItemCountInSlot(this.voxelItemSlotId) >= this.itemCount)
+							if (!client.playerEntity.playerInventory.hasItemStackInSlot(this.sourceItemSlotId) && inventoryVoxel.blockInventory.getItemCountInSlot(this.targetItemSlotId) >= this.itemCount)
 							{
 								// Remove items from voxel
-								if (inventoryVoxel.blockInventory.removeItemsFromStack(this.voxelItemSlotId, this.itemCount))
+								if (inventoryVoxel.blockInventory.removeItemsFromStack(this.targetItemSlotId, this.itemCount))
 								{
 									// Add to players inventory
-									if (!client.playerEntity.playerInventory.addItemsToStack(this.playerItemSlotId, this.itemCount, voxelItemType.getItemId()))
+									if (!client.playerEntity.playerInventory.addItemsToStack(this.sourceItemSlotId, this.itemCount, voxelItemType.getItemId()))
 									{
 										// Rollback if adding was not successfull
-										inventoryVoxel.blockInventory.addItemsToStack(this.voxelItemSlotId, this.itemCount, voxelItemType.getItemId());
+										inventoryVoxel.blockInventory.addItemsToStack(this.targetItemSlotId, this.itemCount, voxelItemType.getItemId());
 									}
 								}
 							}
 							break;
 						case PLAYER_TO_INVENTORY:
 							// Validity check
-							if (!inventoryVoxel.blockInventory.hasItemStackInSlot(this.voxelItemSlotId) && client.playerEntity.playerInventory.getItemCountInSlot(this.playerItemSlotId) >= this.itemCount)
+							if (!inventoryVoxel.blockInventory.hasItemStackInSlot(this.targetItemSlotId) && client.playerEntity.playerInventory.getItemCountInSlot(this.sourceItemSlotId) >= this.itemCount)
 							{
 								// Remove items from player
-								if (client.playerEntity.playerInventory.removeItemsFromStack(this.playerItemSlotId, this.itemCount))
+								if (client.playerEntity.playerInventory.removeItemsFromStack(this.sourceItemSlotId, this.itemCount))
 								{
 									// Add to voxels inventory
-									if (!inventoryVoxel.blockInventory.addItemsToStack(this.voxelItemSlotId, this.itemCount, playerItemType.getItemId()))
+									if (!inventoryVoxel.blockInventory.addItemsToStack(this.targetItemSlotId, this.itemCount, playerItemType.getItemId()))
 									{
 										// Rollback if adding was not successfull
-										client.playerEntity.playerInventory.addItemsToStack(this.playerItemSlotId, this.itemCount, playerItemType.getItemId());
+										client.playerEntity.playerInventory.addItemsToStack(this.sourceItemSlotId, this.itemCount, playerItemType.getItemId());
 									}
 								}
 							}
@@ -191,24 +191,24 @@ public class ClientItemTransaction extends APacketModel
 	@Override
 	public void readPacket(BitReader reader)
 	{
-		this.playerItemSlotId = reader.readInt();
+		this.sourceItemSlotId = reader.readInt();
 		this.transactionType = TransactionType.values()[reader.readInt()];
 		this.voxelPositionX = reader.readInt();
 		this.voxelPositionY = reader.readInt();
 		this.voxelPositionZ = reader.readInt();
-		this.voxelItemSlotId = reader.readInt();
+		this.targetItemSlotId = reader.readInt();
 		this.itemCount = reader.readInt();
 	}
 
 	@Override
 	public void writePacket(BitWriter builder)
 	{
-		builder.writeInt(this.playerItemSlotId);
+		builder.writeInt(this.sourceItemSlotId);
 		builder.writeInt(this.transactionType.getValue());
 		builder.writeInt(this.voxelPositionX);
 		builder.writeInt(this.voxelPositionY);
 		builder.writeInt(this.voxelPositionZ);
-		builder.writeInt(this.voxelItemSlotId);
+		builder.writeInt(this.targetItemSlotId);
 		builder.writeInt(this.itemCount);
 	}
 
