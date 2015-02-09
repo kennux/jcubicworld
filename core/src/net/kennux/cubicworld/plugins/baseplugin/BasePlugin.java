@@ -28,6 +28,7 @@ import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.item.ItemClass;
 import net.kennux.cubicworld.item.ItemStack;
 import net.kennux.cubicworld.item.ItemSystem;
+import net.kennux.cubicworld.math.Vector3i;
 import net.kennux.cubicworld.networking.Protocol;
 import net.kennux.cubicworld.networking.packet.ChatMessage;
 import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
@@ -64,6 +65,7 @@ import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.util.DebugHelper;
 import net.kennux.cubicworld.util.VectorHelper;
 import net.kennux.cubicworld.voxel.RaycastHit;
+import net.kennux.cubicworld.voxel.VoxelChunk;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelEngine;
 import net.kennux.cubicworld.voxel.VoxelRenderState;
@@ -255,6 +257,39 @@ public class BasePlugin extends APlugin
 			@Override
 			public void keyReleased(CubicWorldGame cubicWorld)
 			{
+			}
+		});
+		
+		// Register player inventory handler
+		inputManager.addInputAction(Input.Keys.P, new IKeyInputHandler()
+		{
+
+			@Override
+			public void keyPressed(CubicWorldGame cubicWorld)
+			{
+			}
+
+			@Override
+			public void keyReleased(CubicWorldGame cubicWorld)
+			{
+				Vector3 playerPos = cubicWorld.playerController.getPosition();
+				Vector3 chunkPos = cubicWorld.voxelWorld.getChunkspacePosition(playerPos);
+				
+				VoxelChunk chunk = cubicWorld.voxelWorld.getChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z, false);
+				
+				if (chunk != null)
+				{
+					Vector3 voxelSpace = cubicWorld.voxelWorld.getVoxelspacePosition(playerPos);
+					Vector3i chunkOrigin = chunk.getAbsoluteVoxelPosition(0, 0, 0);
+					
+					voxelSpace.x -= chunkOrigin.x;
+					voxelSpace.y -= chunkOrigin.y;
+					voxelSpace.z -= chunkOrigin.z;
+					
+					System.out.println(voxelSpace);
+					
+					cubicWorld.voxelWorld.getChunk(0, 0, 0, false).regenerateLightingAndMesh();
+				}
 			}
 		});
 

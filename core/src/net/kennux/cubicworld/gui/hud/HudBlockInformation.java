@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 /**
  * <pre>
@@ -57,7 +58,7 @@ public class HudBlockInformation implements IHudElement
 			spriteBatch.draw(this.currentBlockTexture, texturePosition.x, texturePosition.y, textureSize.x, textureSize.y);
 
 			// Render text
-			font.draw(spriteBatch, "Block: " + VoxelEngine.getNameByVoxelId(this.currentVoxelType.voxelId) + " | Lightlevel: " + this.lightLevel, infoTextPosition.x, infoTextPosition.y);
+			font.draw(spriteBatch, "Block: " + VoxelEngine.getNameByVoxelId(this.currentVoxelType.voxelId) + " | Top Lightlevel: " + this.lightLevel, infoTextPosition.x, infoTextPosition.y);
 		}
 	}
 
@@ -86,7 +87,9 @@ public class HudBlockInformation implements IHudElement
 			// Get current block texture
 			this.currentBlockTexture = selectedVoxel.voxelType.getGuiTexture();
 			this.currentVoxelType = selectedVoxel.voxelType;
-			this.lightLevel = selectedVoxel.lightLevel;
+			
+			Vector3 selectedTop = new Vector3(this.cubicWorld.currentBlockHit.hitVoxelPosition).add(0,1,0);
+			this.lightLevel = this.cubicWorld.voxelWorld.getLightLevel((int)selectedTop.x, (int)selectedTop.y, (int)selectedTop.z);
 		}
 	}
 
