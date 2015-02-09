@@ -1,6 +1,7 @@
 package net.kennux.cubicworld.voxel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
@@ -1044,11 +1045,8 @@ public class VoxelChunk
 			if (this.voxelData == null)
 				return;
 			
-			if (this.chunkY == 7 && !this.master.isServer() && this.master.getSunLightLevel() == 12)
-			{
-				int jk = 123;
-				jk *= jk + 123;
-			}
+			ArrayList<Byte> levelList = new ArrayList<Byte>(6);
+			
 			for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
 				for (int x = VoxelWorld.chunkWidth-1; x >= 0; x--)
 					for (int z = VoxelWorld.chunkDepth-1; z >= 0; z--)
@@ -1084,57 +1082,30 @@ public class VoxelChunk
 									VoxelData backVoxel = (z == 0 ? this.master.getVoxel(absX, absY, absZ-1) : this.voxelData[x][y][z-1]);
 									VoxelData frontVoxel = (z == VoxelWorld.chunkDepth - 1 ? this.master.getVoxel(absX, absY, absZ+1) : this.voxelData[x][y][z+1]);
 									
-									int median = 0;
-									int medianCount = 0;
+									levelList.clear();
+									
 									if (topVoxel != null && topVoxel.voxelType == null && topVoxel.lightLevel != -1)
-									{
-										median += topVoxel.lightLevel;
-										medianCount++;
-									}
+										levelList.add(topVoxel.lightLevel);
 									if (leftVoxel != null && leftVoxel.voxelType == null && leftVoxel.lightLevel != -1)
-									{
-										median += leftVoxel.lightLevel;
-										medianCount++;
-									}
+										levelList.add(leftVoxel.lightLevel);
 									if (rightVoxel != null && rightVoxel.voxelType == null && rightVoxel.lightLevel != -1)
-									{
-										median += rightVoxel.lightLevel;
-										medianCount++;
-									}
+										levelList.add(rightVoxel.lightLevel);
 									if (backVoxel != null && backVoxel.voxelType == null && backVoxel.lightLevel != -1)
-									{
-										median += backVoxel.lightLevel;
-										medianCount++;
-									}
+										levelList.add(backVoxel.lightLevel);
 									if (frontVoxel != null && frontVoxel.voxelType == null && frontVoxel.lightLevel != -1)
+										levelList.add(frontVoxel.lightLevel);
+									
+									if (levelList.size() > 0)
 									{
-										median += frontVoxel.lightLevel;
-										medianCount++;
+										Collections.sort(levelList);
+										
+										v.lightLevel = levelList.get(levelList.size()-1);
 									}
-									
-									if (medianCount == 0)
-										v.lightLevel = 1;
 									else
-										v.lightLevel = (byte)(median / medianCount);
-									
-									/*byte[] adjacentLightLevels = new byte[] { topLightLevel, leftLightLevel, rightLightLevel, backLightLevel, frontLightLevel };
-									
-									Arrays.sort(adjacentLightLevels);
-									byte highestLevel = adjacentLightLevels[4];*/
-									
-									// v.lightLevel = (byte)(median / medianCount); // (byte)((topLightLevel + leftLightLevel + rightLightLevel + backLightLevel + frontLightLevel) / 5.0f);
+										v.lightLevel = this.master.getSunLightLevel();
 								}
 								else
 								{
-									
-									/*byte lightLevel = 1; // (byte) (highestLevel-1);
-									
-									if (lightLevel <= 0)
-									{
-										lightLevel = 1;
-									}
-									
-									v.lightLevel = lightLevel;*/
 									v.lightLevel = 1;
 								}
 								
