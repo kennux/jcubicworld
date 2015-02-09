@@ -142,8 +142,9 @@ public class VoxelData
 
 	/**
 	 * This voxeldata's light level.
+	 * -1 means unitinitialized.
 	 */
-	public byte lightLevel;
+	public byte lightLevel = -1;
 
 	/**
 	 * The voxel data model.

@@ -1,7 +1,6 @@
 package net.kennux.cubicworld.voxel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
@@ -214,6 +213,13 @@ public class VoxelChunk
 	 * The voxel update handlers list.
 	 */
 	private HashMap<Vector3, IVoxelTileEntityHandler> tileEntityHandlers = new HashMap<Vector3, IVoxelTileEntityHandler>();
+	
+	/**
+	 * The voxel update handlers list copy instance.
+	 * The copy of this instance will get used for acutally firing the tile entity events.
+	 * @see VoxelChunk#update()
+	 */
+	private HashMap<Vector3, IVoxelTileEntityHandler> tileEntityHandlersCopyInstance = new HashMap<Vector3, IVoxelTileEntityHandler>();
 
 	private Object generationLockObject = new Object();
 
@@ -846,6 +852,8 @@ public class VoxelChunk
 	/**
 	 * Sets the voxel data at the given x|y|z position.
 	 * Pass in null or just new VoxelData() as voxel for setting air.
+	 * You can and must use this function also if you update a voxel data object to send out a world update on the server.
+	 * Don't use this for changes on the client as the client has to send packets for updating the voxel world.
 	 * 
 	 * @param x
 	 * @param y
@@ -986,10 +994,14 @@ public class VoxelChunk
 
 		synchronized (this.voxelDataLockObject)
 		{
-			HashMap<Vector3, IVoxelTileEntityHandler> tileEntitiesClone = (HashMap<Vector3, IVoxelTileEntityHandler>) this.tileEntityHandlers.clone();
-
+			this.tileEntityHandlersCopyInstance.clear();
+			for (Entry<Vector3, IVoxelTileEntityHandler> entry : this.tileEntityHandlers.entrySet())
+			{
+				this.tileEntityHandlersCopyInstance.put(entry.getKey(), entry.getValue());
+			}
+			
 			// Exec tile entity updates
-			for (Entry<Vector3, IVoxelTileEntityHandler> entry : tileEntitiesClone.entrySet())
+			for (Entry<Vector3, IVoxelTileEntityHandler> entry : this.tileEntityHandlersCopyInstance.entrySet())
 			{
 				int x = (int) entry.getKey().x;
 				int y = (int) entry.getKey().y;
@@ -1031,10 +1043,15 @@ public class VoxelChunk
 		{
 			if (this.voxelData == null)
 				return;
-
-			for (int x = VoxelWorld.chunkWidth - 1; x >= 0; x--)
-				for (int y = VoxelWorld.chunkHeight - 1; y >= 0; y--)
-					for (int z = VoxelWorld.chunkDepth - 1; z >= 0; z--)
+			
+			if (this.chunkY == 7 && !this.master.isServer() && this.master.getSunLightLevel() == 12)
+			{
+				int jk = 123;
+				jk *= jk + 123;
+			}
+			for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
+				for (int x = VoxelWorld.chunkWidth-1; x >= 0; x--)
+					for (int z = VoxelWorld.chunkDepth-1; z >= 0; z--)
 						if (this.voxelData[x][y][z] != null)
 						{
 							VoxelData v = this.voxelData[x][y][z];
@@ -1042,44 +1059,91 @@ public class VoxelChunk
 							int absX = absolutePos.x;
 							int absY = absolutePos.y;
 							int absZ = absolutePos.z;
-
-							if (y == VoxelWorld.chunkHeight - 1 && (v.voxelType == null || v.voxelType.transparent))
+							
+							if (absY == this.master.worldHeight-1 && (v.voxelType == null || v.voxelType.transparent))
 							{
 								v.lightLevel = (byte) (this.master.getSunLightLevel() - (this.master.chunksOnYAxis() - this.chunkY));
 							}
 							else
 							{
-								// Simplified:
-								// (y == chunkHeight-1 [last block on y-axis top] ? get light level from master in global space : (voxel data in local space is not set ? max light level : get from local space))
-								byte topLightLevel = (y == VoxelWorld.chunkHeight - 1 ? this.master.getLightLevel(absX, absY + 1, absZ) : (this.voxelData[x][y + 1][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y + 1][z].lightLevel));
-
 								// Forward light through air and transparent blocks
 								if (v.voxelType == null || v.voxelType.transparent)
-									v.lightLevel = topLightLevel;
-								else
 								{
 									// Get neighbour levels
-									byte leftLightLevel = (x == 0 ? this.master.getLightLevel(absX - 1, absY, absZ) : (this.voxelData[x - 1][y][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x - 1][y][z].lightLevel));
-									byte rightLightLevel = (x == VoxelWorld.chunkWidth - 1 ? this.master.getLightLevel(absX + 1, absY, absZ) : (this.voxelData[x + 1][y][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x + 1][y][z].lightLevel));
-									byte backLightLevel = (z == 0 ? this.master.getLightLevel(absX, absY, absZ - 1) : (this.voxelData[x][y][z - 1] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y][z - 1].lightLevel));
-									byte frontLightLevel = (z == VoxelWorld.chunkDepth - 1 ? this.master.getLightLevel(absX, absY, absZ + 1) : (this.voxelData[x][y][z + 1] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y][z + 1].lightLevel));
-									byte[] adjacentLightLevels = new byte[] { topLightLevel, leftLightLevel, rightLightLevel, backLightLevel, frontLightLevel };
-
+									// Simplified:
+									// (y == chunkHeight-1 [last block on y-axis top] ? get light level from master in global space : (voxel data in local space is not set ? max light level : get from local space))
+									/*byte topLightLevel = (y == VoxelWorld.chunkHeight - 1 ? this.master.getLightLevel(absX, absY+1, absZ) : (this.voxelData[x][y+1][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y+1][z].lightLevel));
+									byte leftLightLevel = (x == 0 ? this.master.getLightLevel(absX-1, absY, absZ) : (this.voxelData[x-1][y][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x-1][y][z].lightLevel));
+									byte rightLightLevel = (x == VoxelWorld.chunkWidth - 1 ? this.master.getLightLevel(absX+1, absY, absZ) : (this.voxelData[x+1][y][z] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x+1][y][z].lightLevel));
+									byte backLightLevel = (z == 0 ? this.master.getLightLevel(absX, absY, absZ-1) : (this.voxelData[x][y][z-1] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y][z-1].lightLevel));
+									byte frontLightLevel = (z == VoxelWorld.chunkDepth - 1 ? this.master.getLightLevel(absX, absY, absZ+1) : (this.voxelData[x][y][z+1] == null ? CubicWorldConfiguration.maxLightLevel : this.voxelData[x][y][z+1].lightLevel));
+									*/
+									VoxelData topVoxel = (y == VoxelWorld.chunkHeight - 1 ? this.master.getVoxel(absX, absY+1, absZ) : this.voxelData[x][y+1][z]);
+									VoxelData leftVoxel = (x == 0 ? this.master.getVoxel(absX-1, absY, absZ) : this.voxelData[x-1][y][z]);
+									VoxelData rightVoxel = (x == VoxelWorld.chunkWidth - 1 ? this.master.getVoxel(absX+1, absY, absZ) : this.voxelData[x+1][y][z]);
+									VoxelData backVoxel = (z == 0 ? this.master.getVoxel(absX, absY, absZ-1) : this.voxelData[x][y][z-1]);
+									VoxelData frontVoxel = (z == VoxelWorld.chunkDepth - 1 ? this.master.getVoxel(absX, absY, absZ+1) : this.voxelData[x][y][z+1]);
+									
+									int median = 0;
+									int medianCount = 0;
+									if (topVoxel != null && topVoxel.voxelType == null && topVoxel.lightLevel != -1)
+									{
+										median += topVoxel.lightLevel;
+										medianCount++;
+									}
+									if (leftVoxel != null && leftVoxel.voxelType == null && leftVoxel.lightLevel != -1)
+									{
+										median += leftVoxel.lightLevel;
+										medianCount++;
+									}
+									if (rightVoxel != null && rightVoxel.voxelType == null && rightVoxel.lightLevel != -1)
+									{
+										median += rightVoxel.lightLevel;
+										medianCount++;
+									}
+									if (backVoxel != null && backVoxel.voxelType == null && backVoxel.lightLevel != -1)
+									{
+										median += backVoxel.lightLevel;
+										medianCount++;
+									}
+									if (frontVoxel != null && frontVoxel.voxelType == null && frontVoxel.lightLevel != -1)
+									{
+										median += frontVoxel.lightLevel;
+										medianCount++;
+									}
+									
+									if (medianCount == 0)
+										v.lightLevel = 1;
+									else
+										v.lightLevel = (byte)(median / medianCount);
+									
+									/*byte[] adjacentLightLevels = new byte[] { topLightLevel, leftLightLevel, rightLightLevel, backLightLevel, frontLightLevel };
+									
 									Arrays.sort(adjacentLightLevels);
-									byte highestLevel = adjacentLightLevels[4];
-									byte lightLevel = (byte) (highestLevel - 1);
-
+									byte highestLevel = adjacentLightLevels[4];*/
+									
+									// v.lightLevel = (byte)(median / medianCount); // (byte)((topLightLevel + leftLightLevel + rightLightLevel + backLightLevel + frontLightLevel) / 5.0f);
+								}
+								else
+								{
+									
+									/*byte lightLevel = 1; // (byte) (highestLevel-1);
+									
 									if (lightLevel <= 0)
 									{
 										lightLevel = 1;
 									}
-
-									v.lightLevel = lightLevel;
+									
+									v.lightLevel = lightLevel;*/
+									v.lightLevel = 1;
 								}
+								
+								if (v.lightLevel <= 0)
+									v.lightLevel = 1;
 							}
-
+							
 						}
-
+			
 			this.lightingDirty = false;
 		}
 	}

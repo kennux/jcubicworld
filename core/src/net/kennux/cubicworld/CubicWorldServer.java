@@ -227,6 +227,10 @@ public class CubicWorldServer implements Runnable
 
 		ConsoleHelper.writeLog("info", "Preparing spawn area...", "Server Init");
 
+		// init day night cycle
+		this.dayNightCycle = new DayNightCycle();
+		this.dayNightCycle.setTime((byte) 14, (byte) 0);
+
 		try
 		{
 			this.voxelWorld.setWorldFile(new VoxelWorldSave(this.savePath));
@@ -237,7 +241,7 @@ public class CubicWorldServer implements Runnable
 			ConsoleHelper.logError(e);
 			System.exit(-1);
 		}
-
+		this.voxelWorld.setSunLightLevel(this.dayNightCycle.getLightLevel());
 		this.voxelWorld.generateChunksAround(Vector3.Zero, CubicWorldConfiguration.chunkLoadDistance, true);
 		this.voxelWorld.update();
 
@@ -271,10 +275,6 @@ public class CubicWorldServer implements Runnable
 		// Update thread init
 		this.updateThread = new Thread(new CubicWorldServerUpdateThread(this));
 		this.updateThread.setName("Server update thread");
-
-		// init day night cycle
-		this.dayNightCycle = new DayNightCycle();
-		this.dayNightCycle.setTime((byte) 6, (byte) 0);
 
 		this.profiler.stopProfiling("ServerInit()");
 

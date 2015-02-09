@@ -12,6 +12,7 @@ import net.kennux.cubicworld.networking.packet.ClientLogin;
 import net.kennux.cubicworld.networking.packet.ClientPlayerUpdate;
 import net.kennux.cubicworld.networking.packet.ServerChunkData;
 import net.kennux.cubicworld.networking.packet.ServerPlayerSpawn;
+import net.kennux.cubicworld.networking.packet.ServerTimeUpdate;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
@@ -94,7 +95,7 @@ public class CubicWorldClient extends AClientSocket
 
 		for (IPacketModel packet : packetsList)
 		{
-			if (packet instanceof ServerChunkData)
+			if (packet instanceof ServerChunkData || packet instanceof ServerTimeUpdate)
 			{
 				packet.interpretClientSide(this.cubicWorld);
 			}

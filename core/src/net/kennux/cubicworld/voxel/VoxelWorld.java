@@ -47,7 +47,7 @@ public class VoxelWorld
 	 * The current sun light level.
 	 * If this changes, all chunks will regenerate!
 	 */
-	private int sunLightLevel;
+	private byte sunLightLevel;
 
 	/**
 	 * The world height controls how much chunks will get stacked on the y-axis.
@@ -969,6 +969,8 @@ public class VoxelWorld
 
 	/**
 	 * Sets the block at the given global blockspace position.
+	 * You can and must use this function also if you update a voxel data object to send out a world update on the server.
+	 * Don't use this for changes on the client as the client has to send packets for updating the voxel world.
 	 * 
 	 * @param x
 	 * @param y
@@ -1042,7 +1044,7 @@ public class VoxelWorld
 	/**
 	 * @return the sunLightLevel
 	 */
-	public int getSunLightLevel()
+	public byte getSunLightLevel()
 	{
 		return sunLightLevel;
 	}
@@ -1051,7 +1053,7 @@ public class VoxelWorld
 	 * This will regenerate all chunk meshes.
 	 * @param sunLightLevel the sunLightLevel to set
 	 */
-	public void setSunLightLevel(int sunLightLevel)
+	public void setSunLightLevel(byte sunLightLevel)
 	{
 		this.chunks.recalculateLightingAndMeshes();
 		this.sunLightLevel = sunLightLevel;

@@ -76,6 +76,13 @@ public class DayNightCycle
 	 */
 	public void tick()
 	{
+		if (CubicWorldConfiguration.inDev)
+		{
+			this.hour = 14;
+			this.minute = 0;
+			return;
+		}
+		
 		// Every 10th tick.
 		if (tickCounter >= 10)
 		{
