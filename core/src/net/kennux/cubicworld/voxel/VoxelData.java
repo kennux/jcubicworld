@@ -141,10 +141,16 @@ public class VoxelData
 	public byte rotation = 0;
 
 	/**
-	 * This voxeldata's light level.
+	 * This voxeldata's local light level.
 	 * -1 means unitinitialized.
 	 */
-	private byte lightLevel = -1;
+	private byte localLightLevel = -1;
+
+	/**
+	 * This voxeldata's global light level.
+	 * -1 means unitinitialized.
+	 */
+	private byte globalLightLevel = -1;
 
 	/**
 	 * The voxel data model.
@@ -225,9 +231,17 @@ public class VoxelData
 	/**
 	 * @return the lightLevel
 	 */
-	public byte getLightLevel()
+	public byte getGlobalLightLevel()
 	{
-		return lightLevel;
+		return this.globalLightLevel;
+	}
+	
+	/**
+	 * @return the lightLevel
+	 */
+	public byte getLocalLightLevel()
+	{
+		return this.localLightLevel;
 	}
 
 	/**
@@ -235,7 +249,7 @@ public class VoxelData
 	 */
 	public void setLocalLightLevel(byte lightLevel)
 	{
-		this.lightLevel = lightLevel;
+		this.localLightLevel = lightLevel;
 	}
 	
 	/**
@@ -244,5 +258,21 @@ public class VoxelData
 	public void setLocalLightLevel(int lightLevel)
 	{
 		this.setLocalLightLevel((byte) lightLevel);
+	}
+
+	/**
+	 * @param lightLevel the lightLevel to set
+	 */
+	public void setGlobalLightLevel(byte lightLevel)
+	{
+		this.globalLightLevel = lightLevel;
+	}
+	
+	/**
+	 * @param lightLevel the lightLevel to set
+	 */
+	public void setGlobalLightLevel(int lightLevel)
+	{
+		this.setGlobalLightLevel((byte) lightLevel);
 	}
 }

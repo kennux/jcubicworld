@@ -1,6 +1,7 @@
 package net.kennux.cubicworld.voxel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
@@ -9,6 +10,7 @@ import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.inventory.IInventoryUpdateHandler;
+import net.kennux.cubicworld.math.Mathf;
 import net.kennux.cubicworld.math.Vector3i;
 import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.networking.packet.inventory.ServerBlockInventoryUpdate;
@@ -185,6 +187,11 @@ public class VoxelChunk
 	private boolean localLightingDirty = false;
 
 	/**
+	 * Gets set to true if the global lighting information is up 2 date.
+	 */
+	private boolean globalLightingDirty = false;
+
+	/**
 	 * Gets set to true if a save of this chunk to the voxel world file is
 	 * needed.
 	 * Will get handled in update().
@@ -300,6 +307,7 @@ public class VoxelChunk
 	private void chunkDataWasLoaded()
 	{
 		this.localLightingDirty = true;
+		this.globalLightingDirty = true;
 		this.voxelMeshDirty = true;
 		this.saveDirty = false;
 	}
@@ -311,6 +319,7 @@ public class VoxelChunk
 	public void regenerateLightingAndMesh()
 	{
 		this.localLightingDirty = true;
+		this.globalLightingDirty = true;
 		this.voxelMeshDirty = true;
 		this.saveDirty = false;
 	}
@@ -322,6 +331,7 @@ public class VoxelChunk
 	private void chunkDataWasModified()
 	{
 		this.localLightingDirty = true;
+		this.globalLightingDirty = true;
 		this.voxelMeshDirty = true;
 		this.saveDirty = true;
 	}
@@ -472,12 +482,12 @@ public class VoxelChunk
 							// Normal voxel rendering
 							VoxelFace[] faceMappings = ROTATION_MAPPINGS[voxelData[x][y][z].rotation];
 
-							byte leftLighting = leftVoxel == null ? 0 : leftVoxel.getLightLevel();
-							byte rightLighting = rightVoxel == null ? 0 : rightVoxel.getLightLevel();
-							byte topLighting = topVoxel == null ? 0 : topVoxel.getLightLevel();
-							byte bottomLighting = bottomVoxel == null ? 0 : bottomVoxel.getLightLevel();
-							byte backLighting = backVoxel == null ? 0 : backVoxel.getLightLevel();
-							byte frontLighting = frontVoxel == null ? 0 : frontVoxel.getLightLevel();
+							byte leftLighting = leftVoxel == null ? 0 : leftVoxel.getGlobalLightLevel();
+							byte rightLighting = rightVoxel == null ? 0 : rightVoxel.getGlobalLightLevel();
+							byte topLighting = topVoxel == null ? 0 : topVoxel.getGlobalLightLevel();
+							byte bottomLighting = bottomVoxel == null ? 0 : bottomVoxel.getGlobalLightLevel();
+							byte backLighting = backVoxel == null ? 0 : backVoxel.getGlobalLightLevel();
+							byte frontLighting = frontVoxel == null ? 0 : frontVoxel.getGlobalLightLevel();
 
 							// Write mesh data
 							if (leftSideVisible)
@@ -570,7 +580,7 @@ public class VoxelChunk
 	}
 
 	/**
-	 * Returns the light level of the block at the given position.
+	 * Returns the global light level of the block at the given position.
 	 * Returns -1 if there is no voxel in the given position or if an error
 	 * happend.
 	 * 
@@ -579,7 +589,7 @@ public class VoxelChunk
 	 * @param z
 	 * @return
 	 */
-	public byte getLightLevel(int x, int y, int z)
+	public byte getGlobalLightLevel(int x, int y, int z)
 	{
 		// Bounds check
 		if (this.voxelData != null && x >= 0 && y >= 0 && z >= 0 && x < VoxelWorld.chunkWidth && y < VoxelWorld.chunkHeight && z < VoxelWorld.chunkDepth)
@@ -587,7 +597,7 @@ public class VoxelChunk
 			synchronized (this.voxelDataLockObject)
 			{
 				if (this.voxelData[x][y][z] != null)
-					return this.voxelData[x][y][z].getLightLevel();
+					return this.voxelData[x][y][z].getGlobalLightLevel();
 			}
 		}
 
@@ -697,6 +707,16 @@ public class VoxelChunk
 	 * @return
 	 */
 	public boolean isInitializedAndLightingReady()
+	{
+		return this.isInitialized() && !this.localLightingDirty && !this.globalLightingDirty;
+	}
+
+	/**
+	 * Returns true if this chunk is initialized and it's local lighting is not dirty.
+	 * 
+	 * @return
+	 */
+	public boolean isInitializedAndLocalLightingReady()
 	{
 		return this.isInitialized() && !this.localLightingDirty;
 	}
@@ -987,10 +1007,22 @@ public class VoxelChunk
 
 		// Lighting check
 		// The lighting algorithm needs all chunks around this chunk to be ready.
-		if (!ClientChunkRequest.areRequestsPending() && this.localLightingDirty && this.isInitialized() && (this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLightingReady(new ChunkKey(this.chunkX, this.chunkY + 1, this.chunkZ))))
+		if (!ClientChunkRequest.areRequestsPending() && this.localLightingDirty && this.isInitialized() && (this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLocalLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ)))
 		{
 			this.recalculateLocalLighting();
 			this.localLightingDirty = false;
+		}
+		
+		if (!ClientChunkRequest.areRequestsPending() && this.globalLightingDirty && this.isInitialized() &&
+			this.master.chunkLocalLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ) && 
+			this.master.chunkLocalLightingReady(this.chunkX, this.chunkY - 1, this.chunkZ) && 
+			this.master.chunkLocalLightingReady(this.chunkX + 1, this.chunkY, this.chunkZ) && 
+			this.master.chunkLocalLightingReady(this.chunkX - 1, this.chunkY, this.chunkZ) && 
+			this.master.chunkLocalLightingReady(this.chunkX, this.chunkY, this.chunkZ + 1) &&
+			this.master.chunkLocalLightingReady(this.chunkX, this.chunkY, this.chunkZ - 1))
+		{
+			this.recalculateGlobalLighting();
+			this.globalLightingDirty = false;
 		}
 
 		synchronized (this.voxelDataLockObject)
@@ -1018,7 +1050,7 @@ public class VoxelChunk
 
 		boolean frameMismatch = (lastUpdateCallId != this.master.updateCallId);
 
-		if (!ClientChunkRequest.areRequestsPending() && !this.localLightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() &&
+		if (!ClientChunkRequest.areRequestsPending() && !this.localLightingDirty && !this.globalLightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() &&
 		// Check all neighbours if lighting is ready
 				this.master.chunkLightingReady(this.chunkX + 1, this.chunkY, this.chunkZ) && this.master.chunkLightingReady(this.chunkX - 1, this.chunkY, this.chunkZ) && this.master.chunkLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ) && this.master.chunkLightingReady(this.chunkX, this.chunkY - 1, this.chunkZ) && this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ + 1) && this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ - 1) && (CubicWorldConfiguration.meshGenerationsPerFrameLimit == -1 || frameMismatch || generationsProcessedThisFrame <= CubicWorldConfiguration.meshGenerationsPerFrameLimit))
 		{
@@ -1029,11 +1061,71 @@ public class VoxelChunk
 				lastUpdateCallId = this.master.updateCallId;
 				generationsProcessedThisFrame = 0;
 			}
-
+			
 			this.generateMesh();
 			generationsProcessedThisFrame++;
 		}
 	}
+
+	/**
+	 * Calculates the global light for the given position and face of a voxel.
+	 */
+	private void recalculateGlobalLighting()
+	{
+		synchronized (this.voxelDataLockObject)
+		{
+			if (this.voxelData == null)
+				return;
+			
+			VoxelData v = null;
+			Vector3i absolutePos = null;
+			
+			// Temporary shadow pass levels
+			// byte[][][] lightValues = new byte[VoxelWorld.chunkWidth][VoxelWorld.chunkHeight][VoxelWorld.chunkDepth];
+			
+			// Shadow pass
+			for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
+				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
+					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
+						if (this.voxelData[x][y][z] != null)
+						{
+							v = this.voxelData[x][y][z];
+							absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
+							
+							if (v.voxelType == null || v.voxelType.transparent)
+							{
+								VoxelData topVoxel = (y == VoxelWorld.chunkHeight - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y+1, absolutePos.z) : this.voxelData[x][y+1][z];
+								// VoxelData bottomVoxel = (y == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y-1, absolutePos.z) : this.voxelData[x][y-1][z];
+								VoxelData leftVoxel = (x == 0) ? this.master.getVoxel(absolutePos.x-1, absolutePos.y, absolutePos.z) : this.voxelData[x-1][y][z];
+								VoxelData rightVoxel = (x == VoxelWorld.chunkWidth - 1) ? this.master.getVoxel(absolutePos.x+1, absolutePos.y, absolutePos.z) : this.voxelData[x+1][y][z];
+								VoxelData backVoxel = (z == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z-1) : this.voxelData[x][y][z-1];
+								VoxelData frontVoxel = (z == VoxelWorld.chunkDepth - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z+1) : this.voxelData[x][y][z+1];
+	
+								byte topLightLevel = topVoxel == null ? this.master.getSunLightLevel() : topVoxel.getLocalLightLevel();
+								byte leftLightLevel = leftVoxel == null ? this.master.getSunLightLevel() : leftVoxel.getLocalLightLevel();
+								byte rightLightLevel = rightVoxel == null ? this.master.getSunLightLevel() : rightVoxel.getLocalLightLevel();
+								byte backLightLevel = backVoxel == null ? this.master.getSunLightLevel() : backVoxel.getLocalLightLevel();
+								byte fronLightLevel = frontVoxel == null ? this.master.getSunLightLevel() : frontVoxel.getLocalLightLevel();
+								
+								byte adjacentMedian = (byte)((leftLightLevel + rightLightLevel + backLightLevel + fronLightLevel) / 4.0f);
+								
+								v.setGlobalLightLevel(Mathf.lerp(topLightLevel, adjacentMedian, 0.8f));
+							}
+							else
+							{
+								v.setGlobalLightLevel(0);
+							}
+						}
+			
+			/*for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
+				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
+					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
+					{
+						this.voxelData[x][y][z].setGlobalLightLevel(this.voxelData[x][y][z].getLocalLightLevel());
+					}*/
+		}
+	}
+	
 
 	/**
 	 * Calculates the local light for the given position and face of a voxel.
@@ -1045,32 +1137,20 @@ public class VoxelChunk
 			if (this.voxelData == null)
 				return;
 			
-			// Init sun light
-
+			VoxelData v = null;
+			
+			// Sunlight pass
 			for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
 				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
 					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
 					{
-						VoxelData v = this.voxelData[x][y][z];
+						v = this.voxelData[x][y][z];
 						
 						if (v.voxelType != null && !v.voxelType.transparent)
 							v.setLocalLightLevel(0);
 						else
 							v.setLocalLightLevel(this.master.getSunLightLevel());
 					}
-			
-			for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
-				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
-					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
-						if (this.voxelData[x][y][z] != null)
-						{
-							VoxelData v = this.voxelData[x][y][z];
-							Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
-							int absX = absolutePos.x;
-							int absY = absolutePos.y;
-							int absZ = absolutePos.z;
-						}
-			
 		}
 	}
 

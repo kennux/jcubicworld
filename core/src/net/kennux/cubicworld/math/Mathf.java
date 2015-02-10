@@ -11,6 +11,30 @@ package net.kennux.cubicworld.math;
 public class Mathf
 {
 	/**
+	 * Linear interpolation.
+	 * @param start
+	 * @param end
+	 * @param percent
+	 * @return
+	 */
+	public static float lerp(float start, float end, float percent)
+	{
+		return (start + percent*(end - start));
+	}
+	
+	/**
+	 * Linear interpolation.
+	 * @param start
+	 * @param end
+	 * @param percent
+	 * @return
+	 */
+	public static byte lerp(byte start, byte end, float percent)
+	{
+		return (byte) ((float)start + percent*(float)(end - start));
+	}
+	
+	/**
 	 * Ceils a float to an integer.
 	 * 
 	 * @param val

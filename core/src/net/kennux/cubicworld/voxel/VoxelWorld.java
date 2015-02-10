@@ -253,7 +253,7 @@ public class VoxelWorld
 	}
 
 	/**
-	 * Returns true if the chunk at the given position is loaded, initialized and lighting ready.
+	 * Returns true if the chunk at the given position is loaded, initialized and local AND global lighting ready.
 	 * If the chunk is non-existing, this function will return true.
 	 * 
 	 * @param chunkKey
@@ -544,7 +544,7 @@ public class VoxelWorld
 			return 0;
 		}
 
-		return chunk.getLightLevel(x, y, z);
+		return chunk.getGlobalLightLevel(x, y, z);
 	}
 
 	/**
@@ -826,7 +826,7 @@ public class VoxelWorld
 	}
 
 	/**
-	 * Checks if the chunk with the given chunkspace position already got
+	 * Checks if the chunk at the given chunkspace position already got
 	 * initialized.
 	 * 
 	 * @param chunkX
@@ -840,6 +840,20 @@ public class VoxelWorld
 		if (chunk == null)
 			return false;
 		return chunk.isInitialized();
+	}
+
+	/**
+	 * Checks if the chunk at the given chunkspace position already calculated it's local lighting.
+	 * Will return true if the chunk is non-exisiting.
+	 * @param chunkX
+	 * @param chunkY
+	 * @param chunkZ
+	 * @return
+	 */
+	public boolean chunkLocalLightingReady(int chunkX, int chunkY, int chunkZ)
+	{
+		VoxelChunk chunk = this.chunks.get(new ChunkKey(chunkX, chunkY, chunkZ));
+		return chunk == null || chunk.isInitializedAndLocalLightingReady();
 	}
 
 	/**
