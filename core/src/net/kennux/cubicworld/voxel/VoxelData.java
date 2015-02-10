@@ -144,7 +144,7 @@ public class VoxelData
 	 * This voxeldata's light level.
 	 * -1 means unitinitialized.
 	 */
-	public byte lightLevel = -1;
+	private byte lightLevel = -1;
 
 	/**
 	 * The voxel data model.
@@ -220,5 +220,29 @@ public class VoxelData
 	public void setRenderStateId(int renderStateId)
 	{
 		this.renderStateId = (byte) renderStateId;
+	}
+
+	/**
+	 * @return the lightLevel
+	 */
+	public byte getLightLevel()
+	{
+		return lightLevel;
+	}
+
+	/**
+	 * @param lightLevel the lightLevel to set
+	 */
+	public void setLocalLightLevel(byte lightLevel)
+	{
+		this.lightLevel = lightLevel;
+	}
+	
+	/**
+	 * @param lightLevel the lightLevel to set
+	 */
+	public void setLocalLightLevel(int lightLevel)
+	{
+		this.setLocalLightLevel((byte) lightLevel);
 	}
 }
