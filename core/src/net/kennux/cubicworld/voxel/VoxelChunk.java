@@ -1,7 +1,6 @@
 package net.kennux.cubicworld.voxel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
@@ -1096,18 +1095,18 @@ public class VoxelChunk
 							{
 								VoxelData topVoxel = (y == VoxelWorld.chunkHeight - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y+1, absolutePos.z) : this.voxelData[x][y+1][z];
 								// VoxelData bottomVoxel = (y == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y-1, absolutePos.z) : this.voxelData[x][y-1][z];
-								VoxelData leftVoxel = (x == 0) ? this.master.getVoxel(absolutePos.x-1, absolutePos.y, absolutePos.z) : this.voxelData[x-1][y][z];
+								//VoxelData leftVoxel = (x == 0) ? this.master.getVoxel(absolutePos.x-1, absolutePos.y, absolutePos.z) : this.voxelData[x-1][y][z];
 								VoxelData rightVoxel = (x == VoxelWorld.chunkWidth - 1) ? this.master.getVoxel(absolutePos.x+1, absolutePos.y, absolutePos.z) : this.voxelData[x+1][y][z];
-								VoxelData backVoxel = (z == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z-1) : this.voxelData[x][y][z-1];
+								//VoxelData backVoxel = (z == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z-1) : this.voxelData[x][y][z-1];
 								VoxelData frontVoxel = (z == VoxelWorld.chunkDepth - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z+1) : this.voxelData[x][y][z+1];
 	
 								byte topLightLevel = topVoxel == null ? this.master.getSunLightLevel() : topVoxel.getLocalLightLevel();
-								byte leftLightLevel = leftVoxel == null ? this.master.getSunLightLevel() : leftVoxel.getLocalLightLevel();
+								//byte leftLightLevel = leftVoxel == null ? this.master.getSunLightLevel() : leftVoxel.getLocalLightLevel();
 								byte rightLightLevel = rightVoxel == null ? this.master.getSunLightLevel() : rightVoxel.getLocalLightLevel();
-								byte backLightLevel = backVoxel == null ? this.master.getSunLightLevel() : backVoxel.getLocalLightLevel();
+								//byte backLightLevel = backVoxel == null ? this.master.getSunLightLevel() : backVoxel.getLocalLightLevel();
 								byte fronLightLevel = frontVoxel == null ? this.master.getSunLightLevel() : frontVoxel.getLocalLightLevel();
 								
-								byte adjacentMedian = (byte)((leftLightLevel + rightLightLevel + backLightLevel + fronLightLevel) / 4.0f);
+								byte adjacentMedian = (byte)((rightLightLevel + fronLightLevel) / 2.0f);
 								
 								v.setGlobalLightLevel(Mathf.lerp(topLightLevel, adjacentMedian, 0.8f));
 							}

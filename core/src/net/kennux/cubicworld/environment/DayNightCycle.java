@@ -125,14 +125,22 @@ public class DayNightCycle
 	
 	public byte getLightLevel()
 	{
+		// minutes = (hours * 60) + minute
 		int minutes = (this.hour * 60) + this.minute;
 		
+		// before 03:00 or after 22:00 there is no sunlight
 		if (minutes < 3*60 || minutes > 22*60)
 			return 1;
 		
-		float lightPercentage = ((minutes - (3*60)) / (19f * 60f)) * 2.0f;
-		if (lightPercentage > 1)
-			lightPercentage = 1.0f - Mathf.repeat(lightPercentage, 1.0f);
+		// Use parabola formula f(x) = ax² + bx + c to determine the lightlevel
+		// Fixed points are 3am is sunrise, 14am is highest level (1) and 22 am is sunset
+		// Values are:
+		// a = -0.0114
+		// b = 0.2841
+		// c = -0.75
+		
+		float hourValue = minutes / 60.0f;
+		float lightPercentage = (-0.0114f * (hourValue*hourValue)) + (0.2841f * hourValue) - 0.75f;
 		
 		return (byte) ((lightPercentage * (CubicWorldConfiguration.maxLightLevel-1))+1);
 	}
