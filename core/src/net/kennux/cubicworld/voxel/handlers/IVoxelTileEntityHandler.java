@@ -9,7 +9,7 @@ import net.kennux.cubicworld.voxel.VoxelData;
  * This interface gets used to hold voxel tile entity handlers.
  * Tile entity handlers can get used to recieve updates or other events and to store additional block data.
  * 
- * If your tile entity handler needs initialization, place it in a constructor <b>WITHOUT</b> any parameters.
+ * Tile entities will get instantiated by an implementation of ITileEntityHandlerFactory.
  * </pre>
  * 
  * @author KennuX
