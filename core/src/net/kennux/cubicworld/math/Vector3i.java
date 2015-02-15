@@ -50,4 +50,9 @@ public class Vector3i
 	{
 		return (this.x ^ this.y ^ this.z);
 	}
+	
+	public String toString()
+	{
+		return "Vector3i {" + this.x + "," + this.y + "," + this.z + "}";
+	}
 }

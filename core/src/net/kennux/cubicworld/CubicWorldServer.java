@@ -22,6 +22,7 @@ import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 import net.kennux.cubicworld.voxel.VoxelWorldSave;
+import net.kennux.cubicworld.voxel.generator.TestGenerator;
 import net.kennux.cubicworld.voxel.generator.WorldGenerator;
 import net.kennux.cubicworld.voxel.generator.noise.SimplexNoise3D;
 import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;
@@ -222,7 +223,7 @@ public class CubicWorldServer implements Runnable
 
 		SimplexNoise3D.seed(1337);
 
-		this.voxelWorld.setWorldGenerator(new WorldGenerator());
+		this.voxelWorld.setWorldGenerator(new TestGenerator());
 		this.entityManager = new EntityManager(this.voxelWorld, true, true, slots);
 
 		ConsoleHelper.writeLog("info", "Preparing spawn area...", "Server Init");

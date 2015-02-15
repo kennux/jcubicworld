@@ -1,6 +1,7 @@
 package net.kennux.cubicworld.voxel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
@@ -1065,7 +1066,7 @@ public class VoxelChunk
 			generationsProcessedThisFrame++;
 		}
 	}
-
+	
 	/**
 	 * Calculates the global light for the given position and face of a voxel.
 	 */
@@ -1076,52 +1077,75 @@ public class VoxelChunk
 			if (this.voxelData == null)
 				return;
 			
-			VoxelData v = null;
-			Vector3i absolutePos = null;
-			
-			// Temporary shadow pass levels
-			// byte[][][] lightValues = new byte[VoxelWorld.chunkWidth][VoxelWorld.chunkHeight][VoxelWorld.chunkDepth];
-			
-			// Shadow pass
 			for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
-				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
-					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
-						if (this.voxelData[x][y][z] != null)
-						{
-							v = this.voxelData[x][y][z];
-							absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
-							
-							if (v.voxelType == null || v.voxelType.transparent)
-							{
-								VoxelData topVoxel = (y == VoxelWorld.chunkHeight - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y+1, absolutePos.z) : this.voxelData[x][y+1][z];
-								// VoxelData bottomVoxel = (y == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y-1, absolutePos.z) : this.voxelData[x][y-1][z];
-								//VoxelData leftVoxel = (x == 0) ? this.master.getVoxel(absolutePos.x-1, absolutePos.y, absolutePos.z) : this.voxelData[x-1][y][z];
-								VoxelData rightVoxel = (x == VoxelWorld.chunkWidth - 1) ? this.master.getVoxel(absolutePos.x+1, absolutePos.y, absolutePos.z) : this.voxelData[x+1][y][z];
-								//VoxelData backVoxel = (z == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z-1) : this.voxelData[x][y][z-1];
-								VoxelData frontVoxel = (z == VoxelWorld.chunkDepth - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z+1) : this.voxelData[x][y][z+1];
-	
-								byte topLightLevel = topVoxel == null ? this.master.getSunLightLevel() : topVoxel.getLocalLightLevel();
-								//byte leftLightLevel = leftVoxel == null ? this.master.getSunLightLevel() : leftVoxel.getLocalLightLevel();
-								byte rightLightLevel = rightVoxel == null ? this.master.getSunLightLevel() : rightVoxel.getLocalLightLevel();
-								//byte backLightLevel = backVoxel == null ? this.master.getSunLightLevel() : backVoxel.getLocalLightLevel();
-								byte fronLightLevel = frontVoxel == null ? this.master.getSunLightLevel() : frontVoxel.getLocalLightLevel();
-								
-								byte adjacentMedian = (byte)((rightLightLevel + fronLightLevel) / 2.0f);
-								
-								v.setGlobalLightLevel(Mathf.lerp(topLightLevel, adjacentMedian, 0.8f));
-							}
-							else
-							{
-								v.setGlobalLightLevel(0);
-							}
-						}
-			
-			/*for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
-				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
-					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
+				for (int x = VoxelWorld.chunkWidth-1; x >= 0; x--)
+					for (int z = VoxelWorld.chunkDepth-1; z >= 0; z--)
 					{
 						this.voxelData[x][y][z].setGlobalLightLevel(this.voxelData[x][y][z].getLocalLightLevel());
-					}*/
+					}
+			
+			/*if (this.voxelData != null)
+				return;*/
+			
+			VoxelData v = null;
+			Vector3i absolutePos = null;
+			boolean workLeft = true;
+			
+			while (workLeft)
+			{
+				workLeft = false;
+				for (int x = VoxelWorld.chunkWidth-1; x >= 0; x--)
+					for (int z = VoxelWorld.chunkDepth-1; z >= 0; z--)
+						for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
+						{
+							v = this.voxelData[x][y][z];
+							
+							/*if (v.getLocalLightLevel() == -1)
+							{
+								this.calculateGlobalLighting(x, y, z);
+							}*/
+							
+							if (v.getLocalLightLevel() == -1)
+							{
+								absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
+								VoxelData topVoxel = (y == VoxelWorld.chunkHeight - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y+1, absolutePos.z) : this.voxelData[x][y+1][z];
+								VoxelData bottomVoxel = (y == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y-1, absolutePos.z) : this.voxelData[x][y-1][z];
+								VoxelData leftVoxel = (x == 0) ? this.master.getVoxel(absolutePos.x-1, absolutePos.y, absolutePos.z) : this.voxelData[x-1][y][z];
+								VoxelData rightVoxel = (x == VoxelWorld.chunkWidth - 1) ? this.master.getVoxel(absolutePos.x+1, absolutePos.y, absolutePos.z) : this.voxelData[x+1][y][z];
+								VoxelData backVoxel = (z == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z-1) : this.voxelData[x][y][z-1];
+								VoxelData frontVoxel = (z == VoxelWorld.chunkDepth - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z+1) : this.voxelData[x][y][z+1];
+								
+								// Otherwise we are able to determine the lightlevel of this voxel
+								byte topLightLevel = topVoxel == null ? -1 : (topVoxel.voxelType != null && !topVoxel.voxelType.transparent) ? -2 : topVoxel.getLocalLightLevel();
+								byte leftLightLevel = leftVoxel == null ? -1 : (leftVoxel.voxelType != null && !leftVoxel.voxelType.transparent) ? -2 : leftVoxel.getLocalLightLevel();
+								byte rightLightLevel = rightVoxel == null ? -1 : (rightVoxel.voxelType != null && !rightVoxel.voxelType.transparent) ? -2 : rightVoxel.getLocalLightLevel();
+								byte backLightLevel = backVoxel == null ? -1 : (backVoxel.voxelType != null && !backVoxel.voxelType.transparent) ? -2 : backVoxel.getLocalLightLevel();
+								byte frontLightLevel = frontVoxel == null ? -1 : (frontVoxel.voxelType != null && !frontVoxel.voxelType.transparent) ? -2 : frontVoxel.getLocalLightLevel();
+								byte bottomLightLevel = bottomVoxel == null ? -1 : (bottomVoxel.voxelType != null && !bottomVoxel.voxelType.transparent) ? -2 : bottomVoxel.getLocalLightLevel();
+								
+								
+								// Determine the highest adjacent level
+								byte[] levels = new byte[] {topLightLevel, leftLightLevel, rightLightLevel, backLightLevel, frontLightLevel, bottomLightLevel};
+								Arrays.sort(levels);
+								byte highestLevel = levels[levels.length-1];
+								
+								// Check if adjacent levels are ready
+								if (highestLevel == -1)
+								{
+									workLeft = true;
+									continue;
+								}
+								
+								// Set light level
+								v.setGlobalLightLevel(highestLevel-(byte)1);
+								
+								if (v.getGlobalLightLevel() < 0)
+									v.setGlobalLightLevel(0);
+								
+								v.setLocalLightLevel(v.getGlobalLightLevel());
+							}
+						}
+			}
 		}
 	}
 	
@@ -1137,18 +1161,44 @@ public class VoxelChunk
 				return;
 			
 			VoxelData v = null;
+			Vector3i absolutePos;
 			
-			// Sunlight pass
+			// Clear pass
 			for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
 				for (int x = 0; x < VoxelWorld.chunkWidth; x++)
 					for (int z = 0; z < VoxelWorld.chunkDepth; z++)
 					{
 						v = this.voxelData[x][y][z];
+						v.setLocalLightLevel(-1);
+						v.setGlobalLightLevel(-1);
+					}
+			
+			// Sunlight pass
+			for (int x = 0; x < VoxelWorld.chunkWidth; x++)
+				for (int z = 0; z < VoxelWorld.chunkDepth; z++)
+					for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
+					{
+						v = this.voxelData[x][y][z];
+						absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
 						
-						if (v.voxelType != null && !v.voxelType.transparent)
-							v.setLocalLightLevel(0);
-						else
+						if (absolutePos.y == this.master.worldHeight - 1)
+						{
 							v.setLocalLightLevel(this.master.getSunLightLevel());
+						}
+						else
+						{
+							VoxelData topVoxel = (y == VoxelWorld.chunkHeight - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y+1, absolutePos.z) : this.voxelData[x][y+1][z];
+							
+							if (v.voxelType != null && !v.voxelType.transparent)
+								v.setLocalLightLevel(0);
+							else if ((v.voxelType == null || v.voxelType.transparent) && topVoxel.getLocalLightLevel() < this.master.getSunLightLevel())
+							{
+								// System.out.println(absolutePos + " " + topVoxel.getLocalLightLevel() + " " + v.getLocalLightLevel() + " " + v.getGlobalLightLevel());
+								v.setLocalLightLevel(-1);
+							}
+							else
+								v.setLocalLightLevel(topVoxel.getLocalLightLevel());
+						}
 					}
 		}
 	}
@@ -1156,32 +1206,19 @@ public class VoxelChunk
 	/**
 	 * Writes mesh data to the given lists.
 	 * 
-	 * @param vertices
-	 *            Main vertex list.
-	 * @param indices
-	 *            Main index list.
-	 * @param uvs
-	 *            Main uvs list.
-	 * @param colors
-	 *            Main colors list.
-	 * @param sideVertices
-	 *            Vertex array from the side vertices array.
-	 * @param sideIndices
-	 *            Side indices from the side indices array.
-	 * @param indicesCounter
-	 *            The current index counter.
-	 * @param x
-	 *            The current voxel worldspace position.
-	 * @param y
-	 *            The current voxel worldspace position.
-	 * @param z
-	 *            The current voxel worldspace position.
-	 * @param color
-	 *            The voxel color.
-	 * @param blockId
-	 *            The voxel type id.
-	 * @param face
-	 *            The foxel face to use for getting uv coordinates.
+	 * @param vertices Main vertex list.
+	 * @param indices Main index list.
+	 * @param uvs Main uvs list.
+	 * @param colors Main colors list.
+	 * @param sideVertices Vertex array from the side vertices array.
+	 * @param sideIndices Side indices from the side indices array.
+	 * @param indicesCounter The current index counter.
+	 * @param x The current voxel worldspace position.
+	 * @param y The current voxel worldspace position.
+	 * @param z The current voxel worldspace position.
+	 * @param color The voxel color.
+	 * @param blockId The voxel type id.
+	 * @param face The foxel face to use for getting uv coordinates.
 	 */
 	private void WriteSideData(ArrayList<Float> vertices, ArrayList<Short> indices, Vector3[] sideVertices, Vector3[] sideNormals, short[] sideIndices, short indicesCounter, int x, int y, int z, VoxelData voxelData, VoxelFace face, byte lightLevel)
 	{
