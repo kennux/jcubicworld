@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldServer;
-import net.kennux.cubicworld.math.Mathf;
+import net.kennux.cubicworld.math.MathUtils;
 import net.kennux.cubicworld.pathfinder.Path;
 import net.kennux.cubicworld.pathfinder.Pathfinder;
 import net.kennux.cubicworld.util.ConsoleHelper;
@@ -311,9 +311,9 @@ public class VoxelWorld
 	public VoxelCollision collisionCheck(BoundingBox boundingBox)
 	{
 		// TODO Check if we really need all that voxels
-		int width = Mathf.ceilToInt(boundingBox.max.x - boundingBox.min.x) + 1;
-		int height = Mathf.ceilToInt(boundingBox.max.y - boundingBox.min.y) + 1;
-		int depth = Mathf.ceilToInt(boundingBox.max.z - boundingBox.min.z) + 1;
+		int width = MathUtils.ceilToInt(boundingBox.max.x - boundingBox.min.x) + 1;
+		int height = MathUtils.ceilToInt(boundingBox.max.y - boundingBox.min.y) + 1;
+		int depth = MathUtils.ceilToInt(boundingBox.max.z - boundingBox.min.z) + 1;
 
 		Vector3 voxelspaceCenter = this.getVoxelspacePosition(new Vector3(boundingBox.min));
 		@SuppressWarnings("deprecation")
@@ -505,7 +505,7 @@ public class VoxelWorld
 	 */
 	public Vector3 getChunkspacePosition(Vector3 worldspace)
 	{
-		return new Vector3(Mathf.floorToInt((worldspace.x / VoxelWorld.chunkWidth)), Mathf.floorToInt((worldspace.y / VoxelWorld.chunkHeight)), Mathf.floorToInt((worldspace.z / VoxelWorld.chunkDepth)));
+		return new Vector3(MathUtils.floorToInt((worldspace.x / VoxelWorld.chunkWidth)), MathUtils.floorToInt((worldspace.y / VoxelWorld.chunkHeight)), MathUtils.floorToInt((worldspace.z / VoxelWorld.chunkDepth)));
 	}
 
 	/**
@@ -637,7 +637,7 @@ public class VoxelWorld
 	 */
 	public Vector3 getVoxelspacePosition(Vector3 worldspace)
 	{
-		return new Vector3(Mathf.floorToInt(worldspace.x), Mathf.floorToInt(worldspace.y), Mathf.floorToInt(worldspace.z));
+		return new Vector3(MathUtils.floorToInt(worldspace.x), MathUtils.floorToInt(worldspace.y), MathUtils.floorToInt(worldspace.z));
 	}
 
 	/**
@@ -791,9 +791,9 @@ public class VoxelWorld
 	public boolean intersects(BoundingBox boundingBox)
 	{
 		// TODO Check if we really need all that voxels
-		int width = Mathf.ceilToInt(boundingBox.max.x - boundingBox.min.x) + 1;
-		int height = Mathf.ceilToInt(boundingBox.max.y - boundingBox.min.y) + 1;
-		int depth = Mathf.ceilToInt(boundingBox.max.z - boundingBox.min.z) + 1;
+		int width = MathUtils.ceilToInt(boundingBox.max.x - boundingBox.min.x) + 1;
+		int height = MathUtils.ceilToInt(boundingBox.max.y - boundingBox.min.y) + 1;
+		int depth = MathUtils.ceilToInt(boundingBox.max.z - boundingBox.min.z) + 1;
 
 		Vector3 voxelspaceCenter = this.getVoxelspacePosition(new Vector3(boundingBox.min));
 

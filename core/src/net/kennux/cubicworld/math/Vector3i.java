@@ -15,6 +15,11 @@ public class Vector3i
 	public int y;
 	public int z;
 
+	public Vector3i()
+	{
+		this(0,0,0);
+	}
+	
 	public Vector3i(int x, int y, int z)
 	{
 		this.x = x;

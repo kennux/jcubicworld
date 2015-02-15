@@ -3,7 +3,7 @@ package net.kennux.cubicworld.assets;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import net.kennux.cubicworld.math.Mathf;
+import net.kennux.cubicworld.math.MathUtils;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -120,16 +120,16 @@ public class TextureAtlas
 	public void compileTexture()
 	{
 		// Max textures per axis
-		int maxTexturesOnX = Mathf.floorToInt((float) maximumAtlasSize / (float) textureWidth);
-		int maxTexturesOnY = Mathf.floorToInt((float) maximumAtlasSize / (float) textureHeight);
+		int maxTexturesOnX = MathUtils.floorToInt((float) maximumAtlasSize / (float) textureWidth);
+		int maxTexturesOnY = MathUtils.floorToInt((float) maximumAtlasSize / (float) textureHeight);
 
 		// texture per axis
-		int texturesOnX = Mathf.min(textures.size(), maxTexturesOnX);
-		int texturesOnY = Mathf.ceilToInt((float) textures.size() / (float) maxTexturesOnY);
+		int texturesOnX = MathUtils.min(textures.size(), maxTexturesOnX);
+		int texturesOnY = MathUtils.ceilToInt((float) textures.size() / (float) maxTexturesOnY);
 
 		// Calculate atlas dimensions
-		this.atlasWidth = Mathf.min(textures.size(), maxTexturesOnX) * textureWidth;
-		this.atlasHeight = Mathf.ceilToInt((float) textures.size() / (float) maxTexturesOnY) * textureWidth;
+		this.atlasWidth = MathUtils.min(textures.size(), maxTexturesOnX) * textureWidth;
+		this.atlasHeight = MathUtils.ceilToInt((float) textures.size() / (float) maxTexturesOnY) * textureWidth;
 
 		// Create texture
 		Pixmap atlasData = new Pixmap(atlasWidth, atlasHeight, Format.RGBA8888);
@@ -173,11 +173,11 @@ public class TextureAtlas
 	 */
 	public Rectangle getAtlasRegion(int textureId)
 	{
-		int maxTexturesOnX = Mathf.floorToInt((float) maximumAtlasSize / (float) textureWidth);
-		int maxTexturesOnY = Mathf.floorToInt((float) maximumAtlasSize / (float) textureHeight);
+		int maxTexturesOnX = MathUtils.floorToInt((float) maximumAtlasSize / (float) textureWidth);
+		int maxTexturesOnY = MathUtils.floorToInt((float) maximumAtlasSize / (float) textureHeight);
 
 		int textureY = textureId % maxTexturesOnY;
-		int textureX = Mathf.floorToInt(textureId / (float) maxTexturesOnX);
+		int textureX = MathUtils.floorToInt(textureId / (float) maxTexturesOnX);
 
 		// build rectangle
 		return new Rectangle(textureX * this.textureWidth, textureY * this.textureHeight, this.textureWidth, this.textureHeight);

@@ -218,7 +218,6 @@ public class CubicWorldServer implements Runnable
 
 				CubicWorld.getServer().sendPacket(voxelUpdate);
 			}
-
 		});
 
 		SimplexNoise3D.seed(1337);

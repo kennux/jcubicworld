@@ -1,7 +1,7 @@
 package net.kennux.cubicworld.plugins.baseplugin;
 
 import net.kennux.cubicworld.CubicWorld;
-import net.kennux.cubicworld.math.Mathf;
+import net.kennux.cubicworld.math.MathUtils;
 
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
@@ -73,7 +73,7 @@ public class InputMovementController
 		movement.y *= 0f;
 		movement.z *= 4f;
 
-		float movementSpeed = Mathf.min(movement.len(), this.movementSpeed);
+		float movementSpeed = MathUtils.min(movement.len(), this.movementSpeed);
 		movement.nor();
 		movement.x *= movementSpeed;
 		movement.z *= movementSpeed;

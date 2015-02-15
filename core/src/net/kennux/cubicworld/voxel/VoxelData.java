@@ -1,6 +1,8 @@
 package net.kennux.cubicworld.voxel;
 
+import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.inventory.BlockInventory;
+import net.kennux.cubicworld.math.MathUtils;
 import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
@@ -141,16 +143,17 @@ public class VoxelData
 	public byte rotation = 0;
 
 	/**
-	 * This voxeldata's local light level.
+	 * This voxeldata's sun light level.
+	 * This light level will get set in the local lighting pass.
 	 * -1 means unitinitialized.
 	 */
-	private byte localLightLevel = -1;
+	private byte sunLightLevel = -1;
 
 	/**
-	 * This voxeldata's global light level.
+	 * This voxeldata's block light level.
 	 * -1 means unitinitialized.
 	 */
-	private byte globalLightLevel = -1;
+	private byte blockLightLevel = -1;
 
 	/**
 	 * The voxel data model.
@@ -231,48 +234,58 @@ public class VoxelData
 	/**
 	 * @return the lightLevel
 	 */
-	public byte getGlobalLightLevel()
+	public byte getBlockLightLevel()
 	{
-		return this.globalLightLevel;
+		return this.blockLightLevel;
 	}
 	
 	/**
 	 * @return the lightLevel
 	 */
-	public byte getLocalLightLevel()
+	public byte getSunLightLevel()
 	{
-		return this.localLightLevel;
+		return this.sunLightLevel;
 	}
 
 	/**
 	 * @param lightLevel the lightLevel to set
 	 */
-	public void setLocalLightLevel(byte lightLevel)
+	public void setSunLightLevel(byte lightLevel)
 	{
-		this.localLightLevel = lightLevel;
+		this.sunLightLevel = lightLevel;
 	}
 	
 	/**
 	 * @param lightLevel the lightLevel to set
 	 */
-	public void setLocalLightLevel(int lightLevel)
+	public void setSunLightLevel(int lightLevel)
 	{
-		this.setLocalLightLevel((byte) lightLevel);
+		this.setSunLightLevel((byte) lightLevel);
 	}
 
 	/**
 	 * @param lightLevel the lightLevel to set
 	 */
-	public void setGlobalLightLevel(byte lightLevel)
+	public void setBlockLightLevel(byte shadowLevel)
 	{
-		this.globalLightLevel = lightLevel;
+		this.blockLightLevel = shadowLevel;
 	}
 	
 	/**
 	 * @param lightLevel the lightLevel to set
 	 */
-	public void setGlobalLightLevel(int lightLevel)
+	public void setBlockLightLevel(int shadowLevel)
 	{
-		this.setGlobalLightLevel((byte) lightLevel);
+		this.setBlockLightLevel((byte) shadowLevel);
+	}
+	
+	/**
+	 * Returns the lightlevel, composed of sunlight and shadow level.
+	 * @return
+	 */
+	public byte getLightLevel()
+	{
+		byte highestLightLevel = this.blockLightLevel > this.sunLightLevel ? this.blockLightLevel : this.sunLightLevel;
+		return MathUtils.clamp(highestLightLevel, (byte)CubicWorldConfiguration.maxLightLevel, (byte)0);
 	}
 }

@@ -3,7 +3,7 @@ package net.kennux.cubicworld.gui.elements;
 import net.kennux.cubicworld.gui.GuiHelper;
 import net.kennux.cubicworld.gui.overlay.Overlay;
 import net.kennux.cubicworld.gui.skin.AGuiSkin;
-import net.kennux.cubicworld.math.Mathf;
+import net.kennux.cubicworld.math.MathUtils;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -40,7 +40,7 @@ public class InventoryView extends AGuiElement
 
 		// Calculate view dimensions
 		int slotCount = endSlot - startSlot;
-		int slotRows = Mathf.ceilToInt(slotCount / slotsPerRow);
+		int slotRows = MathUtils.ceilToInt(slotCount / slotsPerRow);
 		Vector2 absoluteCellspacing = GuiHelper.getAbsoluteFromPercentagePosition(new Vector2(cellspacing, cellspacing));
 
 		// Generate item slot size

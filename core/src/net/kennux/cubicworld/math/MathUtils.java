@@ -8,8 +8,25 @@ package net.kennux.cubicworld.math;
  * @author KennuX
  *
  */
-public class Mathf
+public class MathUtils
 {
+	
+	/**
+	 * Clamps the given byte a to a maximum of max and minimum of min
+	 * @param a
+	 * @param max
+	 * @return
+	 */
+	public static byte clamp(byte a, byte max, byte min)
+	{
+		if (a > max)
+			return max;
+		else if (a < min)
+			return min;
+		
+		return a;
+	}
+	
 	/**
 	 * Linear interpolation.
 	 * @param start
@@ -108,7 +125,7 @@ public class Mathf
 	{
 		if (v > r)
 		{
-			float n = Mathf.floorToInt(v / r);
+			float n = MathUtils.floorToInt(v / r);
 			return (v - (n * r));
 		}
 		return v;

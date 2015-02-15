@@ -2,7 +2,7 @@ package net.kennux.cubicworld.entity;
 
 import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.inventory.PlayerInventory;
-import net.kennux.cubicworld.math.Mathf;
+import net.kennux.cubicworld.math.MathUtils;
 import net.kennux.cubicworld.networking.packet.inventory.ClientDropItem;
 import net.kennux.cubicworld.networking.packet.inventory.ClientItemMove;
 import net.kennux.cubicworld.util.Time;
@@ -270,19 +270,19 @@ public class PlayerController extends AEntity
 
 		// Max check
 		if (this.velocity.x > 0)
-			this.velocity.x = Mathf.min(this.velocity.x, this.getMaximumSpeed());
+			this.velocity.x = MathUtils.min(this.velocity.x, this.getMaximumSpeed());
 		else if (this.velocity.x < 0)
-			this.velocity.x = Mathf.max(this.velocity.x, -this.getMaximumSpeed());
+			this.velocity.x = MathUtils.max(this.velocity.x, -this.getMaximumSpeed());
 
 		if (this.velocity.y > 0)
-			this.velocity.y = Mathf.min(this.velocity.y, this.getMaximumSpeed());
+			this.velocity.y = MathUtils.min(this.velocity.y, this.getMaximumSpeed());
 		else if (this.velocity.y < 0)
-			this.velocity.y = Mathf.max(this.velocity.y, -this.getMaximumSpeed());
+			this.velocity.y = MathUtils.max(this.velocity.y, -this.getMaximumSpeed());
 
 		if (this.velocity.z > 0)
-			this.velocity.z = Mathf.min(this.velocity.z, this.getMaximumSpeed());
+			this.velocity.z = MathUtils.min(this.velocity.z, this.getMaximumSpeed());
 		else if (this.velocity.z < 0)
-			this.velocity.z = Mathf.max(this.velocity.z, -this.getMaximumSpeed());
+			this.velocity.z = MathUtils.max(this.velocity.z, -this.getMaximumSpeed());
 
 		boolean moving = new Vector3(this.velocity).add(0, -this.velocity.y, 0).len() > 0.1f;
 

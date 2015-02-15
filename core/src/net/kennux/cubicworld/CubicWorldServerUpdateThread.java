@@ -3,7 +3,7 @@ package net.kennux.cubicworld;
 import java.util.ArrayList;
 
 import net.kennux.cubicworld.entity.AEntity;
-import net.kennux.cubicworld.math.Mathf;
+import net.kennux.cubicworld.math.MathUtils;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
 import net.kennux.cubicworld.networking.IPacketModel;
 import net.kennux.cubicworld.networking.packet.ServerEntitySpawn;
@@ -336,7 +336,7 @@ public class CubicWorldServerUpdateThread implements Runnable
 				if (this.millisBehind < 0)
 					this.millisBehind = 0;
 
-				deltaTime = deltaTime + (int) Mathf.min(spareTime, this.millisBehind);
+				deltaTime = deltaTime + (int) MathUtils.min(spareTime, this.millisBehind);
 			}
 			// ConsoleHelper.writeLog("info", "Delta time: " + deltaTime + ", Millis behind: " + this.millisBehind, "Server");
 

@@ -3,7 +3,7 @@ package net.kennux.cubicworld.entity;
 import java.util.Random;
 
 import net.kennux.cubicworld.CubicWorld;
-import net.kennux.cubicworld.math.Mathf;
+import net.kennux.cubicworld.math.MathUtils;
 import net.kennux.cubicworld.pathfinder.Path;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 
@@ -131,7 +131,7 @@ public abstract class AMobEntity extends ACharacterEntity
 
 			// Re-calculate path
 			if (!this.voxelWorld.getVoxelspacePosition(this.getPosition()).equals(this.voxelWorld.getVoxelspacePosition(target.getPosition())))
-				this.nextPath = this.voxelWorld.findPath(new Vector3(this.getPosition()), new Vector3(target.getPosition()), true, Mathf.ceilToInt(this.getCharacterHeight()));
+				this.nextPath = this.voxelWorld.findPath(new Vector3(this.getPosition()), new Vector3(target.getPosition()), true, MathUtils.ceilToInt(this.getCharacterHeight()));
 
 			this.lastPathFind = System.currentTimeMillis();
 		}

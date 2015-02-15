@@ -1,7 +1,7 @@
 package net.kennux.cubicworld.environment;
 
 import net.kennux.cubicworld.CubicWorldConfiguration;
-import net.kennux.cubicworld.math.Mathf;
+import net.kennux.cubicworld.math.MathUtils;
 import net.kennux.cubicworld.networking.packet.ServerTimeUpdate;
 
 /**
@@ -102,8 +102,8 @@ public class DayNightCycle
 	{
 		if (this.minute >= 60)
 		{
-			this.hour += Mathf.floorToInt(this.minute / 60.0f);
-			this.minute -= Mathf.floorToInt(this.minute / 60.0f) * 60;
+			this.hour += MathUtils.floorToInt(this.minute / 60.0f);
+			this.minute -= MathUtils.floorToInt(this.minute / 60.0f) * 60;
 		}
 	}
 	
