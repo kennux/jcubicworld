@@ -1126,17 +1126,22 @@ public class VoxelChunk
 		}
 	}
 	
+	private ArrayList<Vector3i> leftBlocksTemporary;
+	
 	/**
 	 * Calculates the global light for the given position and face of a voxel.
 	 */
 	private void recalculateGlobalLighting()
 	{
+		if (this.leftBlocksTemporary == null)
+			this.leftBlocksTemporary = new ArrayList<Vector3i>();
+		
 		synchronized(this.voxelDataLockObject)
 		{
 			// Needed variables
 			VoxelData v = null;
 			boolean blocksLeft = false;
-			Vector3i absolutePos = new Vector3i();
+			// Vector3i absolutePos = new Vector3i();
 			
 			// Shadow pass
 			// This will flood light into caves
@@ -1149,7 +1154,7 @@ public class VoxelChunk
 						// This function will only iterate over air or transparent blocks which are uninitialized.
 						if (v.getBlockLightLevel() == -1 && (v.voxelType == null || v.voxelType.transparent))
 						{
-							this.getAbsoluteVoxelPosition(x, y, z, absolutePos);
+							Vector3i absolutePos =  this.getAbsoluteVoxelPosition(x, y, z);
 							
 							// Get all adjacent voxels
 							VoxelData[] adjacentVoxels = new VoxelData[]
@@ -1172,23 +1177,38 @@ public class VoxelChunk
 							byte highestLightLevel = -1;
 							
 							// Iterate through all adjacent voxels
+							boolean onlySolidBlocksReady = true;
+							
 							for (VoxelData vd : adjacentVoxels)
 							{
 								if (vd != null && (vd.getSunLightLevel() > 0 || vd.getBlockLightLevel() != -1))
 								{
-									byte lightLevel = (byte) (vd.getLightLevel() - 1);
+									if (vd.voxelType == null || vd.voxelType.transparent)
+										onlySolidBlocksReady = false;
+									
+									byte lightLevel = vd.getLightLevel();
 									if (lightLevel > highestLightLevel)
 										highestLightLevel = lightLevel;
 								}
 							}
 							
 							// If no blocks were ready...
-							if (highestLightLevel == -1)
+							if (highestLightLevel <= -1 || onlySolidBlocksReady)
 							{
-								System.out.println("Block left: " + absolutePos);
-								// ... we're done here!
-								blocksLeft = true;
-								continue;
+								// If the block already was left once in this generation
+								if (this.leftBlocksTemporary.contains(absolutePos))
+								{
+									// Force light level to 0
+									highestLightLevel = 0;
+								}
+								// If it not was already in the list, we'll add it to the list.
+								else
+								{
+									this.leftBlocksTemporary.add(absolutePos);
+									// ... we're done here!
+									blocksLeft = true;
+									continue;
+								}
 							}
 							
 							// If there were blocks ready
@@ -1204,7 +1224,10 @@ public class VoxelChunk
 			// Only if there were no blocks left, we are done calculating the lighting
 			// If not, we will go on with the lighting in the next update() call.
 			if (!blocksLeft)
+			{
+				this.leftBlocksTemporary.clear();
 				this.globalLightingDirty = false;
+			}
 		}
 	}
 	
