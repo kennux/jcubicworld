@@ -1126,15 +1126,20 @@ public class VoxelChunk
 		}
 	}
 	
-	private ArrayList<Vector3i> leftBlocksTemporary;
+	/**
+	 * Temporary array list which will contain all voxels which depend on another voxel for lighting.
+	 * Gets used in the global lighting pass to prevent searching ready voxels forever.
+	 * @see VoxelChunk#recalculateGlobalLighting()
+	 */
+	private ArrayList<Vector3i> dependencyVoxelsTemporary;
 	
 	/**
 	 * Calculates the global light for the given position and face of a voxel.
 	 */
 	private void recalculateGlobalLighting()
 	{
-		if (this.leftBlocksTemporary == null)
-			this.leftBlocksTemporary = new ArrayList<Vector3i>();
+		if (this.dependencyVoxelsTemporary == null)
+			this.dependencyVoxelsTemporary = new ArrayList<Vector3i>();
 		
 		synchronized(this.voxelDataLockObject)
 		{
@@ -1159,56 +1164,60 @@ public class VoxelChunk
 							// Get all adjacent voxels
 							VoxelData[] adjacentVoxels = new VoxelData[]
 							{
-									// Top Voxel
-									(y == VoxelWorld.chunkHeight - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y+1, absolutePos.z) : this.voxelData[x][y+1][z],
-									// Bottom Voxel
-									(y == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y-1, absolutePos.z) : this.voxelData[x][y-1][z],
-									// Left Voxel
-									(x == 0) ? this.master.getVoxel(absolutePos.x-1, absolutePos.y, absolutePos.z) : this.voxelData[x-1][y][z],
-									// Right Voxel
-									(x == VoxelWorld.chunkWidth - 1) ? this.master.getVoxel(absolutePos.x+1, absolutePos.y, absolutePos.z) : this.voxelData[x+1][y][z],
-									// Back Voxel
-									(z == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z-1) : this.voxelData[x][y][z-1],
-									// Front Voxel
-									(z == VoxelWorld.chunkDepth - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z+1) : this.voxelData[x][y][z+1]
+								// Top Voxel
+								(y == VoxelWorld.chunkHeight - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y+1, absolutePos.z) : this.voxelData[x][y+1][z],
+								// Bottom Voxel
+								(y == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y-1, absolutePos.z) : this.voxelData[x][y-1][z],
+								// Left Voxel
+								(x == 0) ? this.master.getVoxel(absolutePos.x-1, absolutePos.y, absolutePos.z) : this.voxelData[x-1][y][z],
+								// Right Voxel
+								(x == VoxelWorld.chunkWidth - 1) ? this.master.getVoxel(absolutePos.x+1, absolutePos.y, absolutePos.z) : this.voxelData[x+1][y][z],
+								// Back Voxel
+								(z == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z-1) : this.voxelData[x][y][z-1],
+								// Front Voxel
+								(z == VoxelWorld.chunkDepth - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z+1) : this.voxelData[x][y][z+1]
 							};
 							
 							// Variable for the highest light level on the adjacent blocks
 							byte highestLightLevel = -1;
 							
 							// Iterate through all adjacent voxels
-							boolean onlySolidBlocksReady = true;
+							boolean onlyDependingVoxelsReady = true;
 							
 							for (VoxelData vd : adjacentVoxels)
 							{
-								if (vd != null && (vd.getSunLightLevel() > 0 || vd.getBlockLightLevel() != -1))
+								// Determin whether the current block is a translucent block or not.
+								boolean translucentVoxel = vd != null && (vd.voxelType == null || vd.voxelType.transparent);
+								
+								if (onlyDependingVoxelsReady && translucentVoxel && !this.dependencyVoxelsTemporary.contains(absolutePos))
 								{
-									if (vd.voxelType == null || vd.voxelType.transparent)
-										onlySolidBlocksReady = false;
-									
+									onlyDependingVoxelsReady = false;
+								}
+								
+								// Only translucent voxels AND
+								// SunLightLevel is > 0 (means initialized and not shadow area) OR block light level == -1 (means uninitialized)
+								if (translucentVoxel && (vd.getSunLightLevel() > 0 || vd.getBlockLightLevel() != -1))
+								{
 									byte lightLevel = vd.getLightLevel();
 									if (lightLevel > highestLightLevel)
 										highestLightLevel = lightLevel;
 								}
 							}
 							
-							// If no blocks were ready...
-							if (highestLightLevel <= -1 || onlySolidBlocksReady)
+							// Dependency check
+							if (onlyDependingVoxelsReady)
 							{
-								// If the block already was left once in this generation
-								if (this.leftBlocksTemporary.contains(absolutePos))
-								{
-									// Force light level to 0
-									highestLightLevel = 0;
-								}
-								// If it not was already in the list, we'll add it to the list.
-								else
-								{
-									this.leftBlocksTemporary.add(absolutePos);
-									// ... we're done here!
-									blocksLeft = true;
-									continue;
-								}
+								highestLightLevel = 0;
+							}
+							
+							// If no blocks were ready...
+							if (highestLightLevel <= -1)
+							{
+								this.dependencyVoxelsTemporary.add(absolutePos);
+								System.out.println("FAIL!!! " + absolutePos);
+								// ... we're done here!
+								blocksLeft = true;
+								continue;
 							}
 							
 							// If there were blocks ready
@@ -1218,6 +1227,9 @@ public class VoxelChunk
 								lightLevel = 0;
 							
 							v.setBlockLightLevel(lightLevel);
+							
+							// Remove block from the dependency list if it is in there
+							this.dependencyVoxelsTemporary.remove(absolutePos);
 						}
 					}
 			
@@ -1225,7 +1237,7 @@ public class VoxelChunk
 			// If not, we will go on with the lighting in the next update() call.
 			if (!blocksLeft)
 			{
-				this.leftBlocksTemporary.clear();
+				this.dependencyVoxelsTemporary.clear();
 				this.globalLightingDirty = false;
 			}
 		}
