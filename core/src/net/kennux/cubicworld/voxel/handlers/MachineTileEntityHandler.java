@@ -25,7 +25,7 @@ import net.kennux.cubicworld.voxel.VoxelData;
  * @author KennuX
  *
  */
-public abstract class MachineUpdateHandler implements IVoxelTileEntityHandler
+public abstract class MachineTileEntityHandler implements IVoxelTileEntityHandler
 {
 	/**
 	 * Return true in here if the machine's conditions for starting working are met.

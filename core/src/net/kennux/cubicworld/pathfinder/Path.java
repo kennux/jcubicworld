@@ -104,8 +104,7 @@ public class Path
 
 	}
 
-	// ////////////////////////////// GETTERS AND SETTERS
-	// ////////////////////////////////
+	//////////////////////////////// GETTERS AND SETTERS //////////////////////////////////
 
 	public Vector3 getStartPosition()
 	{
@@ -164,7 +163,7 @@ public class Path
 	 * Sets the steps array for this path.
 	 * If this function was called this path gets marked as processed and found.
 	 * 
-	 * Pass null in as steps to set this instance to path was processed and not
+	 * Pass null in as steps to set this instance to path was processed but not
 	 * found.
 	 * 
 	 * @param steps

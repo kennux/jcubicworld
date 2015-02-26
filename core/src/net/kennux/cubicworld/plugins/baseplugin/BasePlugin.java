@@ -71,7 +71,7 @@ import net.kennux.cubicworld.voxel.VoxelEngine;
 import net.kennux.cubicworld.voxel.VoxelRenderState;
 import net.kennux.cubicworld.voxel.handlers.ITileEntityHandlerFactory;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
-import net.kennux.cubicworld.voxel.handlers.MachineUpdateHandler;
+import net.kennux.cubicworld.voxel.handlers.MachineTileEntityHandler;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -484,7 +484,7 @@ public class BasePlugin extends APlugin
 			@Override
 			public IVoxelTileEntityHandler newInstance()
 			{
-				return new MachineUpdateHandler()
+				return new MachineTileEntityHandler()
 				{
 					@Override
 					protected boolean getWorkingState(IInventory inventory)

@@ -7,9 +7,9 @@ import com.badlogic.gdx.math.Vector3;
  * <pre>
  * Sun implementation for usage in a day / night system.
  * This class is not finished yet.
- * It will handle sun sprite rendering. It is currently just a placeholder
- * class.
+ * It will handle sun sprite rendering. It is currently just a placeholder class.
  * A sun will get added to the skybox as soon as the skybox supports it.
+ * TODO
  * </pre>
  * 
  * @author KennuX

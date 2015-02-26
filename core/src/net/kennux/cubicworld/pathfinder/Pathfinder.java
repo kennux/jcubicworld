@@ -42,15 +42,18 @@ public class Pathfinder implements Runnable
 	private LinkedList<PathfinderTask> taskStack;
 	private Object taskStackLockObject = new Object();
 
+	
 	public Pathfinder(VoxelWorld world)
 	{
 		// Start the pathfinder thread
 		this.pathfinderThread = new Thread(this);
 		this.pathfinderThread.setName("Pathfinder worker thread");
-
+	
 		// Initialize
 		this.world = world;
 		this.taskStack = new LinkedList<PathfinderTask>();
+		
+		// Start the thread
 		this.pathfinderThread.start();
 	}
 
@@ -230,35 +233,43 @@ public class Pathfinder implements Runnable
 	@Override
 	public void run()
 	{
+		// This array list will get used as a temporary storage for tasks which needs to get executed.
+		// This is needed because otherwise the addPathfinderTask function would block till all current tasks are done.
+		ArrayList<PathfinderTask> tasks = new ArrayList<PathfinderTask>();
+		
 		while (true)
 		{
+			tasks.clear();
+			
 			// Work available?
 			synchronized (this.taskStackLockObject)
 			{
 				if (this.taskStack.size() > 0)
 				{
-					// Get first object
-					PathfinderTask task = this.taskStack.removeFirst();
+					tasks.add(this.taskStack.removeFirst());
+				}
+			}
+			
+			for (PathfinderTask task : tasks)
+			{	
+				// Process all tasks
+				while (task != null)
+				{
+					// Actually find the path
+					this.findPath(task.pathInstance);
 
-					// Process all tasks
-					while (task != null)
-					{
-						// Actually find the path
-						this.findPath(task.pathInstance);
-
-						// Get next object
-						if (this.taskStack.size() > 0)
-							task = this.taskStack.removeFirst();
-						else
-							task = null;
-					}
+					// Get next object
+					if (this.taskStack.size() > 0)
+						task = this.taskStack.removeFirst();
+					else
+						task = null;
 				}
 			}
 
 			// Wait some time before re-loop
 			try
 			{
-				Thread.sleep(2);
+				Thread.sleep(1);
 			}
 			catch (InterruptedException e)
 			{

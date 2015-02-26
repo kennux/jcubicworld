@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
 /**
  * <pre>
+ * TODO: This class is not finished yet!
  * 
  * Post-processing effect implementation. Gets the shaders from the assets
  * folder. Structure: assets/shaders/postprocess/[effect name]/vertex.shader

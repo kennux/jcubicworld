@@ -9,7 +9,7 @@ package net.kennux.cubicworld.inventory;
 public interface IInventoryUpdateHandler
 {
 	/**
-	 * Gets called when the inventory got updated.
+	 * Gets called when the inventory got updated (modified).
 	 */
 	public void inventoryGotUpdated(IInventory inventory);
 }

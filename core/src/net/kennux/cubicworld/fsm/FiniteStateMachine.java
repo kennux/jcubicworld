@@ -6,11 +6,16 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 /**
+ * <pre>
+ * This is a very basic finite state machine implementation.
+ * It can get used to implement ai or other things which could need a state machine.
  * 
+ * Important: If you implement a finite state machine, don't forget to overload the FiniteStateMachine() constructor :-)
+ * </pre>
  * @author kennux
  *
  */
-public class FiniteStateMachine
+public abstract class FiniteStateMachine
 {
 	/**
 	 * The states.
@@ -37,7 +42,6 @@ public class FiniteStateMachine
 	{
 		this.states = new ArrayList<IState>();
 		this.transitions = new HashMap<Entry<IState, IState>, ITransition>();
-
 	}
 
 	/**

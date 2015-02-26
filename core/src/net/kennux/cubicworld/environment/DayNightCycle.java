@@ -30,17 +30,11 @@ public class DayNightCycle
 	 */
 	private byte minute;
 
+	/**
+	 * Temporary tick counter variable used for counting ticks from 1-10 (10 ticks = 1 minute).
+	 * @see DayNightCycle#tick()
+	 */
 	private int tickCounter;
-
-	public byte getHour()
-	{
-		return this.hour;
-	}
-
-	public byte getMinute()
-	{
-		return this.minute;
-	}
 
 	/**
 	 * Returns a new instance of the ServerTimeUpdate. You can add this to the
@@ -107,6 +101,10 @@ public class DayNightCycle
 		}
 	}
 	
+	/**
+	 * Returns a string in format hour:minute both with leading 0's if hour or minute are less than 10.
+	 * @return
+	 */
 	public String getTimeString()
 	{
 		// Build strings
@@ -123,6 +121,10 @@ public class DayNightCycle
 		return hourString + ":" + minuteString;
 	}
 	
+	/**
+	 * Calculates the sun light level for the current daytime.
+	 * @return
+	 */
 	public byte getLightLevel()
 	{
 		// minutes = (hours * 60) + minute
@@ -143,5 +145,15 @@ public class DayNightCycle
 		float lightPercentage = (-0.0114f * (hourValue*hourValue)) + (0.2841f * hourValue) - 0.75f;
 		
 		return (byte) ((lightPercentage * (CubicWorldConfiguration.maxLightLevel-1))+1);
+	}
+	
+	public byte getHour()
+	{
+		return this.hour;
+	}
+
+	public byte getMinute()
+	{
+		return this.minute;
 	}
 }
