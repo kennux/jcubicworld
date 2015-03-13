@@ -182,30 +182,7 @@ public class VoxelData
 	 * </pre>
 	 */
 	public BlockInventory blockInventory;
-
-	/**
-	 * The current render state.
-	 * This is a byte, because there shouldnt be more than 127 render states. never.
-	 */
-	private byte renderStateId = 0;
-
-	/**
-	 * @return the renderStateId
-	 */
-	public VoxelRenderState getRenderState()
-	{
-		return this.voxelType.getRenderState(this.renderStateId);
-	}
-
-	/**
-	 * @param renderStateId
-	 *            the renderStateId to set
-	 */
-	public int getRenderStateId()
-	{
-		return this.renderStateId;
-	}
-
+	
 	/**
 	 * <pre>
 	 * Transforms the given voxel face.
@@ -221,16 +198,7 @@ public class VoxelData
 	{
 		return VoxelChunk.ROTATION_MAPPINGS[this.rotation][facing.getValue()];
 	}
-
-	/**
-	 * @param renderStateId
-	 *            the renderStateId to set
-	 */
-	public void setRenderStateId(int renderStateId)
-	{
-		this.renderStateId = (byte) renderStateId;
-	}
-
+	
 	/**
 	 * @return the lightLevel
 	 */

@@ -3,6 +3,8 @@ package net.kennux.cubicworld.plugins.baseplugin;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
+import com.badlogic.gdx.graphics.Camera;
+
 import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.admin.AdminSystem;
@@ -61,6 +63,7 @@ import net.kennux.cubicworld.plugins.baseplugin.gui.XMLTextboxLoader;
 import net.kennux.cubicworld.plugins.baseplugin.input.BlockSelectorHudHandler;
 import net.kennux.cubicworld.plugins.baseplugin.input.CameraMouseHandler;
 import net.kennux.cubicworld.plugins.baseplugin.input.MovementKeyHandler;
+import net.kennux.cubicworld.plugins.baseplugin.tileentities.FurnaceTileEntity;
 import net.kennux.cubicworld.util.ConsoleHelper;
 import net.kennux.cubicworld.util.DebugHelper;
 import net.kennux.cubicworld.util.VectorHelper;
@@ -68,10 +71,9 @@ import net.kennux.cubicworld.voxel.RaycastHit;
 import net.kennux.cubicworld.voxel.VoxelChunk;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelEngine;
-import net.kennux.cubicworld.voxel.VoxelRenderState;
 import net.kennux.cubicworld.voxel.handlers.ITileEntityHandlerFactory;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
-import net.kennux.cubicworld.voxel.handlers.MachineUpdateHandler;
+import net.kennux.cubicworld.voxel.handlers.AMachineTileEntityHandler;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -480,70 +482,33 @@ public class BasePlugin extends APlugin
 		// Furnace action handler
 		ITileEntityHandlerFactory furnaceTileEntityHandlerFactory = new ITileEntityHandlerFactory()
 		{
-
 			@Override
 			public IVoxelTileEntityHandler newInstance()
 			{
-				return new MachineUpdateHandler()
-				{
-					@Override
-					protected boolean getWorkingState(IInventory inventory)
-					{
-						ItemStack fuelStack = inventory.getItemStackInSlot(0);
-						return fuelStack != null && fuelStack.getType().getItemId() == BasePlugin.itemCoalId;
-					}
-
-					@Override
-					protected void workTick()
-					{
-						// System.out.println("Work tick!");
-					}
-
-					@Override
-					public void handleAction(VoxelData voxelData, int x, int y, int z)
-					{
-						// Get cubic world game instance.
-						CubicWorldGame cubicWorld = CubicWorld.getClient();
-
-						// Init overlay data
-						OverlayData overlayData = new OverlayData();
-						overlayData.put("inventory", voxelData.blockInventory);
-						overlayData.put("playerInventory", CubicWorld.getClient().playerController.getPlayerInventory());
-						overlayData.put("voxelPos", new Vector3(x, y, z));
-
-						// Activate overlay
-						IGuiOverlay blockOverlay = cubicWorld.guiManager.getOverlayById(BasePlugin.furnaceGuiOverlayId);
-
-						blockOverlay.setOverlayData(overlayData);
-
-						// Now open the overlay
-						cubicWorld.guiManager.openOverlay(BasePlugin.furnaceGuiOverlayId);
-					}
-
-				};
+				return new FurnaceTileEntity();
 			}
 		};
 
 		// Register voxels
-		voxelGrassId = VoxelEngine.registerType("Grass").setRenderState(0, new VoxelRenderState(grassTopId, dirtId, grassSideId, grassSideId, grassSideId, grassSideId)).setGuiTexture(grassTop).voxelId;
+		voxelGrassId = VoxelEngine.registerType("Grass").setTextures(grassTopId, dirtId, grassSideId, grassSideId, grassSideId, grassSideId).setGuiTexture(grassTop).voxelId;
 
-		voxelDirtId = VoxelEngine.registerType("Dirt").setRenderState(0, new VoxelRenderState(dirtId, dirtId, dirtId, dirtId, dirtId, dirtId)).setGuiTexture(dirt).voxelId;
+		voxelDirtId = VoxelEngine.registerType("Dirt").setTextures(dirtId, dirtId, dirtId, dirtId, dirtId, dirtId).setGuiTexture(dirt).voxelId;
 
-		voxelBedrockId = VoxelEngine.registerType("Bedrock").setRenderState(0, new VoxelRenderState(bedrockId, bedrockId, bedrockId, bedrockId, bedrockId, bedrockId)).setGuiTexture(bedrock).voxelId;
+		voxelBedrockId = VoxelEngine.registerType("Bedrock").setTextures(bedrockId, bedrockId, bedrockId, bedrockId, bedrockId, bedrockId).setGuiTexture(bedrock).voxelId;
 
-		voxelLeavesSpruceId = VoxelEngine.registerType("LeavesSpruce").setRenderState(0, new VoxelRenderState(leavesSpruceId, leavesSpruceId, leavesSpruceId, leavesSpruceId, leavesSpruceId, leavesSpruceId)).setTransparent(true).setGuiTexture(leavesSpruce).voxelId;
+		voxelLeavesSpruceId = VoxelEngine.registerType("LeavesSpruce").setTextures(leavesSpruceId, leavesSpruceId, leavesSpruceId, leavesSpruceId, leavesSpruceId, leavesSpruceId).setTransparent(true).setGuiTexture(leavesSpruce).voxelId;
 
-		voxelTreeSpruceId = VoxelEngine.registerType("TreeSpruce").setRenderState(0, new VoxelRenderState(treeSpruceId, treeSpruceId, treeSpruceId, treeSpruceId, treeSpruceId, treeSpruceId)).setGuiTexture(treeSpruce).voxelId;
+		voxelTreeSpruceId = VoxelEngine.registerType("TreeSpruce").setTextures(treeSpruceId, treeSpruceId, treeSpruceId, treeSpruceId, treeSpruceId, treeSpruceId).setGuiTexture(treeSpruce).voxelId;
 
-		voxelStoneId = VoxelEngine.registerType("Stone").setRenderState(0, new VoxelRenderState(stoneId, stoneId, stoneId, stoneId, stoneId, stoneId)).setGuiTexture(stone).voxelId;
+		voxelStoneId = VoxelEngine.registerType("Stone").setTextures(stoneId, stoneId, stoneId, stoneId, stoneId, stoneId).setGuiTexture(stone).voxelId;
 
-		voxelGlassId = VoxelEngine.registerType("Glass").setRenderState(0, new VoxelRenderState(glassId, glassId, glassId, glassId, glassId, glassId)).setTransparent(true).setGuiTexture(glass).voxelId;
+		voxelGlassId = VoxelEngine.registerType("Glass").setTextures(glassId, glassId, glassId, glassId, glassId, glassId).setTransparent(true).setGuiTexture(glass).voxelId;
 
 		// Create furnace render states
-		VoxelRenderState furnaceNormalState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontId, furnaceSideId);
-		VoxelRenderState furnaceWorkingState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontLitId, furnaceSideId);
+		/*VoxelRenderState furnaceNormalState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontId, furnaceSideId);
+		VoxelRenderState furnaceWorkingState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontLitId, furnaceSideId);*/
 
-		voxelFurnaceId = VoxelEngine.registerType("Furnace").setTileEntityHandlerFactory(furnaceTileEntityHandlerFactory).setRenderState(0, furnaceNormalState).setRenderState(1, furnaceWorkingState).setInventorySize(2).setGuiTexture(furnaceFrontTexture).voxelId;
+		voxelFurnaceId = VoxelEngine.registerType("Furnace").setTextures(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontId, furnaceSideId).setTileEntityHandlerFactory(furnaceTileEntityHandlerFactory).setInventorySize(2).setGuiTexture(furnaceFrontTexture).voxelId;
 	}
 
 	public void initializeGuiManager(GuiManager guiManager)
@@ -681,7 +646,7 @@ public class BasePlugin extends APlugin
 		AdminSystem.registerCommand("test", new TestCommand());
 	}
 
-	@Event(eventType = "update")
+	@Event(eventName = "update")
 	public void update(boolean isServer)
 	{
 		if (!isServer)

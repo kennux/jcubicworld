@@ -1,7 +1,6 @@
 package net.kennux.cubicworld.voxel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
@@ -10,7 +9,6 @@ import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.inventory.IInventoryUpdateHandler;
-import net.kennux.cubicworld.math.MathUtils;
 import net.kennux.cubicworld.math.Vector3i;
 import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.networking.packet.inventory.ServerBlockInventoryUpdate;
@@ -202,31 +200,31 @@ public class VoxelChunk
 	 * The voxel world master instance.
 	 */
 	public VoxelWorld master;
-
+	
 	/**
-	 * The models which will get rendered in every frame.
-	 * They get built in generateMeshData().
+	 * The visible tile entity positions.
+	 * Will get built in the generateMesh() function.
+	 * This list is the "new" one which will get set to visibleTileEntities in createMesh().
 	 */
-	private ArrayList<ModelInstance> models;
+	private ArrayList<Vector3i> newVisibleTileEntities = new ArrayList<Vector3i>();
+	
 	/**
-	 * The temporary new models value.
-	 * Will get built in generateMeshData().
-	 * 
-	 * This gets first set and then used in the models arraylist.
+	 * The visible tile entity positions.
+	 * Will get set in the createNewMesh() function.
 	 */
-	private ArrayList<ModelInstance> newModels;
+	private ArrayList<Vector3i> visibleTileEntities = new ArrayList<Vector3i>();
 
 	/**
 	 * The voxel update handlers list.
 	 */
-	private HashMap<Vector3, IVoxelTileEntityHandler> tileEntityHandlers = new HashMap<Vector3, IVoxelTileEntityHandler>();
+	private HashMap<Vector3i, IVoxelTileEntityHandler> tileEntityHandlers = new HashMap<Vector3i, IVoxelTileEntityHandler>();
 	
 	/**
 	 * The voxel update handlers list copy instance.
 	 * The copy of this instance will get used for acutally firing the tile entity events.
 	 * @see VoxelChunk#update()
 	 */
-	private HashMap<Vector3, IVoxelTileEntityHandler> tileEntityHandlersCopyInstance = new HashMap<Vector3, IVoxelTileEntityHandler>();
+	private HashMap<Vector3i, IVoxelTileEntityHandler> tileEntityHandlersCopyInstance = new HashMap<Vector3i, IVoxelTileEntityHandler>();
 
 	private Object generationLockObject = new Object();
 
@@ -397,6 +395,9 @@ public class VoxelChunk
 				// Set the vertices
 				this.voxelMesh.setVertices(this.newVertices);
 				this.voxelMesh.setIndices(this.newIndices);
+				
+				// Set the visible tile entities
+				this.visibleTileEntities = this.newVisibleTileEntities;
 
 				// Calculate bounding box
 				try
@@ -425,8 +426,6 @@ public class VoxelChunk
 			 * if (this.voxelMesh != null)
 			 * this.voxelMesh.dispose();
 			 */
-
-			this.models = this.newModels;
 			// this.voxelMesh = newMesh;
 		}
 	}
@@ -459,7 +458,7 @@ public class VoxelChunk
 			final int initListLength = 16000; // Start with a length of 16000 to avoid re-allocation
 			ArrayList<Float> vertices = new ArrayList<Float>(initListLength * vertexSize);
 			ArrayList<Short> indices = new ArrayList<Short>(initListLength);
-			ArrayList<ModelInstance> modelList = new ArrayList<ModelInstance>();
+			this.newVisibleTileEntities.clear();
 			short indicesCounter = 0;
 
 			for (int x = 0; x < VoxelWorld.chunkWidth; x++)
@@ -473,6 +472,7 @@ public class VoxelChunk
 							continue;
 
 						Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
+						Vector3i localPos = new Vector3i(x,y,z);
 						int absX = absolutePos.x;
 						int absY = absolutePos.y;
 						int absZ = absolutePos.z;
@@ -492,22 +492,12 @@ public class VoxelChunk
 						boolean frontSideVisible = z != VoxelWorld.chunkDepth - 1 ? (frontVoxel == null || frontVoxel.voxelType == null || frontVoxel.voxelType.voxelId < 0 || frontVoxel.voxelType.transparent) : true;
 
 						// Model or normal voxel rendering?
-						if (voxelData[x][y][z].voxelType.isModelRendering() &&
+						if (voxelData[x][y][z].voxelType.isTileEntity() &&
 						// Atleast any side visible?
 								(leftSideVisible || rightSideVisible || topSideVisible || bottomSideVisible || backSideVisible || frontSideVisible))
 						{
-							// Model rendering
-							Model m = voxelData[x][y][z].voxelType.getModel();
-							ModelInstance mInstance = new ModelInstance(m);
-
-							Vector3 vert = new Vector3(x, y, z);
-							vert.x += 0.5f + ((float) this.chunkX * (float) VoxelWorld.chunkWidth);
-							vert.y += 0.5f + ((float) this.chunkY * (float) VoxelWorld.chunkHeight);
-							vert.z += 0.5f + ((float) this.chunkZ * (float) VoxelWorld.chunkDepth);
-
-							// Set model transformation
-							mInstance.transform.set(vert, VoxelChunk.rotationTransformMappings[voxelData[x][y][z].rotation]);
-							modelList.add(mInstance);
+							// Add to the visible list
+							this.newVisibleTileEntities.add(localPos);
 						}
 						else
 						{
@@ -558,7 +548,6 @@ public class VoxelChunk
 			}
 
 			// Set new models list and bounding box
-			this.newModels = modelList;
 			this.newBoundingBox = new BoundingBox(this.getAbsoluteVoxelPosition(0, 0, 0).toFloatVector(), this.getAbsoluteVoxelPosition(VoxelWorld.chunkWidth, VoxelWorld.chunkHeight, VoxelWorld.chunkDepth).toFloatVector());
 
 			// Generate vertex data
@@ -833,28 +822,21 @@ public class VoxelChunk
 			this.voxelMesh.render(shader, GL20.GL_TRIANGLES);
 		}
 		CubicWorld.getClient().profiler.stopProfiling("MeshRendering" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ);
-	}
 
-	/**
-	 * <pre>
-	 * Renders all voxels on this chunk which are model rendered.
-	 * This is part of the second rendering pass of the voxel world.
-	 * 
-	 * This method is <b>NOT</b> thread-safe.
-	 * </pre>
-	 * 
-	 * @param modelBatch
-	 */
-	public void renderModels(Camera cam, ModelBatch modelBatch)
-	{
-		if (this.voxelMesh != null && this.boundingBox != null && cam.frustum.boundsInFrustum(this.boundingBox))
+		CubicWorld.getClient().profiler.startProfiling("TileEntityRendering" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ, "");
+		for (Vector3i pos : this.visibleTileEntities)
 		{
-			// Render block models
-			for (ModelInstance mI : this.models)
+			// Get the tile entity handler
+			IVoxelTileEntityHandler tileEntityHandler = this.tileEntityHandlers.get(pos);
+			
+			// Check if the tile entity handler is not null for error prevention
+			if (tileEntityHandler != null)
 			{
-				modelBatch.render(mI);
+				// Handle the render
+				tileEntityHandler.handleRender(cam, this.getVoxel(pos.x, pos.y, pos.z), pos.x + (this.chunkX * VoxelWorld.chunkWidth), pos.y + (this.chunkY * VoxelWorld.chunkHeight), pos.z + (this.chunkZ * VoxelWorld.chunkDepth));
 			}
 		}
+		CubicWorld.getClient().profiler.stopProfiling("TileEntityRendering" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ);
 	}
 
 	/**
@@ -948,7 +930,7 @@ public class VoxelChunk
 				voxel = new VoxelData();
 
 			// Remove update handler if existing
-			Vector3 voxelPos = new Vector3(x, y, z);
+			Vector3i voxelPos = new Vector3i(x, y, z);
 			this.tileEntityHandlers.remove(voxelPos);
 
 			this.voxelData[x][y][z] = voxel;
@@ -1005,7 +987,7 @@ public class VoxelChunk
 	}
 
 	/**
-	 * Iterates through every voxel data in this instance and collects all update handler.
+	 * Iterates through every voxel data in this instance and collects all tile entity handlers.
 	 */
 	private void setTileEntityHandlerAll()
 	{
@@ -1020,7 +1002,7 @@ public class VoxelChunk
 						// Check if the voxel at the given position is not null, not air and a tile entity
 						if (this.voxelData[x][y][z] != null && this.voxelData[x][y][z].voxelType != null && this.voxelData[x][y][z].voxelType.isTileEntity())
 							// Add to tile entity handlers
-							this.tileEntityHandlers.put(new Vector3(x, y, z), this.voxelData[x][y][z].tileEntity);
+							this.tileEntityHandlers.put(new Vector3i(x, y, z), this.voxelData[x][y][z].tileEntity);
 
 		}
 	}
@@ -1063,19 +1045,19 @@ public class VoxelChunk
 
 		// Lighting check
 		// The lighting algorithm needs all chunks around this chunk to be ready.
-		if (!ClientChunkRequest.areRequestsPending() && this.localLightingDirty && this.isInitialized() && (this.chunkY == this.master.chunksOnYAxis() || this.master.chunkLocalLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ)))
+		if (!ClientChunkRequest.areRequestsPending() && this.localLightingDirty && this.isInitialized() && (this.chunkY == this.master.chunksOnYAxis() || this.master.isChunkLocalLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ)))
 		{
 			this.recalculateLocalLighting();
 			this.localLightingDirty = false;
 		}
 		
 		if (!ClientChunkRequest.areRequestsPending() && this.globalLightingDirty && this.isInitialized() &&
-			this.master.chunkLocalLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ) && 
-			this.master.chunkLocalLightingReady(this.chunkX, this.chunkY - 1, this.chunkZ) && 
-			this.master.chunkLocalLightingReady(this.chunkX + 1, this.chunkY, this.chunkZ) && 
-			this.master.chunkLocalLightingReady(this.chunkX - 1, this.chunkY, this.chunkZ) && 
-			this.master.chunkLocalLightingReady(this.chunkX, this.chunkY, this.chunkZ + 1) &&
-			this.master.chunkLocalLightingReady(this.chunkX, this.chunkY, this.chunkZ - 1))
+			this.master.isChunkLocalLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ) && 
+			this.master.isChunkLocalLightingReady(this.chunkX, this.chunkY - 1, this.chunkZ) && 
+			this.master.isChunkLocalLightingReady(this.chunkX + 1, this.chunkY, this.chunkZ) && 
+			this.master.isChunkLocalLightingReady(this.chunkX - 1, this.chunkY, this.chunkZ) && 
+			this.master.isChunkLocalLightingReady(this.chunkX, this.chunkY, this.chunkZ + 1) &&
+			this.master.isChunkLocalLightingReady(this.chunkX, this.chunkY, this.chunkZ - 1))
 		{
 			this.recalculateGlobalLighting();
 			
@@ -1087,13 +1069,13 @@ public class VoxelChunk
 		synchronized (this.voxelDataLockObject)
 		{
 			this.tileEntityHandlersCopyInstance.clear();
-			for (Entry<Vector3, IVoxelTileEntityHandler> entry : this.tileEntityHandlers.entrySet())
+			for (Entry<Vector3i, IVoxelTileEntityHandler> entry : this.tileEntityHandlers.entrySet())
 			{
 				this.tileEntityHandlersCopyInstance.put(entry.getKey(), entry.getValue());
 			}
 			
 			// Exec tile entity updates
-			for (Entry<Vector3, IVoxelTileEntityHandler> entry : this.tileEntityHandlersCopyInstance.entrySet())
+			for (Entry<Vector3i, IVoxelTileEntityHandler> entry : this.tileEntityHandlersCopyInstance.entrySet())
 			{
 				int x = (int) entry.getKey().x;
 				int y = (int) entry.getKey().y;
@@ -1155,6 +1137,8 @@ public class VoxelChunk
 					for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
 					{
 						v = this.voxelData[x][y][z];
+						if (v == null)
+							continue;
 						
 						// This function will only iterate over air or transparent blocks which are uninitialized.
 						if (v.getBlockLightLevel() == -1 && (v.voxelType == null || v.voxelType.transparent))
@@ -1262,6 +1246,9 @@ public class VoxelChunk
 					for (int y = VoxelWorld.chunkHeight-1; y >= 0; y--)
 					{
 						v = this.voxelData[x][y][z];
+						if (v == null)
+							continue;
+						
 						v.setSunLightLevel(-1);
 						
 						// The blocklight level will get initialized with 0
@@ -1281,6 +1268,8 @@ public class VoxelChunk
 						// Calculate the absolute position of the current voxel
 						this.getAbsoluteVoxelPosition(x, y, z, absolutePos);
 						v = this.voxelData[x][y][z];
+						if (v == null)
+							continue;
 						
 						// If the current voxel is the most at the upper border of the world bounding
 						// Set the sunlight level to it for propagating it down.
@@ -1349,11 +1338,11 @@ public class VoxelChunk
 	 * @param blockId The voxel type id.
 	 * @param face The foxel face to use for getting uv coordinates.
 	 */
-	private void WriteSideData(ArrayList<Float> vertices, ArrayList<Short> indices, Vector3[] sideVertices, Vector3[] sideNormals, short[] sideIndices, short indicesCounter, int x, int y, int z, VoxelData voxelData, VoxelFace face, byte lightLevel)
+	private final void WriteSideData(ArrayList<Float> vertices, ArrayList<Short> indices, Vector3[] sideVertices, Vector3[] sideNormals, short[] sideIndices, short indicesCounter, int x, int y, int z, VoxelData voxelData, VoxelFace face, byte lightLevel)
 	{
 		// short blockId = voxelData.voxelType.voxelId;
 
-		Vector2[] uv = voxelData.getRenderState().getUvsForFace(face);
+		Vector2[] uv = voxelData.voxelType.getUvsForFace(face);
 
 		// boolean transparent = VoxelEngine.getVoxelType(blockId).transparent;
 

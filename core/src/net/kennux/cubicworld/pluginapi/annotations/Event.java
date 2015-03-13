@@ -21,5 +21,5 @@ import java.lang.annotation.Target;
 // on class level
 public @interface Event
 {
-	public String eventType() default "";
+	public String eventName() default "";
 }

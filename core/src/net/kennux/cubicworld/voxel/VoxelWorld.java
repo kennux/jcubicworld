@@ -850,7 +850,7 @@ public class VoxelWorld
 	 * @param chunkZ
 	 * @return
 	 */
-	public boolean chunkLocalLightingReady(int chunkX, int chunkY, int chunkZ)
+	public boolean isChunkLocalLightingReady(int chunkX, int chunkY, int chunkZ)
 	{
 		VoxelChunk chunk = this.chunks.get(new ChunkKey(chunkX, chunkY, chunkZ));
 		return chunk == null || chunk.isInitializedAndLocalLightingReady();

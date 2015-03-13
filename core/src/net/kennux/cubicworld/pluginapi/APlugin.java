@@ -94,7 +94,6 @@ public abstract class APlugin
 	 */
 	public abstract void loadSounds();
 
-	// Bootstrap
 	/**
 	 * <pre>
 	 * Gets called when this plugin should load it's textures and add them to

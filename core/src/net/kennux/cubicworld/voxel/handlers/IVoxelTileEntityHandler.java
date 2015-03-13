@@ -1,5 +1,7 @@
 package net.kennux.cubicworld.voxel.handlers;
 
+import com.badlogic.gdx.graphics.Camera;
+
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelData;
@@ -38,6 +40,15 @@ public interface IVoxelTileEntityHandler extends Cloneable
 	 * @param z
 	 */
 	public void handleAction(VoxelData voxelData, int x, int y, int z);
+	
+	/**
+	 * Gets called if the tile entity should get rendered.
+	 * @param voxelData
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	public void handleRender(Camera camera, VoxelData voxelData, int x, int y, int z);
 
 	public void serialize(BitWriter writer);
 

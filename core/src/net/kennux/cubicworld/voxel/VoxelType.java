@@ -9,6 +9,7 @@ import net.kennux.cubicworld.voxel.handlers.ITileEntityHandlerFactory;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * <pre>
@@ -48,12 +49,6 @@ public class VoxelType
 	private int inventorySize = -1;
 
 	/**
-	 * Gets set by setModel().
-	 * If this is null, normal textured block rendering gets used.
-	 */
-	private Model model;
-
-	/**
 	 * The texture which gets display for example in the block info hud element.
 	 * If you got a normal voxel, just use any of it's side textures.
 	 */
@@ -84,14 +79,105 @@ public class VoxelType
 	 * The filter rule set instance for this voxel type.
 	 */
 	private InventoryFilterRuleSet filterRuleSet;
+	
+
+	public int topTexture, bottomTexture, leftTexture, rightTexture, frontTexture, backTexture;
+	public Vector2[] topUv, bottomUv, leftUv, rightUv, frontUv, backUv;
+
+	public VoxelType setTextures(int topTexture, int bottomTexture, int leftTexture, int rightTexture, int frontTexture, int backTexture)
+	{
+		this.topTexture = topTexture;
+		this.bottomTexture = bottomTexture;
+		this.leftTexture = leftTexture;
+		this.rightTexture = rightTexture;
+		this.frontTexture = frontTexture;
+		this.backTexture = backTexture;
+		
+		return this;
+	}
 
 	/**
-	 * The rendering definitions.
-	 * Key = state id
-	 * Value = rendering definition
+	 * Gets uvs for the given faces.
+	 * 
+	 * @param face
+	 * @return
 	 */
-	private HashMap<Integer, VoxelRenderState> renderStates = new HashMap<Integer, VoxelRenderState>();
+	public Vector2[] getUvsForFace(VoxelFace face)
+	{
+		switch (face)
+		{
+			case FRONT:
+				return this.frontUv;
 
+			case BACK:
+				return this.backUv;
+
+			case LEFT:
+				return this.leftUv;
+
+			case RIGHT:
+				return this.rightUv;
+
+			case TOP:
+				return this.topUv;
+
+			case BOTTOM:
+				return this.bottomUv;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Initializes the UV-Coordinates for this voxel type. Gets called by the
+	 * voxelengine after the bootstrap was successfully executed.
+	 */
+	public void initializeUvs()
+	{
+		this.topUv = VoxelEngine.getUvForTexture(topTexture);
+		this.bottomUv = VoxelEngine.getUvForTexture(bottomTexture);
+		this.leftUv = VoxelEngine.getUvForTexture(leftTexture);
+		this.rightUv = VoxelEngine.getUvForTexture(rightTexture);
+		this.frontUv = VoxelEngine.getUvForTexture(frontTexture);
+		this.backUv = VoxelEngine.getUvForTexture(backTexture);
+	}
+
+	/**
+	 * Sets the texture for a given face.
+	 * 
+	 * @param face
+	 * @param textureId
+	 */
+	public void setTexture(VoxelFace face, int textureId)
+	{
+		switch (face)
+		{
+			case FRONT:
+				this.frontTexture = textureId;
+				break;
+
+			case BACK:
+				this.backTexture = textureId;
+				break;
+
+			case LEFT:
+				this.leftTexture = textureId;
+				break;
+
+			case RIGHT:
+				this.rightTexture = textureId;
+				break;
+
+			case TOP:
+				this.topTexture = textureId;
+				break;
+
+			case BOTTOM:
+				this.bottomTexture = textureId;
+				break;
+		}
+	}
+	
 	/**
 	 * Returns true if this voxel type is able to physically collide with other objects.
 	 * 
@@ -153,31 +239,6 @@ public class VoxelType
 		return lightRadius;
 	}
 
-	/**
-	 * Returns the model used by this voxel type.
-	 * Before calling this you should check if this voxel type is model rendered.
-	 * You can use isModelRendering() to check this.
-	 * 
-	 * This may returns null if the model is not set.
-	 * 
-	 * @return
-	 */
-	public Model getModel()
-	{
-		return this.model;
-	}
-
-	/**
-	 * Gets the renderstate for the given state id.
-	 * 
-	 * @param stateId
-	 * @return
-	 */
-	public VoxelRenderState getRenderState(int stateId)
-	{
-		return this.renderStates.get(new Integer(stateId));
-	}
-
 	public boolean isTileEntity()
 	{
 		return this.tileEntityHandlerFactory != null;
@@ -192,33 +253,11 @@ public class VoxelType
 	}
 
 	/**
-	 * Initializes the UV-Coordinates for this voxel type. Gets called by the
-	 * voxelengine after the bootstrap was successfully executed.
-	 */
-	public void initializeUvs()
-	{
-		for (Entry<Integer, VoxelRenderState> entry : this.renderStates.entrySet())
-		{
-			entry.getValue().initializeUvs();
-		}
-	}
-
-	/**
 	 * @return the isLightSource
 	 */
 	public boolean isLightSource()
 	{
 		return isLightSource;
-	}
-
-	/**
-	 * Returns true if a model was set to this voxel type with setModel().
-	 * 
-	 * @return
-	 */
-	public boolean isModelRendering()
-	{
-		return this.model != null;
 	}
 
 	/**
@@ -286,30 +325,6 @@ public class VoxelType
 		this.isLightSource = true;
 		this.lightRadius = lightRadius;
 		this.lightEmittingLevel = emittingLevel;
-	}
-
-	/**
-	 * If you want to use a model as a voxel type, you can set the model in this method.
-	 * If the model is set, no block will get rendered for this voxel type. Instead the model will get drawn in the voxel's <strong>CENTER</strong> position.
-	 * 
-	 * @return
-	 */
-	public VoxelType setModel(Model m)
-	{
-		this.model = m;
-		return this;
-	}
-
-	/**
-	 * Sets the renderstate for the given state id.
-	 * 
-	 * @param face
-	 * @param textureId
-	 */
-	public VoxelType setRenderState(int stateId, VoxelRenderState renderState)
-	{
-		this.renderStates.put(new Integer(stateId), renderState);
-		return this;
 	}
 
 	/**

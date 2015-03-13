@@ -136,7 +136,7 @@ public class PluginManager
 				{
 					// Get the event annotation
 					Event eventAnnotation = m.getAnnotation(Event.class);
-					String eventType = eventAnnotation.eventType();
+					String eventType = eventAnnotation.eventName();
 
 					// Check if this event is allowed / known
 					if (knownEventNames.contains(eventType))

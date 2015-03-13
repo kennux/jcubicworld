@@ -147,19 +147,11 @@ public class ChunkManager
 	 */
 	public void render(Camera cam, ShaderProgram shader, ModelBatch modelBatch)
 	{
-		// Voxel render pass
+		// Render all chunks
 		for (VoxelChunk c : this.chunks.values())
 		{
 			if (c != null)
 				c.render(cam, shader);
-		}
-
-		// Model render pass
-		modelBatch.begin(cam);
-		for (VoxelChunk c : this.chunks.values())
-		{
-			if (c != null)
-				c.renderModels(cam, modelBatch);
 		}
 
 		modelBatch.end();

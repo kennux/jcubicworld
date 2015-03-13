@@ -1,5 +1,7 @@
 package net.kennux.cubicworld.voxel.handlers;
 
+import com.badlogic.gdx.graphics.Camera;
+
 import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.serialization.BitReader;
@@ -25,7 +27,7 @@ import net.kennux.cubicworld.voxel.VoxelData;
  * @author KennuX
  *
  */
-public abstract class MachineUpdateHandler implements IVoxelTileEntityHandler
+public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandler
 {
 	/**
 	 * Return true in here if the machine's conditions for starting working are met.
@@ -33,8 +35,12 @@ public abstract class MachineUpdateHandler implements IVoxelTileEntityHandler
 	 * @return
 	 */
 	protected abstract boolean getWorkingState(IInventory inventory);
-
-	@Override
+	
+	/**
+	 * Is true if the machine is currently in working state.
+	 */
+	private boolean isWorking = false;
+	
 	public void handleUpdate(VoxelData voxelData, int x, int y, int z, boolean isServer)
 	{
 		// Only blocks with inventories are allowed!
@@ -51,21 +57,23 @@ public abstract class MachineUpdateHandler implements IVoxelTileEntityHandler
 		}
 		else
 		{
-			boolean isWorking = (voxelData.getRenderStateId() == 1);
-
 			// Client render things
 			if (!isWorking && workingState)
 			{
 				// Change to working
-				voxelData.setRenderStateId(1);
+				//voxelData.setRenderStateId(1);
+				// TODO
+				this.isWorking = true;
 
 				// Set to voxel world
 				CubicWorld.getClient().voxelWorld.setVoxel(x, y, z, voxelData);
 			}
 			else if (isWorking && !workingState)
 			{
-				// Change to working
-				voxelData.setRenderStateId(0);
+				// Change to not working
+				//voxelData.setRenderStateId(0);
+				// TODO
+				this.isWorking = false;
 
 				// Set to voxel world
 				CubicWorld.getClient().voxelWorld.setVoxel(x, y, z, voxelData);
