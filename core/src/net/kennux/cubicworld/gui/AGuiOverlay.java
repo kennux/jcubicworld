@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
  * Abstract ui overlay implementation.
  * An ui overlay is for example the game settings.
  * 
- * An overlay will darken the screen and draw itself ontop of the darkened
+ * An overlay will obscure the screen and draw itself ontop of the darkened
  * image.
  * It can contain multiple gui elements like buttons, labels, textboxes, etc.
  * </pre>

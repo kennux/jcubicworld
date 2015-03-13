@@ -9,8 +9,7 @@ import com.badlogic.gdx.math.Vector3;
  * 
  * Implementation details:
  * All costs are distances times 10.
- * So heuristic cost is calculated by (int)(Vector3.distance(myPosition,
- * goalPosition) * 10).
+ * So heuristic cost is calculated by (int)(Vector3.distance(myPosition, goalPosition) * 10).
  * This is done to avoid floating-point calculations for better performance.
  * </pre>
  * 
