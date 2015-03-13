@@ -73,11 +73,6 @@ import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelEngine;
 import net.kennux.cubicworld.voxel.handlers.ITileEntityHandlerFactory;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
-<<<<<<< HEAD
-import net.kennux.cubicworld.voxel.handlers.AMachineTileEntityHandler;
-=======
-import net.kennux.cubicworld.voxel.handlers.MachineTileEntityHandler;
->>>>>>> 750b59f707d0cf71089f7ef3d84ab801491a9e23
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -489,47 +484,7 @@ public class BasePlugin extends APlugin
 			@Override
 			public IVoxelTileEntityHandler newInstance()
 			{
-<<<<<<< HEAD
 				return new FurnaceTileEntity();
-=======
-				return new MachineTileEntityHandler()
-				{
-					@Override
-					protected boolean getWorkingState(IInventory inventory)
-					{
-						ItemStack fuelStack = inventory.getItemStackInSlot(0);
-						return fuelStack != null && fuelStack.getType().getItemId() == BasePlugin.itemCoalId;
-					}
-
-					@Override
-					protected void workTick()
-					{
-						// System.out.println("Work tick!");
-					}
-
-					@Override
-					public void handleAction(VoxelData voxelData, int x, int y, int z)
-					{
-						// Get cubic world game instance.
-						CubicWorldGame cubicWorld = CubicWorld.getClient();
-
-						// Init overlay data
-						OverlayData overlayData = new OverlayData();
-						overlayData.put("inventory", voxelData.blockInventory);
-						overlayData.put("playerInventory", CubicWorld.getClient().playerController.getPlayerInventory());
-						overlayData.put("voxelPos", new Vector3(x, y, z));
-
-						// Activate overlay
-						IGuiOverlay blockOverlay = cubicWorld.guiManager.getOverlayById(BasePlugin.furnaceGuiOverlayId);
-
-						blockOverlay.setOverlayData(overlayData);
-
-						// Now open the overlay
-						cubicWorld.guiManager.openOverlay(BasePlugin.furnaceGuiOverlayId);
-					}
-
-				};
->>>>>>> 750b59f707d0cf71089f7ef3d84ab801491a9e23
 			}
 		};
 
