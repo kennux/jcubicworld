@@ -7,33 +7,52 @@ import net.kennux.cubicworld.gui.overlay.OverlayData;
 import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.item.ItemStack;
 import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
+import net.kennux.cubicworld.util.MeshUtil;
 import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.handlers.AMachineTileEntityHandler;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 
 public class FurnaceTileEntity extends AMachineTileEntityHandler
 {
-	private static Model furnaceNotActiveModel;
-	private static Model furnaceActiveModel;
+	private static Mesh furnaceNotActiveMesh;
+	private static Mesh furnaceActiveMesh;
 	
 	/**
 	 * Constructs the models needed for the furnace tile entity.
 	 */
 	public FurnaceTileEntity()
 	{
-		// Initialize resources
-		if (furnaceNotActiveModel != null)
+	}
+
+	@Override
+	protected Mesh getWorkingMesh()
+	{
+		if (furnaceNotActiveMesh == null)
 		{
-			// TODO
+			furnaceNotActiveMesh = MeshUtil.buildBlockMesh(BasePlugin.furnaceTopId, BasePlugin.furnaceTopId, BasePlugin.furnaceSideId, BasePlugin.furnaceSideId, BasePlugin.furnaceFrontId, BasePlugin.furnaceSideId);
 		}
-		if (furnaceActiveModel != null)
+		
+		return furnaceNotActiveMesh;
+	}
+
+	@Override
+	protected Mesh getNotWorkingMesh()
+	{
+		if (furnaceActiveMesh == null)
 		{
-			// TODO
+			furnaceActiveMesh = MeshUtil.buildBlockMesh(BasePlugin.furnaceTopId, BasePlugin.furnaceTopId, BasePlugin.furnaceSideId, BasePlugin.furnaceSideId, BasePlugin.furnaceFrontLitId, BasePlugin.furnaceSideId);
 		}
+		
+		return furnaceActiveMesh;
 	}
 	
 	@Override
@@ -68,11 +87,5 @@ public class FurnaceTileEntity extends AMachineTileEntityHandler
 
 		// Now open the overlay
 		cubicWorld.guiManager.openOverlay(BasePlugin.furnaceGuiOverlayId);
-	}
-	
-	@Override
-	public void handleRender(Camera camera, VoxelData voxelData, int x, int y, int z)
-	{
-		
 	}
 }

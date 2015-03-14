@@ -44,6 +44,13 @@ import com.badlogic.gdx.math.Quaternion;
 public class CubicWorldGame implements ApplicationListener
 {
 	/**
+	 * Reference to the opengl rendering thread.
+	 * This is used to check if a thread has access to the opengl api.
+	 * @see CubicWorld#isReallyClient()
+	 */
+	public Thread renderingThread;
+	
+	/**
 	 * The perspective camera used for rendering.
 	 */
 	public PerspectiveCamera cam;
@@ -197,6 +204,9 @@ public class CubicWorldGame implements ApplicationListener
 	@Override
 	public void create()
 	{
+		// Set render thread
+		this.renderingThread = Thread.currentThread();
+		
 		// Init Profiler
 		GLProfiler.enable();
 		this.profiler = new Profiler();

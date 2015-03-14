@@ -27,6 +27,7 @@ import net.kennux.cubicworld.voxel.generator.WorldGenerator;
 import net.kennux.cubicworld.voxel.generator.noise.SimplexNoise3D;
 import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 
 /**

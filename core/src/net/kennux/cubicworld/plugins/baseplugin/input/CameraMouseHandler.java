@@ -83,6 +83,7 @@ public class CameraMouseHandler implements IMouseInputHandler
 					removeVoxel.y = (int) hitInfo.hitVoxelPosition.y;
 					removeVoxel.z = (int) hitInfo.hitVoxelPosition.z;
 					removeVoxel.data = BlockSelectorGui.instance.constructNewCurrentSelected();
+					removeVoxel.data.rotation = 2;
 
 					CubicWorld.getClient().client.sendPacket(removeVoxel);
 				}

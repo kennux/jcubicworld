@@ -145,16 +145,31 @@ public class ChunkManager
 	 * @param cam
 	 * @param shader
 	 */
-	public void render(Camera cam, ShaderProgram shader, ModelBatch modelBatch)
+	public void render(Camera cam, ShaderProgram shader)
 	{
+		// Start world rendering pass (only chunk meshes)
+		shader.begin();
+
+		shader.setUniformMatrix("m_cameraProj", cam.combined);
+
+		VoxelEngine.textureAtlas.atlasTexture.bind(0);
+		shader.setUniformi("r_textureAtlas", 0);
+		
 		// Render all chunks
 		for (VoxelChunk c : this.chunks.values())
 		{
 			if (c != null)
 				c.render(cam, shader);
 		}
-
-		modelBatch.end();
+		
+		shader.end();
+		
+		// Tile entity pass
+		for (VoxelChunk c : this.chunks.values())
+		{
+			if (c != null)
+				c.renderTileEntities(cam);
+		}
 	}
 
 	/**

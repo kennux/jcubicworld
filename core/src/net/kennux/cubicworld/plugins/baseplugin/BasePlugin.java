@@ -261,7 +261,7 @@ public class BasePlugin extends APlugin
 			}
 		});
 		
-		// Register player inventory handler
+		// Register debug action
 		inputManager.addInputAction(Input.Keys.P, new IKeyInputHandler()
 		{
 

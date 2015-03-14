@@ -158,16 +158,7 @@ public abstract class AEntity
 	{
 		return position;
 	}
-
-	/**
-	 * Returns the size in bytes a state sync needs.
-	 * Standard: 24 (pos + euler).
-	 */
-	public int getStateSyncSize()
-	{
-		return 24;
-	}
-
+	
 	/**
 	 * Initialize all resources of your entity in here.
 	 * This function is called right after setMaster() got called.

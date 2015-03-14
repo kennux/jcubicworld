@@ -1,6 +1,7 @@
 package net.kennux.cubicworld.voxel.handlers;
 
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
@@ -44,9 +45,9 @@ public interface IVoxelTileEntityHandler extends Cloneable
 	/**
 	 * Gets called if the tile entity should get rendered.
 	 * @param voxelData
-	 * @param x
-	 * @param y
-	 * @param z
+	 * @param x X-Position of the voxel in absolute voxelspace.
+	 * @param y Y-Position of the voxel in absolute voxelspace.
+	 * @param z Z-Position of the voxel in absolute voxelspace.
 	 */
 	public void handleRender(Camera camera, VoxelData voxelData, int x, int y, int z);
 

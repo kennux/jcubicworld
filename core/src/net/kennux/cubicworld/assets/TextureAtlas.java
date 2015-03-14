@@ -220,7 +220,7 @@ public class TextureAtlas
 		 * (float) yPosition / (float) this.atlasHeight), new Vector2((float) xPosition / (float) this.atlasWidth,
 		 * (float) yPosition / (float) this.atlasHeight) };
 		 */
-		return textureCoordinates.get(new Integer(textureId));
+		return textureCoordinates.get(Integer.valueOf(textureId));
 	}
 
 	/**

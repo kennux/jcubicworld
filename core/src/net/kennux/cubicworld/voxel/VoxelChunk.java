@@ -100,6 +100,21 @@ public class VoxelChunk
 
 	/**
 	 * <pre>
+	 * Rotation quaternion mappings.
+	 * 
+	 * This array contains quaternions for all rotation ids.
+	 * </pre>
+	 */
+	public static final Quaternion[] ROTATION_MAPPINGS_QUATERNION = new Quaternion[]
+	{
+		new Quaternion().setEulerAngles(0, 0, 0),
+		new Quaternion().setEulerAngles(90, 0, 0),
+		new Quaternion().setEulerAngles(180, 0, 0),
+		new Quaternion().setEulerAngles(270, 0, 0)
+	};
+
+	/**
+	 * <pre>
 	 * The normal vectors for voxelfaces.
 	 * Example usage:
 	 * 
@@ -822,21 +837,31 @@ public class VoxelChunk
 			this.voxelMesh.render(shader, GL20.GL_TRIANGLES);
 		}
 		CubicWorld.getClient().profiler.stopProfiling("MeshRendering" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ);
-
-		CubicWorld.getClient().profiler.startProfiling("TileEntityRendering" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ, "");
-		for (Vector3i pos : this.visibleTileEntities)
+	}
+	
+	/**
+	 * The tile entity rendering pass.
+	 */
+	public void renderTileEntities(Camera cam)
+	{
+		if (this.voxelMesh != null && this.boundingBox != null && cam.frustum.boundsInFrustum(this.boundingBox))
 		{
-			// Get the tile entity handler
-			IVoxelTileEntityHandler tileEntityHandler = this.tileEntityHandlers.get(pos);
-			
-			// Check if the tile entity handler is not null for error prevention
-			if (tileEntityHandler != null)
+			// Render tile entities
+			CubicWorld.getClient().profiler.startProfiling("TileEntityRendering" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ, "");
+			for (Vector3i pos : this.visibleTileEntities)
 			{
-				// Handle the render
-				tileEntityHandler.handleRender(cam, this.getVoxel(pos.x, pos.y, pos.z), pos.x + (this.chunkX * VoxelWorld.chunkWidth), pos.y + (this.chunkY * VoxelWorld.chunkHeight), pos.z + (this.chunkZ * VoxelWorld.chunkDepth));
+				// Get the tile entity handler
+				IVoxelTileEntityHandler tileEntityHandler = this.tileEntityHandlers.get(pos);
+				
+				// Check if the tile entity handler is not null for error prevention
+				if (tileEntityHandler != null)
+				{
+					// Handle the render call
+					tileEntityHandler.handleRender(cam, this.getVoxel(pos.x, pos.y, pos.z), pos.x + (this.chunkX * VoxelWorld.chunkWidth), pos.y + (this.chunkY * VoxelWorld.chunkHeight), pos.z + (this.chunkZ * VoxelWorld.chunkDepth));
+				}
 			}
+			CubicWorld.getClient().profiler.stopProfiling("TileEntityRendering" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ);
 		}
-		CubicWorld.getClient().profiler.stopProfiling("TileEntityRendering" + this.chunkX + "|" + this.chunkY + "|" + this.chunkZ);
 	}
 
 	/**

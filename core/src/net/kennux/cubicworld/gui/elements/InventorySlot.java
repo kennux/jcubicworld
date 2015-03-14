@@ -199,11 +199,11 @@ public class InventorySlot extends AGuiElement
 		font.draw(spriteBatch, slotItemStack.getItemCount() + "", itemCountLabelPos.x, itemCountLabelPos.y);
 	}
 
-	public void renderLast(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin)
+	public void renderLast(SpriteBatch spriteBatch, BitmapFont font, boolean hasFocus, AGuiSkin skin, ShapeRenderer shapeRenderer)
 	{
 		// Get inventory instance
 		ItemStack slotItemStack = ((IInventory) this.parent.getOverlayData().get(this.inventory)).getItemStackInSlot(this.slotId);
-
+		
 		// Check if there actually is an item stack in this slot.
 		if (draggedSlot == this && slotItemStack != null)
 		{

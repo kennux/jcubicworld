@@ -102,11 +102,6 @@ public class VoxelWorld
 	private Pathfinder pathfinderInstance;
 
 	/**
-	 * Gets used to render model blocks in the chunks.
-	 */
-	private ModelBatch chunkModelBatch;
-
-	/**
 	 * Gets incremented after every update call.
 	 */
 	public int updateCallId;
@@ -133,7 +128,6 @@ public class VoxelWorld
 		this.chunks = new ChunkManager();
 
 		// Set references
-		this.chunkModelBatch = new ModelBatch();
 		this.worldShader = shader;
 	}
 
@@ -965,20 +959,10 @@ public class VoxelWorld
 	 */
 	public void render(Camera cam)
 	{
-		// Voxel rendering pass
-		// Set shader values
-		this.worldShader.begin();
-
-		this.worldShader.setUniformMatrix("m_cameraProj", cam.combined);
-
-		VoxelEngine.textureAtlas.atlasTexture.bind(0);
-		this.worldShader.setUniformi("r_textureAtlas", 0);
-
+		// Forward the render call to the chunk manager
 		CubicWorld.getClient().profiler.startProfiling("RenderWorld", "");
-		this.chunks.render(cam, this.worldShader, this.chunkModelBatch);
+		this.chunks.render(cam, this.worldShader);
 		CubicWorld.getClient().profiler.stopProfiling("RenderWorld");
-
-		this.worldShader.end();
 	}
 
 	/**
