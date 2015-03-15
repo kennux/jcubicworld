@@ -158,7 +158,7 @@ public abstract class AEntity
 	{
 		return position;
 	}
-	
+
 	/**
 	 * Initialize all resources of your entity in here.
 	 * This function is called right after setMaster() got called.

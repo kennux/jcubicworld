@@ -49,12 +49,12 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 	 * @return
 	 */
 	protected abstract boolean getWorkingState(IInventory inventory);
-	
+
 	/**
 	 * Is true if the machine is currently in working state.
 	 */
 	private boolean isWorking = false;
-	
+
 	// Model getters and setters.
 	/**
 	 * <pre>
@@ -63,9 +63,11 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 	 * You should NOT create a new instance on every call!
 	 * If null is returned in here nothing will get rendered.
 	 * </pre>
+	 * 
 	 * @return
 	 */
 	protected abstract Mesh getWorkingMesh();
+
 	/**
 	 * <pre>
 	 * Return your mesh for the not working state in here.
@@ -73,17 +75,18 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 	 * You should NOT create a new instance on every call!
 	 * If null is returned in here nothing will get rendered.
 	 * </pre>
+	 * 
 	 * @return
 	 */
 	protected abstract Mesh getNotWorkingMesh();
-	
+
 	/**
 	 * The tile entity shader.
 	 * This will use the shader located in assets/shaders/tileentity as standard.
 	 * Set this shader in your constructor if you want to use a custom one.
 	 */
 	private ShaderProgram tileEntityShader;
-	
+
 	public void handleUpdate(VoxelData voxelData, int x, int y, int z, boolean isServer)
 	{
 		// Only blocks with inventories are allowed!
@@ -92,7 +95,7 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 
 		// Get the current target working state
 		boolean workingState = this.getWorkingState(voxelData.blockInventory);
-		
+
 		if (isServer)
 		{
 			if (workingState)
@@ -106,11 +109,11 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 				this.stoppedWorking();
 			}
 		}
-		
+
 		// Write the is working bool
 		this.isWorking = workingState;
 	}
-	
+
 	@Override
 	public void handleRender(Camera camera, VoxelData voxelData, int x, int y, int z)
 	{
@@ -119,13 +122,13 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 		{
 			this.tileEntityShader = ShaderLoader.loadShader("tileentity");
 		}
-		
+
 		// Check if shader is compiled
 		if (this.tileEntityShader.isCompiled())
 		{
 			// Determine which mesh will get rendered
 			Mesh m = null;
-			
+
 			if (this.isWorking)
 			{
 				m = this.getWorkingMesh();
@@ -134,20 +137,20 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 			{
 				m = this.getNotWorkingMesh();
 			}
-			
+
 			// Should it get rendered?
 			if (m != null)
 			{
 				this.tileEntityShader.begin();
-				
+
 				// Render mesh
 				// TODO: Lighting
 				this.tileEntityShader.setUniformf("m_light", 1); // voxelData.getLightLevel() / (float) CubicWorldConfiguration.maxLightLevel);
 				this.tileEntityShader.setUniformMatrix("m_cameraProj", camera.combined);
-				this.tileEntityShader.setUniformMatrix("m_transform", new Matrix4(new Vector3(x+0.5f,y+0.5f,z+0.5f), VoxelChunk.ROTATION_MAPPINGS_QUATERNION[voxelData.rotation], new Vector3(1,1,1)));
+				this.tileEntityShader.setUniformMatrix("m_transform", new Matrix4(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f), VoxelChunk.ROTATION_MAPPINGS_QUATERNION[voxelData.rotation], new Vector3(1, 1, 1)));
 				VoxelEngine.textureAtlas.atlasTexture.bind(0);
 				this.tileEntityShader.setUniformi("r_textureAtlas", 0);
-				
+
 				m.render(this.tileEntityShader, GL20.GL_TRIANGLES);
 				this.tileEntityShader.end();
 			}
@@ -158,7 +161,7 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 	 * Gets called every tick the machine is working.
 	 */
 	protected abstract void workTick();
-	
+
 	/**
 	 * Gets called in the tick the machine stopped working.
 	 */

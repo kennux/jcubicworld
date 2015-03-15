@@ -32,6 +32,7 @@ public class DayNightCycle
 
 	/**
 	 * Temporary tick counter variable used for counting ticks from 1-10 (10 ticks = 1 minute).
+	 * 
 	 * @see DayNightCycle#tick()
 	 */
 	private int tickCounter;
@@ -76,7 +77,7 @@ public class DayNightCycle
 			this.minute = 0;
 			return;
 		}
-		
+
 		// Every 10th tick.
 		if (tickCounter >= 10)
 		{
@@ -100,9 +101,10 @@ public class DayNightCycle
 			this.minute -= MathUtils.floorToInt(this.minute / 60.0f) * 60;
 		}
 	}
-	
+
 	/**
 	 * Returns a string in format hour:minute both with leading 0's if hour or minute are less than 10.
+	 * 
 	 * @return
 	 */
 	public String getTimeString()
@@ -114,39 +116,40 @@ public class DayNightCycle
 		// Add prefix
 		if (minuteString.length() == 1)
 			minuteString = "0" + minuteString;
-		
+
 		if (hourString.length() == 1)
 			hourString = "0" + hourString;
-		
+
 		return hourString + ":" + minuteString;
 	}
-	
+
 	/**
 	 * Calculates the sun light level for the current daytime.
+	 * 
 	 * @return
 	 */
 	public byte getLightLevel()
 	{
 		// minutes = (hours * 60) + minute
 		int minutes = (this.hour * 60) + this.minute;
-		
+
 		// before 03:00 or after 22:00 there is no sunlight
-		if (minutes < 3*60 || minutes > 22*60)
+		if (minutes < 3 * 60 || minutes > 22 * 60)
 			return 1;
-		
+
 		// Use parabola formula f(x) = ax² + bx + c to determine the lightlevel
 		// Fixed points are 3am is sunrise, 14am is highest level (1) and 22 am is sunset
 		// Values are:
 		// a = -0.0114
 		// b = 0.2841
 		// c = -0.75
-		
+
 		float hourValue = minutes / 60.0f;
-		float lightPercentage = (-0.0114f * (hourValue*hourValue)) + (0.2841f * hourValue) - 0.75f;
-		
-		return (byte) ((lightPercentage * (CubicWorldConfiguration.maxLightLevel-1))+1);
+		float lightPercentage = (-0.0114f * (hourValue * hourValue)) + (0.2841f * hourValue) - 0.75f;
+
+		return (byte) ((lightPercentage * (CubicWorldConfiguration.maxLightLevel - 1)) + 1);
 	}
-	
+
 	public byte getHour()
 	{
 		return this.hour;

@@ -9,6 +9,7 @@ import net.kennux.cubicworld.item.ItemType;
  * The inventory filter rule set is able to hold different rules.
  * An inventory can then check if an item for the given slot is allowed to be placed in.
  * </pre>
+ * 
  * @author KennuX
  *
  */

@@ -42,17 +42,16 @@ public class Pathfinder implements Runnable
 	private LinkedList<PathfinderTask> taskStack;
 	private Object taskStackLockObject = new Object();
 
-	
 	public Pathfinder(VoxelWorld world)
 	{
 		// Start the pathfinder thread
 		this.pathfinderThread = new Thread(this);
 		this.pathfinderThread.setName("Pathfinder worker thread");
-	
+
 		// Initialize
 		this.world = world;
 		this.taskStack = new LinkedList<PathfinderTask>();
-		
+
 		// Start the thread
 		this.pathfinderThread.start();
 	}
@@ -236,11 +235,11 @@ public class Pathfinder implements Runnable
 		// This array list will get used as a temporary storage for tasks which needs to get executed.
 		// This is needed because otherwise the addPathfinderTask function would block till all current tasks are done.
 		ArrayList<PathfinderTask> tasks = new ArrayList<PathfinderTask>();
-		
+
 		while (true)
 		{
 			tasks.clear();
-			
+
 			// Work available?
 			synchronized (this.taskStackLockObject)
 			{
@@ -249,9 +248,9 @@ public class Pathfinder implements Runnable
 					tasks.add(this.taskStack.removeFirst());
 				}
 			}
-			
+
 			for (PathfinderTask task : tasks)
-			{	
+			{
 				// Process all tasks
 				while (task != null)
 				{

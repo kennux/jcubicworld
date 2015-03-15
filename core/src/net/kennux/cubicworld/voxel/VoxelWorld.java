@@ -42,7 +42,7 @@ public class VoxelWorld
 	 * chunk on the z-axis.
 	 */
 	public static final int chunkDepth = 16;
-	
+
 	/**
 	 * The current sun light level.
 	 * If this changes, all chunks will regenerate!
@@ -839,6 +839,7 @@ public class VoxelWorld
 	/**
 	 * Checks if the chunk at the given chunkspace position already calculated it's local lighting.
 	 * Will return true if the chunk is non-exisiting.
+	 * 
 	 * @param chunkX
 	 * @param chunkY
 	 * @param chunkZ
@@ -1049,7 +1050,9 @@ public class VoxelWorld
 
 	/**
 	 * This will regenerate all chunk meshes.
-	 * @param sunLightLevel the sunLightLevel to set
+	 * 
+	 * @param sunLightLevel
+	 *            the sunLightLevel to set
 	 */
 	public void setSunLightLevel(byte sunLightLevel)
 	{

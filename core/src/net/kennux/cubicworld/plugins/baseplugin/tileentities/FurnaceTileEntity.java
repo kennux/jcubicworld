@@ -25,7 +25,7 @@ public class FurnaceTileEntity extends AMachineTileEntityHandler
 {
 	private static Mesh furnaceNotActiveMesh;
 	private static Mesh furnaceActiveMesh;
-	
+
 	/**
 	 * Constructs the models needed for the furnace tile entity.
 	 */
@@ -40,7 +40,7 @@ public class FurnaceTileEntity extends AMachineTileEntityHandler
 		{
 			furnaceActiveMesh = MeshUtil.buildBlockMesh(BasePlugin.furnaceTopId, BasePlugin.furnaceTopId, BasePlugin.furnaceSideId, BasePlugin.furnaceSideId, BasePlugin.furnaceFrontLitId, BasePlugin.furnaceSideId);
 		}
-		
+
 		return furnaceActiveMesh;
 	}
 
@@ -51,10 +51,10 @@ public class FurnaceTileEntity extends AMachineTileEntityHandler
 		{
 			furnaceNotActiveMesh = MeshUtil.buildBlockMesh(BasePlugin.furnaceTopId, BasePlugin.furnaceTopId, BasePlugin.furnaceSideId, BasePlugin.furnaceSideId, BasePlugin.furnaceFrontId, BasePlugin.furnaceSideId);
 		}
-		
+
 		return furnaceNotActiveMesh;
 	}
-	
+
 	@Override
 	protected boolean getWorkingState(IInventory inventory)
 	{
@@ -93,6 +93,6 @@ public class FurnaceTileEntity extends AMachineTileEntityHandler
 	protected void stoppedWorking()
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 }

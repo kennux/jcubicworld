@@ -260,7 +260,7 @@ public class BasePlugin extends APlugin
 			{
 			}
 		});
-		
+
 		// Register debug action
 		inputManager.addInputAction(Input.Keys.P, new IKeyInputHandler()
 		{
@@ -275,20 +275,20 @@ public class BasePlugin extends APlugin
 			{
 				Vector3 playerPos = cubicWorld.playerController.getPosition();
 				Vector3 chunkPos = cubicWorld.voxelWorld.getChunkspacePosition(playerPos);
-				
-				VoxelChunk chunk = cubicWorld.voxelWorld.getChunk((int)chunkPos.x, (int)chunkPos.y, (int)chunkPos.z, false);
-				
+
+				VoxelChunk chunk = cubicWorld.voxelWorld.getChunk((int) chunkPos.x, (int) chunkPos.y, (int) chunkPos.z, false);
+
 				if (chunk != null)
 				{
 					Vector3 voxelSpace = cubicWorld.voxelWorld.getVoxelspacePosition(playerPos);
 					Vector3i chunkOrigin = chunk.getAbsoluteVoxelPosition(0, 0, 0);
-					
+
 					voxelSpace.x -= chunkOrigin.x;
 					voxelSpace.y -= chunkOrigin.y;
 					voxelSpace.z -= chunkOrigin.z;
-					
+
 					System.out.println(voxelSpace);
-					
+
 					cubicWorld.voxelWorld.getChunk(0, 0, 0, false).regenerateLightingAndMesh();
 				}
 			}
@@ -504,8 +504,10 @@ public class BasePlugin extends APlugin
 		voxelGlassId = VoxelEngine.registerType("Glass").setTextures(glassId, glassId, glassId, glassId, glassId, glassId).setTransparent(true).setGuiTexture(glass).voxelId;
 
 		// Create furnace render states
-		/*VoxelRenderState furnaceNormalState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontId, furnaceSideId);
-		VoxelRenderState furnaceWorkingState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontLitId, furnaceSideId);*/
+		/*
+		 * VoxelRenderState furnaceNormalState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontId, furnaceSideId);
+		 * VoxelRenderState furnaceWorkingState = new VoxelRenderState(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontLitId, furnaceSideId);
+		 */
 
 		voxelFurnaceId = VoxelEngine.registerType("Furnace").setTextures(furnaceTopId, furnaceTopId, furnaceSideId, furnaceSideId, furnaceFrontId, furnaceSideId).setTileEntityHandlerFactory(furnaceTileEntityHandlerFactory).setInventorySize(2).setGuiTexture(furnaceFrontTexture).voxelId;
 	}

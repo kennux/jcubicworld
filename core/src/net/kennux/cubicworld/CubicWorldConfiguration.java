@@ -110,7 +110,7 @@ public class CubicWorldConfiguration
 	 * -1 means there is no limit.
 	 */
 	public static int meshCreationsPerFrameLimit = -1;
-	
+
 	public static boolean inDev = true;
 
 	/**

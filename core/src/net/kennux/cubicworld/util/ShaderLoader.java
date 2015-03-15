@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 public class ShaderLoader
 {
 	private static HashMap<String, ShaderProgram> shaderCache = new HashMap<String, ShaderProgram>();
-	
+
 	/**
 	 * Loads a new shader. Files get load from:
 	 * assets/shaders/[shader_name]/vertex.shader
@@ -28,7 +28,7 @@ public class ShaderLoader
 		// Check if shader already cached
 		if (shaderCache.containsKey(name))
 			return shaderCache.get(name);
-		
+
 		ShaderProgram shader = new ShaderProgram(Gdx.files.internal("shaders/" + name + "/vertex.shader").readString(), Gdx.files.internal("shaders/" + name + "/fragment.shader").readString());
 
 		if (!shader.isCompiled())
@@ -38,7 +38,7 @@ public class ShaderLoader
 
 			System.exit(-1);
 		}
-		
+
 		// Add to cache
 		shaderCache.put(name, shader);
 

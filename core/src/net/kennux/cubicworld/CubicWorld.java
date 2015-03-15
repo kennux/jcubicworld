@@ -41,12 +41,13 @@ public class CubicWorld
 	{
 		return CubicWorld.getClient() != null;
 	}
-	
+
 	/**
 	 * <pre>
 	 * Additionally to checking if there is a client instance this function will check if the current thread has an opengl context.
 	 * This is needed in order to seperate client from server code in a development environment where client and server are run in the same application in different threads.
 	 * </pre>
+	 * 
 	 * @see CubicWorld#isClient
 	 * @return
 	 */

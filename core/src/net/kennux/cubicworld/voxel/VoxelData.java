@@ -182,7 +182,7 @@ public class VoxelData
 	 * </pre>
 	 */
 	public BlockInventory blockInventory;
-	
+
 	/**
 	 * <pre>
 	 * Transforms the given voxel face.
@@ -198,7 +198,7 @@ public class VoxelData
 	{
 		return VoxelChunk.ROTATION_MAPPINGS[this.rotation][facing.getValue()];
 	}
-	
+
 	/**
 	 * @return the lightLevel
 	 */
@@ -206,7 +206,7 @@ public class VoxelData
 	{
 		return this.blockLightLevel;
 	}
-	
+
 	/**
 	 * @return the lightLevel
 	 */
@@ -216,15 +216,17 @@ public class VoxelData
 	}
 
 	/**
-	 * @param lightLevel the lightLevel to set
+	 * @param lightLevel
+	 *            the lightLevel to set
 	 */
 	public void setSunLightLevel(byte lightLevel)
 	{
 		this.sunLightLevel = lightLevel;
 	}
-	
+
 	/**
-	 * @param lightLevel the lightLevel to set
+	 * @param lightLevel
+	 *            the lightLevel to set
 	 */
 	public void setSunLightLevel(int lightLevel)
 	{
@@ -232,28 +234,31 @@ public class VoxelData
 	}
 
 	/**
-	 * @param lightLevel the lightLevel to set
+	 * @param lightLevel
+	 *            the lightLevel to set
 	 */
 	public void setBlockLightLevel(byte shadowLevel)
 	{
 		this.blockLightLevel = shadowLevel;
 	}
-	
+
 	/**
-	 * @param lightLevel the lightLevel to set
+	 * @param lightLevel
+	 *            the lightLevel to set
 	 */
 	public void setBlockLightLevel(int shadowLevel)
 	{
 		this.setBlockLightLevel((byte) shadowLevel);
 	}
-	
+
 	/**
 	 * Returns the lightlevel, composed of sunlight and shadow level.
+	 * 
 	 * @return
 	 */
 	public byte getLightLevel()
 	{
 		byte highestLightLevel = this.blockLightLevel > this.sunLightLevel ? this.blockLightLevel : this.sunLightLevel;
-		return MathUtils.clamp(highestLightLevel, (byte)CubicWorldConfiguration.maxLightLevel, (byte)0);
+		return MathUtils.clamp(highestLightLevel, (byte) CubicWorldConfiguration.maxLightLevel, (byte) 0);
 	}
 }

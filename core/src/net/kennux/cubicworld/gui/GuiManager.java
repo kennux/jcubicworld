@@ -42,7 +42,7 @@ public class GuiManager
 	 * The spritebatch used to draw the gui.
 	 */
 	private SpriteBatch guiBatch;
-	
+
 	/**
 	 * The shape render used to render gui elements
 	 */

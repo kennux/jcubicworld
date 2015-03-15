@@ -10,9 +10,10 @@ package net.kennux.cubicworld.math;
  */
 public class MathUtils
 {
-	
+
 	/**
 	 * Clamps the given byte a to a maximum of max and minimum of min
+	 * 
 	 * @param a
 	 * @param max
 	 * @return
@@ -23,12 +24,13 @@ public class MathUtils
 			return max;
 		else if (a < min)
 			return min;
-		
+
 		return a;
 	}
-	
+
 	/**
 	 * Linear interpolation.
+	 * 
 	 * @param start
 	 * @param end
 	 * @param percent
@@ -36,11 +38,12 @@ public class MathUtils
 	 */
 	public static float lerp(float start, float end, float percent)
 	{
-		return (start + percent*(end - start));
+		return (start + percent * (end - start));
 	}
-	
+
 	/**
 	 * Linear interpolation.
+	 * 
 	 * @param start
 	 * @param end
 	 * @param percent
@@ -48,9 +51,9 @@ public class MathUtils
 	 */
 	public static byte lerp(byte start, byte end, float percent)
 	{
-		return (byte) ((float)start + percent*(float)(end - start));
+		return (byte) ((float) start + percent * (float) (end - start));
 	}
-	
+
 	/**
 	 * Ceils a float to an integer.
 	 * 
@@ -120,7 +123,7 @@ public class MathUtils
 	{
 		return Math.min(a, b);
 	}
-	
+
 	public static float repeat(float v, float r)
 	{
 		if (v > r)

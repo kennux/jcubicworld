@@ -79,7 +79,6 @@ public class VoxelType
 	 * The filter rule set instance for this voxel type.
 	 */
 	private InventoryFilterRuleSet filterRuleSet;
-	
 
 	public int topTexture, bottomTexture, leftTexture, rightTexture, frontTexture, backTexture;
 	public Vector2[] topUv, bottomUv, leftUv, rightUv, frontUv, backUv;
@@ -92,7 +91,7 @@ public class VoxelType
 		this.rightTexture = rightTexture;
 		this.frontTexture = frontTexture;
 		this.backTexture = backTexture;
-		
+
 		return this;
 	}
 
@@ -177,7 +176,7 @@ public class VoxelType
 				break;
 		}
 	}
-	
+
 	/**
 	 * Returns true if this voxel type is able to physically collide with other objects.
 	 * 

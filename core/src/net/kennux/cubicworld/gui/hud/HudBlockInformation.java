@@ -87,9 +87,9 @@ public class HudBlockInformation implements IHudElement
 			// Get current block texture
 			this.currentBlockTexture = selectedVoxel.voxelType.getGuiTexture();
 			this.currentVoxelType = selectedVoxel.voxelType;
-			
-			Vector3 selectedTop = new Vector3(this.cubicWorld.currentBlockHit.hitVoxelPosition).add(0,1,0);
-			this.lightLevel = this.cubicWorld.voxelWorld.getLightLevel((int)selectedTop.x, (int)selectedTop.y, (int)selectedTop.z);
+
+			Vector3 selectedTop = new Vector3(this.cubicWorld.currentBlockHit.hitVoxelPosition).add(0, 1, 0);
+			this.lightLevel = this.cubicWorld.voxelWorld.getLightLevel((int) selectedTop.x, (int) selectedTop.y, (int) selectedTop.z);
 		}
 	}
 

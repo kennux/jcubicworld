@@ -18,8 +18,10 @@ public interface IChatCommand
 	/**
 	 * Gets called if a user sends a command.
 	 * 
-	 * @param sender The user who sent this command.
-	 * @param args The command arguments.
+	 * @param sender
+	 *            The user who sent this command.
+	 * @param args
+	 *            The command arguments.
 	 */
 	public void executeCommand(CubicWorldServerClient sender, String[] args);
 }

@@ -154,16 +154,16 @@ public class ChunkManager
 
 		VoxelEngine.textureAtlas.atlasTexture.bind(0);
 		shader.setUniformi("r_textureAtlas", 0);
-		
+
 		// Render all chunks
 		for (VoxelChunk c : this.chunks.values())
 		{
 			if (c != null)
 				c.render(cam, shader);
 		}
-		
+
 		shader.end();
-		
+
 		// Tile entity pass
 		for (VoxelChunk c : this.chunks.values())
 		{
@@ -186,7 +186,7 @@ public class ChunkManager
 			}
 		}
 	}
-	
+
 	/**
 	 * Gets called if the skylight value changes, regenerates the lighting and meshes for all chunks
 	 */

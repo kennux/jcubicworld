@@ -12,6 +12,7 @@ import java.util.Map.Entry;
  * 
  * Important: If you implement a finite state machine, don't forget to overload the FiniteStateMachine() constructor :-)
  * </pre>
+ * 
  * @author kennux
  *
  */

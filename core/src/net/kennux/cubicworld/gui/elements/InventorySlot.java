@@ -98,7 +98,7 @@ public class InventorySlot extends AGuiElement
 
 							// Get inventory
 							IInventory sourceInventory = (IInventory) draggedSlot.parent.getOverlayData().get(draggedSlot.getInventoryName());
-							
+
 							// Get item stacks
 							ItemStack sourceStack = sourceInventory.getItemStackInSlot(draggedSlot.getSlotId());
 
@@ -203,7 +203,7 @@ public class InventorySlot extends AGuiElement
 	{
 		// Get inventory instance
 		ItemStack slotItemStack = ((IInventory) this.parent.getOverlayData().get(this.inventory)).getItemStackInSlot(this.slotId);
-		
+
 		// Check if there actually is an item stack in this slot.
 		if (draggedSlot == this && slotItemStack != null)
 		{

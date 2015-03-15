@@ -10,6 +10,7 @@ import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelEngine;
 
 import org.iq80.snappy.Snappy;
+
 /*
  * import net.jpountz.lz4.LZ4Compressor;
  * import net.jpountz.lz4.LZ4Factory;

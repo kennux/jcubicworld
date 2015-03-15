@@ -163,7 +163,8 @@ public class Skybox implements Disposable
 	/**
 	 * Renders the skybox for the given quaternion camera rotation.
 	 * 
-	 * @param quaternion The rotation of the camera used to render the world.
+	 * @param quaternion
+	 *            The rotation of the camera used to render the world.
 	 */
 	public void render(Quaternion quaternion)
 	{

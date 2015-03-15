@@ -17,9 +17,9 @@ public class Vector3i
 
 	public Vector3i()
 	{
-		this(0,0,0);
+		this(0, 0, 0);
 	}
-	
+
 	public Vector3i(int x, int y, int z)
 	{
 		this.x = x;
@@ -55,7 +55,7 @@ public class Vector3i
 	{
 		return (this.x ^ this.y ^ this.z);
 	}
-	
+
 	public String toString()
 	{
 		return "Vector3i {" + this.x + "," + this.y + "," + this.z + "}";

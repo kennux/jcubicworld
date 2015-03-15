@@ -1,6 +1,7 @@
 package net.kennux.cubicworld;
 
 import java.io.IOException;
+import java.nio.IntBuffer;
 
 import net.kennux.cubicworld.entity.EntityManager;
 import net.kennux.cubicworld.entity.PlayerController;
@@ -34,6 +35,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.utils.BufferUtils;
 
 /**
  * The game's main class.
@@ -46,10 +48,11 @@ public class CubicWorldGame implements ApplicationListener
 	/**
 	 * Reference to the opengl rendering thread.
 	 * This is used to check if a thread has access to the opengl api.
+	 * 
 	 * @see CubicWorld#isReallyClient()
 	 */
 	public Thread renderingThread;
-	
+
 	/**
 	 * The perspective camera used for rendering.
 	 */
@@ -206,7 +209,7 @@ public class CubicWorldGame implements ApplicationListener
 	{
 		// Set render thread
 		this.renderingThread = Thread.currentThread();
-		
+
 		// Init Profiler
 		GLProfiler.enable();
 		this.profiler = new Profiler();
@@ -366,7 +369,7 @@ public class CubicWorldGame implements ApplicationListener
 	{
 		// long nanos = System.nanoTime();
 		this.profiler.startProfiling("Update", "The whole update part of the render() routine");
-		
+
 		// Daynight cycle
 		byte sunlightValue = this.dayNightCycle.getLightLevel();
 		if (this.voxelWorld.getSunLightLevel() != sunlightValue)

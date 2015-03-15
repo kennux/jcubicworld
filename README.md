@@ -89,7 +89,6 @@ Current Features
 - Voxel world rendering
 - World editing (+ Multiplayer sync)
 - Basic physics system (Supports collision boxes and raycasting)
-- 3d Models as voxels (World block model rendering)
 - Input system
 - Pathfinder (A*)
 - GUI System
@@ -108,6 +107,7 @@ Planned Features
 - Weapons (Swords, Bows, Guns)
 - Tools (Pickaxe, Shovel, ...)
 - Multiple Dimensions
+- Multiblock structures
 - Minecraft like world generation (Caves and so on)
 
 

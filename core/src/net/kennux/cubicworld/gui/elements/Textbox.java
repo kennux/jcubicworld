@@ -77,7 +77,7 @@ public class Textbox extends AGuiElement
 		// Draw textbox background
 		Texture texture = skin.getTexture("Textbox");
 		spriteBatch.draw(texture, this.relativeRectangle.x, this.relativeRectangle.y, this.relativeRectangle.width, this.relativeRectangle.height);
-		
+
 		// Draw text
 		// Set scale and color
 		font.setColor(skin.getFontColor());

@@ -21,7 +21,7 @@ import net.kennux.cubicworld.voxel.VoxelData;
 public interface IVoxelTileEntityHandler extends Cloneable
 {
 	/**
-	 * x y and z are in worldspace coordinates
+	 * x y and z are coordinates in absolute voxelspace.
 	 * 
 	 * @param voxelData
 	 * @param x
@@ -32,7 +32,7 @@ public interface IVoxelTileEntityHandler extends Cloneable
 	public void handleUpdate(VoxelData voxelData, int x, int y, int z, boolean isServer);
 
 	/**
-	 * Gets called if the block action (clientside, on clicking it / opening
+	 * Gets called if the block action (clientside handler, on clicking it / opening
 	 * it's gui) get called.
 	 * 
 	 * @param voxelData
@@ -41,13 +41,17 @@ public interface IVoxelTileEntityHandler extends Cloneable
 	 * @param z
 	 */
 	public void handleAction(VoxelData voxelData, int x, int y, int z);
-	
+
 	/**
 	 * Gets called if the tile entity should get rendered.
+	 * 
 	 * @param voxelData
-	 * @param x X-Position of the voxel in absolute voxelspace.
-	 * @param y Y-Position of the voxel in absolute voxelspace.
-	 * @param z Z-Position of the voxel in absolute voxelspace.
+	 * @param x
+	 *            X-Position of the voxel in absolute voxelspace.
+	 * @param y
+	 *            Y-Position of the voxel in absolute voxelspace.
+	 * @param z
+	 *            Z-Position of the voxel in absolute voxelspace.
 	 */
 	public void handleRender(Camera camera, VoxelData voxelData, int x, int y, int z);
 
