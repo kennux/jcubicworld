@@ -24,13 +24,7 @@ public class DesktopLauncher
 	
 	public static void main (String[] arg)
 	{
-		/*try {
-			Thread.sleep(25000);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated caHashMap<K, V>ck
-			e1.printStackTrace();
-		}
-		try
+		/*try
 		{
 			System.in.read();
 		}

@@ -14,6 +14,8 @@ import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.networking.packet.inventory.ServerBlockInventoryUpdate;
 import net.kennux.cubicworld.voxel.ChunkMeshBuilder.ChunkMeshBuilderResult;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
+import net.kennux.cubicworld.voxel.lighting.ALightingSystem;
+import net.kennux.cubicworld.voxel.lighting.BasicLightingSystem;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
@@ -148,16 +150,6 @@ public class VoxelChunk
 	private boolean generationDone = false;
 
 	/**
-	 * Gets set to true if the local lighting information is up 2 date.
-	 */
-	private boolean localLightingDirty = false;
-
-	/**
-	 * Gets set to true if the global lighting information is up 2 date.
-	 */
-	private boolean globalLightingDirty = false;
-
-	/**
 	 * Gets set to true if a save of this chunk to the voxel world file is
 	 * needed.
 	 * Will get handled in update().
@@ -226,7 +218,16 @@ public class VoxelChunk
 	 * The new chunk mesh generation result data.
 	 */
 	private ChunkMeshBuilderResult newMeshData;
+	
+	/**
+	 * The lighting system used by this chunk.
+	 */
+	private ALightingSystem lightingSystem;
 
+	/**
+	 * Creates a new mesh for the mesh pool if there is no free one.
+	 * @return
+	 */
 	private static Mesh newMesh()
 	{
 		return new Mesh(Mesh.VertexDataType.VertexBufferObject, false, 16368, 16368, new VertexAttribute(Usage.Position, 3, "v_Position"), new VertexAttribute(Usage.TextureCoordinates, 2, "v_Uv"), /* new VertexAttribute(Usage.Normal, 3, "v_Normal"), */new VertexAttribute(Usage.ColorUnpacked, 1, "v_Light"));
@@ -234,6 +235,9 @@ public class VoxelChunk
 
 	public VoxelChunk(int chunkX, int chunkY, int chunkZ, VoxelWorld master)
 	{
+		// Init lighting system
+		this.lightingSystem = new BasicLightingSystem();
+		
 		this.voxelData = null;
 
 		// Init rotation mappings
@@ -264,8 +268,7 @@ public class VoxelChunk
 	 */
 	private void chunkDataWasLoaded()
 	{
-		this.localLightingDirty = true;
-		this.globalLightingDirty = true;
+		this.lightingSystem.resetLighting();
 		this.voxelMeshDirty = true;
 		this.saveDirty = false;
 	}
@@ -277,8 +280,7 @@ public class VoxelChunk
 	 */
 	public void regenerateLightingAndMesh()
 	{
-		this.localLightingDirty = true;
-		this.globalLightingDirty = true;
+		this.lightingSystem.resetLighting();
 		this.voxelMeshDirty = true;
 		this.regenerateAdjacentMeshes();
 	}
@@ -312,8 +314,7 @@ public class VoxelChunk
 	 */
 	private void chunkDataWasModified()
 	{
-		this.localLightingDirty = true;
-		this.globalLightingDirty = true;
+		this.lightingSystem.resetLighting();
 		this.voxelMeshDirty = true;
 		this.saveDirty = true;
 	}
@@ -402,7 +403,7 @@ public class VoxelChunk
 	{
 		synchronized (this.generationLockObject)
 		{
-			if (this.localLightingDirty || this.voxelData == null)
+			if (!this.lightingSystem.isReady() || this.voxelData == null)
 				return;
 			
 			this.newMeshData = ChunkMeshBuilder.buildMeshData(this);
@@ -586,6 +587,16 @@ public class VoxelChunk
 	{
 		return this.voxelData != null && this.isGenerationDone();
 	}
+	
+	/**
+	 * @see ALightingSystem#isPassDone(Class)
+	 * @param lightingPassClass
+	 * @return
+	 */
+	public boolean isLightingPassDone(Class lightingPassClass)
+	{
+		return this.lightingSystem.isPassDone(lightingPassClass);
+	}
 
 	/**
 	 * Returns true if this chunk is initialized and it's lighting is not dirty.
@@ -594,17 +605,7 @@ public class VoxelChunk
 	 */
 	public boolean isInitializedAndLightingReady()
 	{
-		return this.isInitialized() && !this.localLightingDirty && !this.globalLightingDirty;
-	}
-
-	/**
-	 * Returns true if this chunk is initialized and it's local lighting is not dirty.
-	 * 
-	 * @return
-	 */
-	public boolean isInitializedAndLocalLightingReady()
-	{
-		return this.isInitialized() && !this.localLightingDirty;
+		return this.isInitialized() && this.lightingSystem.isReady();
 	}
 
 	/**
@@ -894,21 +895,10 @@ public class VoxelChunk
 			}
 		}
 
-		// Lighting check
-		// The lighting algorithm needs all chunks around this chunk to be ready.
-		if (!ClientChunkRequest.areRequestsPending() && this.localLightingDirty && this.isInitialized() && (this.chunkY == this.master.chunksOnYAxis() || this.master.isChunkLocalLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ)))
+		// Lighting calculation
+		synchronized (this.voxelDataLockObject)
 		{
-			this.recalculateLocalLighting();
-			this.localLightingDirty = false;
-		}
-
-		if (!ClientChunkRequest.areRequestsPending() && this.globalLightingDirty && this.isInitialized() && this.master.isChunkLocalLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ) && this.master.isChunkLocalLightingReady(this.chunkX, this.chunkY - 1, this.chunkZ) && this.master.isChunkLocalLightingReady(this.chunkX + 1, this.chunkY, this.chunkZ) && this.master.isChunkLocalLightingReady(this.chunkX - 1, this.chunkY, this.chunkZ) && this.master.isChunkLocalLightingReady(this.chunkX, this.chunkY, this.chunkZ + 1) && this.master.isChunkLocalLightingReady(this.chunkX, this.chunkY, this.chunkZ - 1))
-		{
-			this.recalculateGlobalLighting();
-
-			// If global lighting finished, regenerate adjacent meshes.
-			if (!this.globalLightingDirty)
-				this.regenerateAdjacentMeshes();
+			this.lightingSystem.update(this);
 		}
 
 		synchronized (this.voxelDataLockObject)
@@ -936,7 +926,7 @@ public class VoxelChunk
 
 		boolean frameMismatch = (lastUpdateCallId != this.master.updateCallId);
 
-		if (!ClientChunkRequest.areRequestsPending() && !this.localLightingDirty && !this.globalLightingDirty && this.voxelMeshDirty && this.generationDone && !this.master.isServer() &&
+		if (!ClientChunkRequest.areRequestsPending() && this.lightingSystem.isReady() && this.voxelMeshDirty && this.generationDone && !this.master.isServer() &&
 		// Check all neighbours if lighting is ready
 				this.master.chunkLightingReady(this.chunkX + 1, this.chunkY, this.chunkZ) && this.master.chunkLightingReady(this.chunkX - 1, this.chunkY, this.chunkZ) && this.master.chunkLightingReady(this.chunkX, this.chunkY + 1, this.chunkZ) && this.master.chunkLightingReady(this.chunkX, this.chunkY - 1, this.chunkZ) && this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ + 1) && this.master.chunkLightingReady(this.chunkX, this.chunkY, this.chunkZ - 1) && (CubicWorldConfiguration.meshGenerationsPerFrameLimit == -1 || frameMismatch || generationsProcessedThisFrame <= CubicWorldConfiguration.meshGenerationsPerFrameLimit))
 		{
@@ -950,217 +940,6 @@ public class VoxelChunk
 
 			this.generateMesh();
 			generationsProcessedThisFrame++;
-		}
-	}
-
-	/**
-	 * Temporary array list which will contain all voxels which depend on another voxel for lighting.
-	 * Gets used in the global lighting pass to prevent searching ready voxels forever.
-	 * 
-	 * @see VoxelChunk#recalculateGlobalLighting()
-	 */
-	private ArrayList<Vector3i> dependencyVoxelsTemporary;
-
-	/**
-	 * Calculates the global light for the given position and face of a voxel.
-	 */
-	private void recalculateGlobalLighting()
-	{
-		if (this.dependencyVoxelsTemporary == null)
-			this.dependencyVoxelsTemporary = new ArrayList<Vector3i>();
-
-		synchronized (this.voxelDataLockObject)
-		{
-			// Needed variables
-			VoxelData v = null;
-			boolean blocksLeft = false;
-			// Vector3i absolutePos = new Vector3i();
-
-			// Shadow pass
-			// This will flood light into caves
-			for (int x = 0; x < VoxelWorld.chunkWidth; x++)
-				for (int z = 0; z < VoxelWorld.chunkDepth; z++)
-					for (int y = VoxelWorld.chunkHeight - 1; y >= 0; y--)
-					{
-						v = this.voxelData[x][y][z];
-						if (v == null)
-							continue;
-
-						// This function will only iterate over air or transparent blocks which are uninitialized.
-						if (v.getBlockLightLevel() == -1 && (v.voxelType == null || v.voxelType.transparent))
-						{
-							Vector3i absolutePos = this.getAbsoluteVoxelPosition(x, y, z);
-
-							// Get all adjacent voxels
-							VoxelData[] adjacentVoxels = new VoxelData[] {
-									// Top Voxel
-									(y == VoxelWorld.chunkHeight - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y + 1, absolutePos.z) : this.voxelData[x][y + 1][z],
-									// Bottom Voxel
-									(y == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y - 1, absolutePos.z) : this.voxelData[x][y - 1][z],
-									// Left Voxel
-									(x == 0) ? this.master.getVoxel(absolutePos.x - 1, absolutePos.y, absolutePos.z) : this.voxelData[x - 1][y][z],
-									// Right Voxel
-									(x == VoxelWorld.chunkWidth - 1) ? this.master.getVoxel(absolutePos.x + 1, absolutePos.y, absolutePos.z) : this.voxelData[x + 1][y][z],
-									// Back Voxel
-									(z == 0) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z - 1) : this.voxelData[x][y][z - 1],
-									// Front Voxel
-									(z == VoxelWorld.chunkDepth - 1) ? this.master.getVoxel(absolutePos.x, absolutePos.y, absolutePos.z + 1) : this.voxelData[x][y][z + 1] };
-
-							// Variable for the highest light level on the adjacent blocks
-							byte highestLightLevel = -1;
-
-							// Iterate through all adjacent voxels
-							boolean onlyDependingVoxelsReady = true;
-
-							for (VoxelData vd : adjacentVoxels)
-							{
-								// Determin whether the current block is a translucent block or not.
-								boolean translucentVoxel = vd != null && (vd.voxelType == null || vd.voxelType.transparent);
-
-								if (onlyDependingVoxelsReady && translucentVoxel && !this.dependencyVoxelsTemporary.contains(absolutePos))
-								{
-									onlyDependingVoxelsReady = false;
-								}
-
-								// Only translucent voxels AND
-								// SunLightLevel is > 0 (means initialized and not shadow area) OR block light level == -1 (means uninitialized)
-								if (translucentVoxel && (vd.getSunLightLevel() > 0 || vd.getBlockLightLevel() != -1))
-								{
-									byte lightLevel = vd.getLightLevel();
-									if (lightLevel > highestLightLevel)
-										highestLightLevel = lightLevel;
-								}
-							}
-
-							// Dependency check
-							if (onlyDependingVoxelsReady)
-							{
-								highestLightLevel = 0;
-							}
-
-							// If no blocks were ready...
-							if (highestLightLevel <= -1)
-							{
-								this.dependencyVoxelsTemporary.add(absolutePos);
-								System.out.println("FAIL!!! " + absolutePos);
-								// ... we're done here!
-								blocksLeft = true;
-								continue;
-							}
-
-							// If there were blocks ready
-							byte lightLevel = (byte) (highestLightLevel - 1);
-
-							if (lightLevel < 0)
-								lightLevel = 0;
-
-							v.setBlockLightLevel(lightLevel);
-
-							// Remove block from the dependency list if it is in there
-							this.dependencyVoxelsTemporary.remove(absolutePos);
-						}
-					}
-
-			// Only if there were no blocks left, we are done calculating the lighting
-			// If not, we will go on with the lighting in the next update() call.
-			if (!blocksLeft)
-			{
-				this.dependencyVoxelsTemporary.clear();
-				this.globalLightingDirty = false;
-			}
-		}
-	}
-
-	/**
-	 * Calculates the local light for the given position and face of a voxel.
-	 */
-	private void recalculateLocalLighting()
-	{
-		synchronized (this.voxelDataLockObject)
-		{
-			// Needed variables
-			VoxelData v = null;
-			Vector3i absolutePos = new Vector3i(0, 0, 0);
-
-			// Clear pass
-			// This clears the shadow and sun light level.
-			for (int x = 0; x < VoxelWorld.chunkWidth; x++)
-				for (int z = 0; z < VoxelWorld.chunkDepth; z++)
-					for (int y = VoxelWorld.chunkHeight - 1; y >= 0; y--)
-					{
-						v = this.voxelData[x][y][z];
-						if (v == null)
-							continue;
-
-						v.setSunLightLevel(-1);
-
-						// The blocklight level will get initialized with 0
-						// Because -1 will mean that there is a need to calculate a block light level.
-						// Only blocks occupied with shadows or in range of a light source will need an actual block light level.
-						v.setBlockLightLevel(0);
-					}
-
-			// Sunlight propagation pass
-			// This casts rays from the top of the world on every x|y coordinate pair
-			// After a block was hit by the ray, the sunlight level will get set to -1.
-			// Solid blocks will recieve the sunlight level 0.
-			for (int x = 0; x < VoxelWorld.chunkWidth; x++)
-				for (int z = 0; z < VoxelWorld.chunkDepth; z++)
-					for (int y = VoxelWorld.chunkHeight - 1; y >= 0; y--)
-					{
-						// Calculate the absolute position of the current voxel
-						this.getAbsoluteVoxelPosition(x, y, z, absolutePos);
-						v = this.voxelData[x][y][z];
-						if (v == null)
-							continue;
-
-						// If the current voxel is the most at the upper border of the world bounding
-						// Set the sunlight level to it for propagating it down.
-						if (absolutePos.y == this.master.worldHeight - 1)
-						{
-							v.setSunLightLevel(this.master.getSunLightLevel());
-						}
-						// Upper chunk border propagation
-						else if (y == VoxelWorld.chunkHeight - 1)
-						{
-							// Porpagate light downwards
-							// On the upper chunk border the sun light level will be topLightLevel - 1 but minimum 0
-							VoxelData topVoxel = this.master.getVoxel(absolutePos.x, absolutePos.y + 1, absolutePos.z);
-							byte topLightLevel = (byte) (topVoxel == null ? this.master.getSunLightLevel() - ((this.master.chunksOnYAxis() - 2) - this.chunkY) : topVoxel.getSunLightLevel());
-
-							byte lightLevel = (byte) (topLightLevel - 1);
-
-							if (lightLevel < 0)
-								lightLevel = 0;
-
-							v.setSunLightLevel(lightLevel);
-						}
-						// Solid blocks
-						else if (v.voxelType != null && !v.voxelType.transparent)
-						{
-							// Solid blocks will stop light porpagation
-							// They also cant have a shadow level so will get initialized with 0
-							v.setSunLightLevel(0);
-						}
-						// Air / transparent blocks
-						else if (v.voxelType == null || v.voxelType.transparent)
-						{
-							// Air and transparent blocks will get their light from the upper voxel
-							VoxelData topVoxel = this.master.getVoxel(absolutePos.x, absolutePos.y + 1, absolutePos.z);
-							byte chunkLightLevel = (byte) (this.master.getSunLightLevel() - (this.master.chunksOnYAxis() - this.chunkY));
-
-							// Set the sunlight level
-							v.setSunLightLevel(topVoxel.getSunLightLevel());
-
-							// If this voxel is in the shadow of another voxel (i.e. not directly facing to the sun)
-							// It's block light level will get marked for calculation
-							// The global lighting pass then will calculate the final block light level for this voxel.
-							if (v.getSunLightLevel() < chunkLightLevel)
-							{
-								v.setBlockLightLevel(-1);
-							}
-						}
-					}
 		}
 	}
 	

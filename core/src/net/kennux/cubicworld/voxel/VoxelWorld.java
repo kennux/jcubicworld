@@ -837,21 +837,6 @@ public class VoxelWorld
 	}
 
 	/**
-	 * Checks if the chunk at the given chunkspace position already calculated it's local lighting.
-	 * Will return true if the chunk is non-exisiting.
-	 * 
-	 * @param chunkX
-	 * @param chunkY
-	 * @param chunkZ
-	 * @return
-	 */
-	public boolean isChunkLocalLightingReady(int chunkX, int chunkY, int chunkZ)
-	{
-		VoxelChunk chunk = this.chunks.get(new ChunkKey(chunkX, chunkY, chunkZ));
-		return chunk == null || chunk.isInitializedAndLocalLightingReady();
-	}
-
-	/**
 	 * Returns true if the current voxel world is a server instance.
 	 * 
 	 * @return
