@@ -23,7 +23,7 @@ public class ChunkMeshBuilder
 	 * @author KennuX
 	 *
 	 */
-	public static class ChunkMeshBuilderJobData
+	public static class ChunkMeshBuilderResult
 	{
 		/**
 		 * The voxel mesh's bounding box.
@@ -107,13 +107,13 @@ public class ChunkMeshBuilder
 	
 	private static final int vertexSize = 6;
 
-	public static ChunkMeshBuilderJobData buildMeshData(VoxelChunk chunk)
+	public static ChunkMeshBuilderResult buildMeshData(VoxelChunk chunk)
 	{
 		// Create a local copy of the voxel chunk data
 		VoxelData[][][] voxelData = chunk.getVoxelData();
 		
 		// Create the job data object
-		ChunkMeshBuilderJobData resultData = new ChunkMeshBuilderJobData();
+		ChunkMeshBuilderResult resultData = new ChunkMeshBuilderResult();
 		
 		// the vertices array list
 		final int initListLength = 16000; // Start with a length of 16000 to avoid re-allocation

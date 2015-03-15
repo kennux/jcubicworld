@@ -12,7 +12,7 @@ import net.kennux.cubicworld.inventory.IInventoryUpdateHandler;
 import net.kennux.cubicworld.math.Vector3i;
 import net.kennux.cubicworld.networking.packet.ClientChunkRequest;
 import net.kennux.cubicworld.networking.packet.inventory.ServerBlockInventoryUpdate;
-import net.kennux.cubicworld.voxel.ChunkMeshBuilder.ChunkMeshBuilderJobData;
+import net.kennux.cubicworld.voxel.ChunkMeshBuilder.ChunkMeshBuilderResult;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 
 import com.badlogic.gdx.Gdx;
@@ -225,7 +225,7 @@ public class VoxelChunk
 	/**
 	 * The new chunk mesh generation result data.
 	 */
-	private ChunkMeshBuilderJobData newMeshData;
+	private ChunkMeshBuilderResult newMeshData;
 
 	private static Mesh newMesh()
 	{
