@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
@@ -19,19 +21,18 @@ import com.badlogic.gdx.math.Vector3;
  */
 public class MeshUtil
 {
-	private static final Vector3[] LEFT_SIDE_VERTICES = new Vector3[] { new Vector3(0, 0, 1), new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 1, 1) };
+	private static final Vector3[] LEFT_SIDE_VERTICES = new Vector3[] { new Vector3(-0.5f,-0.5f,0.5f),new Vector3(-0.5f,-0.5f,-0.5f),new Vector3(-0.5f,0.5f,-0.5f),new Vector3(-0.5f,0.5f,0.5f), };
 
-	private static final Vector3[] RIGHT_SIDE_VERTICES = new Vector3[] { new Vector3(1, 0, 0), new Vector3(1, 0, 1), new Vector3(1, 1, 1), new Vector3(1, 1, 0), };
+	private static final Vector3[] RIGHT_SIDE_VERTICES = new Vector3[] { new Vector3(0.5f,-0.5f,-0.5f),new Vector3(0.5f,-0.5f,0.5f),new Vector3(0.5f,0.5f,0.5f),new Vector3(0.5f,0.5f,-0.5f), };
 
-	private static final Vector3[] TOP_SIDE_VERTICES = new Vector3[] { new Vector3(0, 1, 0), new Vector3(1, 1, 0), new Vector3(1, 1, 1), new Vector3(0, 1, 1), };
+	private static final Vector3[] TOP_SIDE_VERTICES = new Vector3[] { new Vector3(-0.5f,0.5f,-0.5f),new Vector3(0.5f,0.5f,-0.5f),new Vector3(0.5f,0.5f,0.5f),new Vector3(-0.5f,0.5f,0.5f), };
 
-	private static final Vector3[] BOTTOM_SIDE_VERTICES = new Vector3[] { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 0, 1), new Vector3(0, 0, 1) };
+	private static final Vector3[] BOTTOM_SIDE_VERTICES = new Vector3[] { new Vector3(-0.5f,-0.5f,-0.5f),new Vector3(0.5f,-0.5f,-0.5f),new Vector3(0.5f,-0.5f,0.5f),new Vector3(-0.5f,-0.5f,0.5f), };
 
-	private static final Vector3[] BACK_SIDE_VERTICES = new Vector3[] { new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 1, 0), new Vector3(0, 1, 0) };
+	private static final Vector3[] BACK_SIDE_VERTICES = new Vector3[] { new Vector3(-0.5f,-0.5f,-0.5f),new Vector3(0.5f,-0.5f,-0.5f),new Vector3(0.5f,0.5f,-0.5f),new Vector3(-0.5f,0.5f,-0.5f), };
 
-	private static final Vector3[] FRON_SIDE_VERTICES = new Vector3[] { new Vector3(1, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 1, 1), new Vector3(1, 1, 1) };
+	private static final Vector3[] FRON_SIDE_VERTICES = new Vector3[] { new Vector3(0.5f,-0.5f,0.5f),new Vector3(-0.5f,-0.5f,0.5f),new Vector3(-0.5f,0.5f,0.5f),new Vector3(0.5f,0.5f,0.5f), };
 
-	
 	/**
 	 * Builds a block mesh.
 	 * @param topTexture

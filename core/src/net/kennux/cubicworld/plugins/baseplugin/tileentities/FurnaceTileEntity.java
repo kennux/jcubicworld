@@ -36,23 +36,23 @@ public class FurnaceTileEntity extends AMachineTileEntityHandler
 	@Override
 	protected Mesh getWorkingMesh()
 	{
-		if (furnaceNotActiveMesh == null)
-		{
-			furnaceNotActiveMesh = MeshUtil.buildBlockMesh(BasePlugin.furnaceTopId, BasePlugin.furnaceTopId, BasePlugin.furnaceSideId, BasePlugin.furnaceSideId, BasePlugin.furnaceFrontId, BasePlugin.furnaceSideId);
-		}
-		
-		return furnaceNotActiveMesh;
-	}
-
-	@Override
-	protected Mesh getNotWorkingMesh()
-	{
 		if (furnaceActiveMesh == null)
 		{
 			furnaceActiveMesh = MeshUtil.buildBlockMesh(BasePlugin.furnaceTopId, BasePlugin.furnaceTopId, BasePlugin.furnaceSideId, BasePlugin.furnaceSideId, BasePlugin.furnaceFrontLitId, BasePlugin.furnaceSideId);
 		}
 		
 		return furnaceActiveMesh;
+	}
+
+	@Override
+	protected Mesh getNotWorkingMesh()
+	{
+		if (furnaceNotActiveMesh == null)
+		{
+			furnaceNotActiveMesh = MeshUtil.buildBlockMesh(BasePlugin.furnaceTopId, BasePlugin.furnaceTopId, BasePlugin.furnaceSideId, BasePlugin.furnaceSideId, BasePlugin.furnaceFrontId, BasePlugin.furnaceSideId);
+		}
+		
+		return furnaceNotActiveMesh;
 	}
 	
 	@Override
@@ -87,5 +87,12 @@ public class FurnaceTileEntity extends AMachineTileEntityHandler
 
 		// Now open the overlay
 		cubicWorld.guiManager.openOverlay(BasePlugin.furnaceGuiOverlayId);
+	}
+
+	@Override
+	protected void stoppedWorking()
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }

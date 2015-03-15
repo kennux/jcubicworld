@@ -92,30 +92,23 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 
 		// Get the current target working state
 		boolean workingState = this.getWorkingState(voxelData.blockInventory);
-
+		
 		if (isServer)
 		{
 			if (workingState)
+			{
+				// If the machine is currently working, call the workTick() function...
 				this.workTick();
-		}
-		else
-		{
-			// Client render things
-			if (!isWorking && workingState)
-			{
-				// Change to working
-				//voxelData.setRenderStateId(1);
-				// TODO
-				this.isWorking = true;
 			}
-			else if (isWorking && !workingState)
+			else if (this.isWorking)
 			{
-				// Change to not working
-				//voxelData.setRenderStateId(0);
-				// TODO
-				this.isWorking = false;
+				// If it stopped working in THIS tick, call the stoppedWorking function.
+				this.stoppedWorking();
 			}
 		}
+		
+		// Write the is working bool
+		this.isWorking = workingState;
 	}
 	
 	@Override
@@ -151,7 +144,7 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 				// TODO: Lighting
 				this.tileEntityShader.setUniformf("m_light", 1); // voxelData.getLightLevel() / (float) CubicWorldConfiguration.maxLightLevel);
 				this.tileEntityShader.setUniformMatrix("m_cameraProj", camera.combined);
-				this.tileEntityShader.setUniformMatrix("m_transform", new Matrix4(new Vector3(x,y,z), VoxelChunk.ROTATION_MAPPINGS_QUATERNION[voxelData.rotation], new Vector3(1,1,1)));
+				this.tileEntityShader.setUniformMatrix("m_transform", new Matrix4(new Vector3(x+0.5f,y+0.5f,z+0.5f), VoxelChunk.ROTATION_MAPPINGS_QUATERNION[voxelData.rotation], new Vector3(1,1,1)));
 				VoxelEngine.textureAtlas.atlasTexture.bind(0);
 				this.tileEntityShader.setUniformi("r_textureAtlas", 0);
 				
@@ -165,6 +158,11 @@ public abstract class AMachineTileEntityHandler implements IVoxelTileEntityHandl
 	 * Gets called every tick the machine is working.
 	 */
 	protected abstract void workTick();
+	
+	/**
+	 * Gets called in the tick the machine stopped working.
+	 */
+	protected abstract void stoppedWorking();
 
 	public void serialize(BitWriter writer)
 	{
