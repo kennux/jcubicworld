@@ -70,10 +70,13 @@ public class ClientLogin extends APacketModel
 				ConsoleHelper.logError(e);
 			}
 		}
-
+		
 		// Set player inventory update handler
 		final PlayerEntity playerEntity = client.playerEntity;
-
+		
+		// Load roles for this user
+		client.roles = server.permissionsBackend.getUserRoles(client.playerEntity.getEntityName());
+		
 		client.playerEntity.playerInventory.setUpdateHandler(new IInventoryUpdateHandler()
 		{
 			@Override

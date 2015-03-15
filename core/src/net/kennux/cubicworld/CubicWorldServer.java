@@ -2,11 +2,17 @@ package net.kennux.cubicworld;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Properties;
 import java.util.Stack;
 
+import net.kennux.cubicworld.admin.permissions.IPermissionSystemBackend;
+import net.kennux.cubicworld.admin.permissions.PermissionRole;
+import net.kennux.cubicworld.admin.permissions.Permissions;
 import net.kennux.cubicworld.entity.AEntity;
 import net.kennux.cubicworld.entity.EntityManager;
 import net.kennux.cubicworld.entity.EntitySystem;
@@ -124,6 +130,16 @@ public class CubicWorldServer implements Runnable
 	 * If this gets set to false, server threads will stop.
 	 */
 	private boolean isRunning;
+	
+	/**
+	 * The server config properties.
+	 */
+	public Properties serverConfig;
+	
+	/**
+	 * The permission system backend instance.
+	 */
+	public IPermissionSystemBackend permissionsBackend;
 
 	/**
 	 * <pre>
@@ -154,10 +170,66 @@ public class CubicWorldServer implements Runnable
 			ConsoleHelper.writeLog("ERROR", "Server instance already initialized!", "Server Init");
 			System.exit(-1);
 		}
+		
+		// Open server config
+		this.serverConfig = new Properties();
+		File serverConfigFile = new File("server.properties");
+		
+		// Create config file if it is non existing
+		if (!serverConfigFile.exists())
+		{
+			try
+			{
+				// Create the new server config file
+				serverConfigFile.createNewFile();
+				
+				// Open the config output stream
+				FileOutputStream configFileOutputStream = new FileOutputStream(serverConfigFile);
+				configFileOutputStream.write(("permissions.backend=net.kennux.cubicworld.admin.permissions.TestBackend\r\n"+
+											"").getBytes());
+			}
+			catch (IOException e)
+			{
+				ConsoleHelper.writeLog("ERROR", "Error while writing the server config!", "Server Init");
+				ConsoleHelper.logError(e);
+				System.exit(-1);
+			}
+		}
+		
+		// Load the server config
+		try
+		{
+			this.serverConfig.load(new FileInputStream(serverConfigFile));
+		}
+		catch (IOException e)
+		{
+			ConsoleHelper.writeLog("ERROR", "Error while loading the server config!", "Server Init");
+			ConsoleHelper.logError(e);
+			System.exit(-1);
+		}
 
 		CubicWorld.setServer(this);
 
 		ConsoleHelper.writeLog("info", "Initializing CubicWorldServer...", "Server Init");
+		
+		// Load the permissions backend
+		try
+		{
+			this.permissionsBackend = (IPermissionSystemBackend)Class.forName(this.serverConfig.getProperty("permissions.backend")).newInstance();
+			
+			// Init permissions
+			PermissionRole[] roles = this.permissionsBackend.loadRoles();
+			for (PermissionRole role : roles)
+			{
+				Permissions.registerRole(role);
+			}
+		}
+		catch (InstantiationException | IllegalAccessException | ClassNotFoundException e)
+		{
+			ConsoleHelper.writeLog("ERROR", "Error while loading the permissions!", "Server Init");
+			ConsoleHelper.logError(e);
+			System.exit(-1);
+		}
 
 		// Init profiler
 		this.profiler = new Profiler();

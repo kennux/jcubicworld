@@ -528,6 +528,9 @@ public class VoxelChunk
 	{
 		synchronized (this.voxelDataLockObject)
 		{
+			if (this.voxelData == null)
+				return null;
+			
 			return this.voxelData.clone();
 		}
 	}

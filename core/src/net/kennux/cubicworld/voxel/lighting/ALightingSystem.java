@@ -78,8 +78,6 @@ public abstract class ALightingSystem
 		if (this.state)
 			return;
 		
-		System.out.println("Lighting!");
-		
 		for (int i = 0; i < this.passes.length; i++)
 		{
 			// Find a pass which is not done yet

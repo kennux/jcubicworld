@@ -37,6 +37,10 @@ public class LocalLightingPass implements ILightingPass
 		
 		VoxelData[][][] voxelData = chunk.getVoxelData();
 		
+		// Only start calculation if the voxel data is already initialized
+		if (voxelData == null)
+			return false;
+		
 		// Check if top chunk is ready
 		
 		// Needed variables

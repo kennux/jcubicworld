@@ -61,6 +61,11 @@ public class CubicWorldServerClient extends AClientSocket
 	 * constructor.
 	 */
 	private int clientIndex;
+	
+	/**
+	 * Serverside only variable used to store all available roles.
+	 */
+	public String[] roles;
 
 	public CubicWorldServerClient(CubicWorldServer master, Socket socket, int clientIndex) throws IOException
 	{

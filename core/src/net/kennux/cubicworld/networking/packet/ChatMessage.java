@@ -4,6 +4,7 @@ import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.admin.AdminSystem;
 import net.kennux.cubicworld.admin.IChatCommand;
+import net.kennux.cubicworld.admin.permissions.Permissions;
 import net.kennux.cubicworld.gui.hud.Chatbox;
 import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
@@ -62,10 +63,20 @@ public class ChatMessage extends APacketModel
 			// Get command
 			IChatCommand commandInstance = AdminSystem.getCommand(command[0]);
 
-			// Execute command if available.
+			// Execute command if available and the sender got appropriate rights
 			if (commandInstance != null)
 			{
-				commandInstance.executeCommand(client, command);
+				if (Permissions.hasRight(client.roles, "command."+command[0]))
+				{
+					commandInstance.executeCommand(client, command);
+				}
+				else
+				{
+					ChatMessage messageModel = new ChatMessage();
+					messageModel.chatMessage = "You don't have the rights to access this command!";
+					messageModel.setPlayerId(client.playerEntity.getEntityId());
+					server.sendPacket(messageModel);
+				}
 			}
 			else
 			{
