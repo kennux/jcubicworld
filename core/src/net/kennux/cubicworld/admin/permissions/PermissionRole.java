@@ -51,7 +51,10 @@ public class PermissionRole
 	}
 	
 	/**
+	 * <pre>
 	 * Checks this role if has the given right.
+	 * If the role has a right like command.* it will act as a wildcard.
+	 * </pre>
 	 * @param rightName
 	 * @return
 	 */
@@ -59,7 +62,24 @@ public class PermissionRole
 	{
 		for (int i = 0; i < this.rights.length; i++)
 		{
-			if (this.rights[i].equals(rightName))
+			// Check if right is a wildcard
+			if (this.rights[i].contains("*"))
+			{
+				// Yes, it is a wildcard!
+				int asteriskPosition = this.rights[i].indexOf("*");
+				
+				// Get wildcard pattern and wildcard
+				String wildcardPattern = this.rights[i].substring(0, asteriskPosition);
+				String wildcard = rightName.substring(0, asteriskPosition);
+				
+				// Check if they match
+				if (wildcardPattern.equals(wildcard))
+				{
+					// User has the right!
+					return true;
+				}
+			}
+			else if (this.rights[i].equals(rightName))
 			{
 				return true;
 			}

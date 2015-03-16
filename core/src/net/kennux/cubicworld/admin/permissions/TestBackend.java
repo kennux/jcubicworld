@@ -8,14 +8,13 @@ public class TestBackend implements IPermissionSystemBackend
 	{
 		return new PermissionRole[]
 		{
-			new PermissionRole("Test", new String[] { "command.test" })
+			new PermissionRole("Test", new String[] { "command.*" })
 		};
 	}
-
+	
 	@Override
 	public String[] getUserRoles(String username)
 	{
 		return new String[] { "Test" };
 	}
-	
 }
