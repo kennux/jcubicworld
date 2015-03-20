@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 /**
  * This class contains static functions used for chunk mesh building and chunk data analyzation.
  * Analyzation means for example getting all visible tile entities in the current chunks as a list.
+ * 
  * @author KennuX
  *
  */
@@ -20,6 +21,7 @@ public class ChunkMeshBuilder
 	/**
 	 * "Dataholder" class for chunk generation data.
 	 * For example, this can hold the new mesh vertices, colors and so on.
+	 * 
 	 * @author KennuX
 	 *
 	 */
@@ -35,7 +37,7 @@ public class ChunkMeshBuilder
 		// thread separated from the main thread.
 		private float[] vertices;
 		private short[] indices;
-		
+
 		/**
 		 * The visible tile entity positions.
 		 * Will get built in the generateMesh() function.
@@ -50,23 +52,23 @@ public class ChunkMeshBuilder
 		{
 			return boundingBox;
 		}
-		
+
 		public float[] getVertices()
 		{
 			return this.vertices;
 		}
-		
+
 		public short[] getIndices()
 		{
 			return this.indices;
 		}
-		
+
 		public ArrayList<Vector3i> getVisibleTileEntities()
 		{
 			return this.visibleTileEntities;
 		}
 	}
-	
+
 	// STATIC DATA
 
 	private static final Vector3[] LEFT_SIDE_VERTICES = new Vector3[] { new Vector3(0, 0, 1), new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 1, 1) };
@@ -104,17 +106,17 @@ public class ChunkMeshBuilder
 	private static final Vector3[] FRONT_SIDE_NORMALS = new Vector3[] { new Vector3(0, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 1) };
 
 	private static final short[] FRONT_SIDE_INDICES = new short[] { 2, 1, 0, 0, 3, 2 };
-	
+
 	private static final int vertexSize = 6;
 
 	public static ChunkMeshBuilderResult buildMeshData(VoxelChunk chunk)
 	{
 		// Create a local copy of the voxel chunk data
 		VoxelData[][][] voxelData = chunk.getVoxelData();
-		
+
 		// Create the job data object
 		ChunkMeshBuilderResult resultData = new ChunkMeshBuilderResult();
-		
+
 		// the vertices array list
 		final int initListLength = 16000; // Start with a length of 16000 to avoid re-allocation
 		ArrayList<Float> vertices = new ArrayList<Float>(initListLength * vertexSize);
@@ -227,30 +229,41 @@ public class ChunkMeshBuilder
 			resultData.indices[i] = index.shortValue();
 			i++;
 		}
-		
+
 		return resultData;
 	}
-	
+
 	/**
 	 * Writes mesh data to the given lists.
 	 * 
-	 * @param vertices Main vertex list.
-	 * @param indices Main index list.
-	 * @param uvs Main uvs list.
-	 * @param colors Main colors list.
-	 * @param sideVertices Vertex array from the side vertices array.
-	 * @param sideIndices Side indices from the side indices array.
-	 * @param indicesCounter The current index counter.
-	 * @param x The current voxel worldspace position.
-	 * @param y The current voxel worldspace position.
-	 * @param z The current voxel worldspace position.
-	 * @param color The voxel color.
-	 * @param blockId The voxel type id.
-	 * @param face The foxel face to use for getting uv coordinates.
+	 * @param vertices
+	 *            Main vertex list.
+	 * @param indices
+	 *            Main index list.
+	 * @param uvs
+	 *            Main uvs list.
+	 * @param colors
+	 *            Main colors list.
+	 * @param sideVertices
+	 *            Vertex array from the side vertices array.
+	 * @param sideIndices
+	 *            Side indices from the side indices array.
+	 * @param indicesCounter
+	 *            The current index counter.
+	 * @param x
+	 *            The current voxel worldspace position.
+	 * @param y
+	 *            The current voxel worldspace position.
+	 * @param z
+	 *            The current voxel worldspace position.
+	 * @param color
+	 *            The voxel color.
+	 * @param blockId
+	 *            The voxel type id.
+	 * @param face
+	 *            The foxel face to use for getting uv coordinates.
 	 */
-	private static final void WriteSideData(ArrayList<Float> vertices, ArrayList<Short> indices, Vector3[] sideVertices, Vector3[] sideNormals,
-			short[] sideIndices, short indicesCounter, int x, int y, int z, VoxelData voxelData, VoxelFace face,
-			byte lightLevel, int chunkX, int chunkY, int chunkZ)
+	private static final void WriteSideData(ArrayList<Float> vertices, ArrayList<Short> indices, Vector3[] sideVertices, Vector3[] sideNormals, short[] sideIndices, short indicesCounter, int x, int y, int z, VoxelData voxelData, VoxelFace face, byte lightLevel, int chunkX, int chunkY, int chunkZ)
 	{
 		// short blockId = voxelData.voxelType.voxelId;
 

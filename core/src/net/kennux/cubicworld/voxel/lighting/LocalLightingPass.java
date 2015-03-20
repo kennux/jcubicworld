@@ -8,6 +8,7 @@ import net.kennux.cubicworld.voxel.VoxelWorld;
 
 /**
  * The sunlight pass.
+ * 
  * @author KennuX
  *
  */
@@ -17,32 +18,32 @@ public class LocalLightingPass implements ILightingPass
 	 * The lightin system master.
 	 */
 	private ALightingSystem lightingSystem;
-	
+
 	public LocalLightingPass(ALightingSystem lightingSystem)
 	{
 		this.lightingSystem = lightingSystem;
 	}
-	
+
 	@Override
 	public boolean executePass(VoxelChunk chunk)
 	{
 		// Check if pass above this is already calculated or this is the top chunk of the world.
 		if (!ClientChunkRequest.areRequestsPending() && chunk.isInitialized() && chunk.getChunkY() != chunk.master.chunksOnYAxis())
 		{
-			VoxelChunk topChunk = chunk.master.getChunk(chunk.getChunkX(), chunk.getChunkY()+1, chunk.getChunkZ(), false);
-			
+			VoxelChunk topChunk = chunk.master.getChunk(chunk.getChunkX(), chunk.getChunkY() + 1, chunk.getChunkZ(), false);
+
 			if (topChunk == null || !topChunk.isLightingPassDone(LocalLightingPass.class))
 				return false;
 		}
-		
+
 		VoxelData[][][] voxelData = chunk.getVoxelData();
-		
+
 		// Only start calculation if the voxel data is already initialized
 		if (voxelData == null)
 			return false;
-		
+
 		// Check if top chunk is ready
-		
+
 		// Needed variables
 		VoxelData v = null;
 		Vector3i absolutePos = new Vector3i(0, 0, 0);
@@ -126,7 +127,7 @@ public class LocalLightingPass implements ILightingPass
 						}
 					}
 				}
-		
+
 		return true;
 	}
 

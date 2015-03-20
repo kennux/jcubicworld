@@ -6,8 +6,9 @@ import net.kennux.cubicworld.admin.AdminSystem;
 import net.kennux.cubicworld.admin.IChatCommand;
 import net.kennux.cubicworld.admin.permissions.Permissions;
 import net.kennux.cubicworld.gui.hud.Chatbox;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.APacketModel;
+import net.kennux.cubicworld.networking.model.PacketTargetInfo;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 
@@ -30,12 +31,22 @@ public class ChatMessage extends APacketModel
 		server.sendPacket(messageModel);
 	}
 
+	/**
+	 * The target info.
+	 */
+	private PacketTargetInfo targetInfo;
+
 	public String chatMessage;
 
-	@Override
-	public int getPlayerId()
+	/**
+	 * This method can get used to make this packet user-exclusive.
+	 * Default of this packet is that it will get broadcasted, but after this call it will only get sent to one user.
+	 * 
+	 * @param playerId
+	 */
+	public void setPlayerId(int playerId)
 	{
-		return -1;
+		this.targetInfo = PacketTargetInfo.createPlayer(playerId);
 	}
 
 	@Override
@@ -66,7 +77,7 @@ public class ChatMessage extends APacketModel
 			// Execute command if available and the sender got appropriate rights
 			if (commandInstance != null)
 			{
-				if (Permissions.hasRight(client.roles, "command."+command[0]))
+				if (Permissions.hasRight(client.roles, "command." + command[0]))
 				{
 					commandInstance.executeCommand(client, command);
 				}
@@ -74,7 +85,7 @@ public class ChatMessage extends APacketModel
 				{
 					ChatMessage messageModel = new ChatMessage();
 					messageModel.chatMessage = "You don't have the rights to access this command!";
-					messageModel.setPlayerId(client.playerEntity.getEntityId());
+					this.targetInfo = PacketTargetInfo.createPlayer(client.playerEntity.getEntityId());
 					server.sendPacket(messageModel);
 				}
 			}
@@ -82,7 +93,7 @@ public class ChatMessage extends APacketModel
 			{
 				ChatMessage messageModel = new ChatMessage();
 				messageModel.chatMessage = "Command not found!";
-				messageModel.setPlayerId(client.playerEntity.getEntityId());
+				this.targetInfo = PacketTargetInfo.createPlayer(client.playerEntity.getEntityId());
 				server.sendPacket(messageModel);
 			}
 		}
@@ -111,6 +122,15 @@ public class ChatMessage extends APacketModel
 	public void writePacket(BitWriter builder)
 	{
 		builder.writeString(this.chatMessage);
+	}
+
+	@Override
+	public PacketTargetInfo getTargetInfo()
+	{
+		if (this.targetInfo == null)
+			this.targetInfo = PacketTargetInfo.createBroadcast();
+
+		return this.targetInfo;
 	}
 
 }

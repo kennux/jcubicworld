@@ -3,8 +3,8 @@ package net.kennux.cubicworld.networking.packet;
 import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.ADistanceCulledPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelData;
@@ -22,7 +22,7 @@ import net.kennux.cubicworld.voxel.VoxelData;
  * @author KennuX
  *
  */
-public class ServerVoxelUpdate extends APacketModel
+public class ServerVoxelUpdate extends ADistanceCulledPacketModel
 {
 	// Chunk coordinates
 	public int x = 0;
@@ -34,12 +34,6 @@ public class ServerVoxelUpdate extends APacketModel
 	public float getCullDistance()
 	{
 		return CubicWorldConfiguration.chunkUpdateDistance;
-	}
-
-	@Override
-	public int getPlayerId()
-	{
-		return -2; // Distance based
 	}
 
 	@Override

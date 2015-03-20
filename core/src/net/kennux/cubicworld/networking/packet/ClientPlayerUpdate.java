@@ -2,8 +2,8 @@ package net.kennux.cubicworld.networking.packet;
 
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.AClientPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 
@@ -18,7 +18,7 @@ import com.badlogic.gdx.math.Vector3;
  * @author KennuX
  *
  */
-public class ClientPlayerUpdate extends APacketModel
+public class ClientPlayerUpdate extends AClientPacketModel
 {
 	// Chunk coordinates
 	public Vector3 position;

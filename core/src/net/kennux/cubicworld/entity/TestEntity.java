@@ -37,7 +37,7 @@ public class TestEntity extends AModelMobEntity
 	@Override
 	public ModelInstance getModelInstance()
 	{
-		return null; // new ModelInstance(BasePlugin.testEntityModel);
+		return null;
 	}
 
 	@Override

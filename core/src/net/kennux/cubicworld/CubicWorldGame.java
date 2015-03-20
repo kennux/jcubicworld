@@ -1,7 +1,6 @@
 package net.kennux.cubicworld;
 
 import java.io.IOException;
-import java.nio.IntBuffer;
 
 import net.kennux.cubicworld.entity.EntityManager;
 import net.kennux.cubicworld.entity.PlayerController;
@@ -35,7 +34,6 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.utils.BufferUtils;
 
 /**
  * The game's main class.

@@ -2,8 +2,8 @@ package net.kennux.cubicworld.networking.packet;
 
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.APlayerPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 
@@ -15,7 +15,7 @@ import net.kennux.cubicworld.serialization.BitWriter;
  * @author KennuX
  *
  */
-public class KeepAlive extends APacketModel
+public class KeepAlive extends APlayerPacketModel
 {
 	@Override
 	public void interpretClientSide(CubicWorldGame cubicWorld)

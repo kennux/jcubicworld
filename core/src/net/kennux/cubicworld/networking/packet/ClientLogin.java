@@ -10,8 +10,8 @@ import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.entity.PlayerEntity;
 import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.inventory.IInventoryUpdateHandler;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.AClientPacketModel;
 import net.kennux.cubicworld.networking.packet.inventory.ServerPlayerInventoryUpdate;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
@@ -27,7 +27,7 @@ import com.badlogic.gdx.math.Vector3;
  * @author KennuX
  *
  */
-public class ClientLogin extends APacketModel
+public class ClientLogin extends AClientPacketModel
 {
 	// Chunk coordinates
 	public String username;
@@ -70,13 +70,13 @@ public class ClientLogin extends APacketModel
 				ConsoleHelper.logError(e);
 			}
 		}
-		
+
 		// Set player inventory update handler
 		final PlayerEntity playerEntity = client.playerEntity;
-		
+
 		// Load roles for this user
 		client.roles = server.permissionsBackend.getUserRoles(client.playerEntity.getEntityName());
-		
+
 		client.playerEntity.playerInventory.setUpdateHandler(new IInventoryUpdateHandler()
 		{
 			@Override

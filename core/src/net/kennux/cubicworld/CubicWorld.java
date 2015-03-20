@@ -1,7 +1,5 @@
 package net.kennux.cubicworld;
 
-import com.badlogic.gdx.Gdx;
-
 import net.kennux.cubicworld.util.ConsoleHelper;
 
 public class CubicWorld

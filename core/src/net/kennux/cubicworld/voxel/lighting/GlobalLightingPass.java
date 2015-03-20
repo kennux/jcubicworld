@@ -23,7 +23,7 @@ public class GlobalLightingPass implements ILightingPass
 	{
 		if (this.dependencyVoxelsTemporary == null)
 			this.dependencyVoxelsTemporary = new ArrayList<Vector3i>();
-		
+
 		// Needed variables
 		VoxelData[][][] voxelData = chunk.getVoxelData();
 		VoxelData v = null;
@@ -122,7 +122,7 @@ public class GlobalLightingPass implements ILightingPass
 			this.dependencyVoxelsTemporary.clear();
 			return true;
 		}
-		
+
 		return false;
 	}
 

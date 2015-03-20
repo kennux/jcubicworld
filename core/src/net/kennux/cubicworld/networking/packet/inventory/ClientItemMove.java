@@ -5,8 +5,8 @@ import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.inventory.BlockInventory;
 import net.kennux.cubicworld.item.ItemStack;
 import net.kennux.cubicworld.item.ItemType;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.AClientPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelData;
@@ -22,7 +22,7 @@ import com.badlogic.gdx.math.Vector3;
  * @author KennuX
  *
  */
-public class ClientItemMove extends APacketModel
+public class ClientItemMove extends AClientPacketModel
 {
 	/**
 	 * Creates a client item move packet model object for the player inventory.

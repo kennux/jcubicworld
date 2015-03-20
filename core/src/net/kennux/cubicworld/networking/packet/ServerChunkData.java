@@ -2,8 +2,8 @@ package net.kennux.cubicworld.networking.packet;
 
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.APlayerPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelChunk;
@@ -19,7 +19,7 @@ import net.kennux.cubicworld.voxel.VoxelEngine;
  * @author KennuX
  *
  */
-public class ServerChunkData extends APacketModel
+public class ServerChunkData extends APlayerPacketModel
 {
 	// Chunk coordinates
 	public int chunkX = 0;

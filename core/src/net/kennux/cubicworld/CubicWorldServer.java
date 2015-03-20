@@ -2,7 +2,6 @@ package net.kennux.cubicworld;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -29,11 +28,9 @@ import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelWorld;
 import net.kennux.cubicworld.voxel.VoxelWorldSave;
 import net.kennux.cubicworld.voxel.generator.TestGenerator;
-import net.kennux.cubicworld.voxel.generator.WorldGenerator;
 import net.kennux.cubicworld.voxel.generator.noise.SimplexNoise3D;
 import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 
 /**
@@ -130,12 +127,12 @@ public class CubicWorldServer implements Runnable
 	 * If this gets set to false, server threads will stop.
 	 */
 	private boolean isRunning;
-	
+
 	/**
 	 * The server config properties.
 	 */
 	public Properties serverConfig;
-	
+
 	/**
 	 * The permission system backend instance.
 	 */
@@ -170,11 +167,11 @@ public class CubicWorldServer implements Runnable
 			ConsoleHelper.writeLog("ERROR", "Server instance already initialized!", "Server Init");
 			System.exit(-1);
 		}
-		
+
 		// Open server config
 		this.serverConfig = new Properties();
 		File serverConfigFile = new File("server.properties");
-		
+
 		// Create config file if it is non existing
 		if (!serverConfigFile.exists())
 		{
@@ -182,11 +179,10 @@ public class CubicWorldServer implements Runnable
 			{
 				// Create the new server config file
 				serverConfigFile.createNewFile();
-				
+
 				// Open the config output stream
 				FileOutputStream configFileOutputStream = new FileOutputStream(serverConfigFile);
-				configFileOutputStream.write(("permissions.backend=net.kennux.cubicworld.admin.permissions.TestBackend\r\n"+
-											"").getBytes());
+				configFileOutputStream.write(("permissions.backend=net.kennux.cubicworld.admin.permissions.TestBackend\r\n" + "").getBytes());
 			}
 			catch (IOException e)
 			{
@@ -195,7 +191,7 @@ public class CubicWorldServer implements Runnable
 				System.exit(-1);
 			}
 		}
-		
+
 		// Load the server config
 		try
 		{
@@ -211,12 +207,12 @@ public class CubicWorldServer implements Runnable
 		CubicWorld.setServer(this);
 
 		ConsoleHelper.writeLog("info", "Initializing CubicWorldServer...", "Server Init");
-		
+
 		// Load the permissions backend
 		try
 		{
-			this.permissionsBackend = (IPermissionSystemBackend)Class.forName(this.serverConfig.getProperty("permissions.backend")).newInstance();
-			
+			this.permissionsBackend = (IPermissionSystemBackend) Class.forName(this.serverConfig.getProperty("permissions.backend")).newInstance();
+
 			// Init permissions
 			PermissionRole[] roles = this.permissionsBackend.loadRoles();
 			for (PermissionRole role : roles)

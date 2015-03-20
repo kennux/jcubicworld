@@ -4,6 +4,7 @@ package net.kennux.cubicworld.admin.permissions;
  * <pre>
  * Permission role class.
  * </pre>
+ * 
  * @author KennuX
  *
  */
@@ -13,14 +14,15 @@ public class PermissionRole
 	 * The rights string list.
 	 */
 	private String[] rights;
-	
+
 	/**
 	 * The name of the role.
 	 */
 	private String roleName;
-	
+
 	/**
 	 * Constructs a role object with the given name as rolename and rights array.
+	 * 
 	 * @param name
 	 * @param rights
 	 */
@@ -29,12 +31,12 @@ public class PermissionRole
 		this.roleName = roleName;
 		this.rights = rights;
 	}
-	
+
 	public String getName()
 	{
 		return this.roleName;
 	}
-	
+
 	/**
 	 * <pre>
 	 * Checks if this role is allowed to execute the command given in commandName.
@@ -42,19 +44,22 @@ public class PermissionRole
 	 * 
 	 * So PermissionRole.hasRight("command."+commandName) would have the same effect.
 	 * </pre>
-	 * @param commandName The command name
+	 * 
+	 * @param commandName
+	 *            The command name
 	 * @return
 	 */
 	public boolean isAllowedToExecuteCommand(String commandName)
 	{
-		return this.hasRight("command."+commandName);
+		return this.hasRight("command." + commandName);
 	}
-	
+
 	/**
 	 * <pre>
 	 * Checks this role if has the given right.
 	 * If the role has a right like command.* it will act as a wildcard.
 	 * </pre>
+	 * 
 	 * @param rightName
 	 * @return
 	 */
@@ -67,11 +72,11 @@ public class PermissionRole
 			{
 				// Yes, it is a wildcard!
 				int asteriskPosition = this.rights[i].indexOf("*");
-				
+
 				// Get wildcard pattern and wildcard
 				String wildcardPattern = this.rights[i].substring(0, asteriskPosition);
 				String wildcard = rightName.substring(0, asteriskPosition);
-				
+
 				// Check if they match
 				if (wildcardPattern.equals(wildcard))
 				{
@@ -84,7 +89,7 @@ public class PermissionRole
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 }

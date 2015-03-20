@@ -13,6 +13,7 @@ import net.kennux.cubicworld.voxel.VoxelChunk;
  * This can be used in order to wait for other voxel's lighting to complete if the data is needed for lighting calculations.
  * 
  * </pre>
+ * 
  * @author KennuX
  *
  */
@@ -25,24 +26,26 @@ public abstract class ALightingSystem
 	 * </pre>
 	 */
 	protected abstract ILightingPass[] getPasses();
-	
+
 	/**
 	 * The values returned by executePass().
+	 * 
 	 * @see ILightingPass#executePass(net.kennux.cubicworld.voxel.VoxelChunk)
 	 */
 	private boolean[] passStates;
-	
+
 	/**
 	 * The passes returned by getPasses().
+	 * 
 	 * @see ALightingSystem#passes
 	 */
 	private ILightingPass[] passes;
-	
+
 	/**
 	 * The overall lighting state.
 	 */
 	private boolean state;
-	
+
 	/**
 	 * You need to overload this constructor!
 	 */
@@ -51,9 +54,10 @@ public abstract class ALightingSystem
 		this.passes = this.getPasses();
 		this.passStates = new boolean[this.passes.length];
 	}
-	
+
 	/**
 	 * Resets all lighting states
+	 * 
 	 * @see ALightingSystem#passStates
 	 */
 	public void resetLighting()
@@ -62,29 +66,31 @@ public abstract class ALightingSystem
 		{
 			this.passStates[i] = false;
 		}
-		
+
 		this.state = false;
 	}
-	
+
 	/**
 	 * Calculates the lighting information.
 	 * Executes the lighting passes.
+	 * 
 	 * @see ALightingSystem#passes
-	 * @param chunk The chunk to light
+	 * @param chunk
+	 *            The chunk to light
 	 */
 	public void update(VoxelChunk chunk)
 	{
 		// Dont run if lighting is ready
 		if (this.state)
 			return;
-		
+
 		for (int i = 0; i < this.passes.length; i++)
 		{
 			// Find a pass which is not done yet
 			if (!this.passStates[i])
 			{
 				this.passStates[i] = this.passes[i].executePass(chunk);
-				
+
 				if (!this.passStates[i])
 				{
 					this.state = false;
@@ -92,11 +98,11 @@ public abstract class ALightingSystem
 				}
 			}
 		}
-		
+
 		this.state = true;
 		return;
 	}
-	
+
 	/**
 	 * Checks if the pass with the given class is already done.
 	 * Returns fals if the given pass was not found.
@@ -107,7 +113,7 @@ public abstract class ALightingSystem
 	public boolean isPassDone(Class clazz)
 	{
 		int passIndex = -1;
-		
+
 		for (int i = 0; i < this.passes.length; i++)
 		{
 			if (this.passes[i].getClass().equals(clazz))
@@ -116,7 +122,7 @@ public abstract class ALightingSystem
 				break;
 			}
 		}
-		
+
 		return this.passStates[passIndex];
 	}
 

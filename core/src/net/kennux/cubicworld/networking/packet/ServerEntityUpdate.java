@@ -3,8 +3,8 @@ package net.kennux.cubicworld.networking.packet;
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.entity.AEntity;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.APlayerPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 
@@ -17,7 +17,7 @@ import net.kennux.cubicworld.serialization.BitWriter;
  * @author KennuX
  *
  */
-public class ServerEntityUpdate extends APacketModel
+public class ServerEntityUpdate extends APlayerPacketModel
 {
 	private int entityId;
 	private byte[] entityData;

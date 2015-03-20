@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.AClientPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 
@@ -20,7 +20,7 @@ import com.badlogic.gdx.math.Vector3;
  * @author KennuX
  *
  */
-public class ClientChunkRequest extends APacketModel
+public class ClientChunkRequest extends AClientPacketModel
 {
 	/**
 	 * The pending chunk requests list.

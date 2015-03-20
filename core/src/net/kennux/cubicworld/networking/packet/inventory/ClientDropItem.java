@@ -4,8 +4,8 @@ import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.entity.ItemEntity;
 import net.kennux.cubicworld.item.ItemStack;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.AClientPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 
@@ -17,7 +17,7 @@ import com.badlogic.gdx.math.Vector3;
  * @author KennuX
  *
  */
-public class ClientDropItem extends APacketModel
+public class ClientDropItem extends AClientPacketModel
 {
 	/**
 	 * The item slot id in the player inventory.

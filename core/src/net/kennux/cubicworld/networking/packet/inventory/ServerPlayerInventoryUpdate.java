@@ -3,8 +3,8 @@ package net.kennux.cubicworld.networking.packet.inventory;
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.inventory.IInventory;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.APlayerPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 
@@ -14,7 +14,7 @@ import net.kennux.cubicworld.serialization.BitWriter;
  * @author KennuX
  *
  */
-public class ServerPlayerInventoryUpdate extends APacketModel
+public class ServerPlayerInventoryUpdate extends APlayerPacketModel
 {
 	/**
 	 * The item slot id in the player inventory.

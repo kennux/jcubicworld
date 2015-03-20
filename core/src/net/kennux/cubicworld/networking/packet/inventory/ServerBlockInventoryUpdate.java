@@ -3,8 +3,8 @@ package net.kennux.cubicworld.networking.packet.inventory;
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.inventory.IInventory;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.ADistanceCulledPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelData;
@@ -15,7 +15,7 @@ import net.kennux.cubicworld.voxel.VoxelData;
  * @author KennuX
  *
  */
-public class ServerBlockInventoryUpdate extends APacketModel
+public class ServerBlockInventoryUpdate extends ADistanceCulledPacketModel
 {
 	/**
 	 * The Block inventory which gets used for serializing.
@@ -36,12 +36,6 @@ public class ServerBlockInventoryUpdate extends APacketModel
 	public int voxelPositionZ;
 
 	private BitReader inventoryReader;
-
-	@Override
-	public int getPlayerId()
-	{
-		return -2; // Distance based
-	}
 
 	@Override
 	public void interpretClientSide(CubicWorldGame cubicWorld)

@@ -23,12 +23,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
@@ -213,12 +209,12 @@ public class VoxelChunk
 	 * Contains the number of generateMesh() calls this frame.
 	 */
 	private static int creationsProcessedThisFrame = -1;
-	
+
 	/**
 	 * The new chunk mesh generation result data.
 	 */
 	private ChunkMeshBuilderResult newMeshData;
-	
+
 	/**
 	 * The lighting system used by this chunk.
 	 */
@@ -226,6 +222,7 @@ public class VoxelChunk
 
 	/**
 	 * Creates a new mesh for the mesh pool if there is no free one.
+	 * 
 	 * @return
 	 */
 	private static Mesh newMesh()
@@ -237,7 +234,7 @@ public class VoxelChunk
 	{
 		// Init lighting system
 		this.lightingSystem = new BasicLightingSystem();
-		
+
 		this.voxelData = null;
 
 		// Init rotation mappings
@@ -331,13 +328,13 @@ public class VoxelChunk
 			// Let's double check to prevent a full crash
 			if (this.newMeshData == null)
 				return;
-			
+
 			// Get data
 			float[] newVertices = this.newMeshData.getVertices();
 			short[] newIndices = this.newMeshData.getIndices();
 			ArrayList<Vector3i> newVisibleTileEntities = this.newMeshData.getVisibleTileEntities();
 			BoundingBox newBoundingBox = this.newMeshData.getBoundingBox();
-			
+
 			// Mesh empty?
 			if (newVertices.length == 0)
 			{
@@ -405,9 +402,9 @@ public class VoxelChunk
 		{
 			if (!this.lightingSystem.isReady() || this.voxelData == null)
 				return;
-			
+
 			this.newMeshData = ChunkMeshBuilder.buildMeshData(this);
-			
+
 			this.newMeshDataReady = true;
 		}
 	}
@@ -530,7 +527,7 @@ public class VoxelChunk
 		{
 			if (this.voxelData == null)
 				return null;
-			
+
 			return this.voxelData.clone();
 		}
 	}
@@ -590,7 +587,7 @@ public class VoxelChunk
 	{
 		return this.voxelData != null && this.isGenerationDone();
 	}
-	
+
 	/**
 	 * @see ALightingSystem#isPassDone(Class)
 	 * @param lightingPassClass
@@ -945,17 +942,17 @@ public class VoxelChunk
 			generationsProcessedThisFrame++;
 		}
 	}
-	
+
 	public int getChunkX()
 	{
 		return this.chunkX;
 	}
-	
+
 	public int getChunkY()
 	{
 		return this.chunkY;
 	}
-	
+
 	public int getChunkZ()
 	{
 		return this.chunkZ;

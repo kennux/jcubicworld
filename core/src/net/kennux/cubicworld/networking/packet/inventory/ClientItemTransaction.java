@@ -4,8 +4,8 @@ import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.item.ItemStack;
 import net.kennux.cubicworld.item.ItemType;
-import net.kennux.cubicworld.networking.APacketModel;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
+import net.kennux.cubicworld.networking.model.AClientPacketModel;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelData;
@@ -16,7 +16,7 @@ import net.kennux.cubicworld.voxel.VoxelData;
  * @author KennuX
  *
  */
-public class ClientItemTransaction extends APacketModel
+public class ClientItemTransaction extends AClientPacketModel
 {
 	/**
 	 * Creates a client item transaction.

@@ -2,6 +2,8 @@ package net.kennux.cubicworld.networking;
 
 import java.util.HashMap;
 
+import net.kennux.cubicworld.networking.model.APacketModel;
+
 /**
  * <pre>
  * Protocol information holder.

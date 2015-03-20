@@ -1,8 +1,8 @@
 package net.kennux.cubicworld.voxel.fluid;
 
-import com.badlogic.gdx.graphics.Color;
-
 import net.kennux.cubicworld.voxel.VoxelType;
+
+import com.badlogic.gdx.graphics.Color;
 
 /**
  * Slightly extended voxel type class.

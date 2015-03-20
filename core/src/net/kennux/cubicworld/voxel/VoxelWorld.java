@@ -12,7 +12,6 @@ import net.kennux.cubicworld.voxel.generator.AWorldGenerator;
 import net.kennux.cubicworld.voxel.handlers.IVoxelDataUpdateHandler;
 
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;

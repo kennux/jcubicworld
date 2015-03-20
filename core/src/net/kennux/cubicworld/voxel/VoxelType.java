@@ -1,14 +1,10 @@
 package net.kennux.cubicworld.voxel;
 
-import java.util.HashMap;
-import java.util.Map.Entry;
-
 import net.kennux.cubicworld.inventory.InventoryFilterRuleSet;
 import net.kennux.cubicworld.voxel.handlers.ITileEntityHandlerFactory;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector2;
 
 /**

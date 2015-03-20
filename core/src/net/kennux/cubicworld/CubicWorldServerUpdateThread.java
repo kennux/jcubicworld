@@ -6,6 +6,7 @@ import net.kennux.cubicworld.entity.AEntity;
 import net.kennux.cubicworld.math.MathUtils;
 import net.kennux.cubicworld.networking.CubicWorldServerClient;
 import net.kennux.cubicworld.networking.IPacketModel;
+import net.kennux.cubicworld.networking.model.PacketTargetInfo;
 import net.kennux.cubicworld.networking.packet.ServerEntitySpawn;
 import net.kennux.cubicworld.networking.packet.ServerEntityUpdate;
 import net.kennux.cubicworld.util.ConsoleHelper;
@@ -131,42 +132,43 @@ public class CubicWorldServerUpdateThread implements Runnable
 					IPacketModel packet = server.packets.pop();
 
 					// Send packet
-					int playerId = packet.getPlayerId();
-					if (playerId == -1)
+					PacketTargetInfo targetInfo = packet.getTargetInfo();
+
+					switch (targetInfo.getPacketTarget())
 					{
-						// Broadcast
-						synchronized (server.clientsLockObject)
-						{
-							for (CubicWorldServerClient client : server.clients)
+						case BROADCAST:
+							// Broadcast
+							synchronized (server.clientsLockObject)
 							{
-								if (client != null && client.isLoggedin())
-									client.sendPacket(packet);
-							}
-						}
-					}
-					else if (playerId == -2)
-					{
-						// Distance-culled Broadcast
-						synchronized (server.clientsLockObject)
-						{
-							for (CubicWorldServerClient client : server.clients)
-							{
-								// Client loggedin and in update distance?
-								if (client != null && client.isLoggedin() && new Vector3(client.playerEntity.getPosition()).sub(packet.getCullPosition()).len() <= packet.getCullDistance())
+								for (CubicWorldServerClient client : server.clients)
 								{
-									client.sendPacket(packet);
+									if (client != null && client.isLoggedin())
+										client.sendPacket(packet);
 								}
 							}
-						}
-					}
-					else
-					{
-						// Single user packet.
-						synchronized (server.clientsLockObject)
-						{
-							if (server.clients[packet.getPlayerId()] != null && server.clients[packet.getPlayerId()].isLoggedin())
-								server.clients[packet.getPlayerId()].sendPacket(packet);
-						}
+							break;
+						case DISTANCE_CULLED:
+							// Distance-culled Broadcast
+							synchronized (server.clientsLockObject)
+							{
+								for (CubicWorldServerClient client : server.clients)
+								{
+									// Client loggedin and in update distance?
+									if (client != null && client.isLoggedin() && new Vector3(client.playerEntity.getPosition()).sub(packet.getCullPosition()).len() <= packet.getCullDistance())
+									{
+										client.sendPacket(packet);
+									}
+								}
+							}
+							break;
+						case PLAYER:
+							// Single user packet.
+							synchronized (server.clientsLockObject)
+							{
+								if (server.clients[packet.getPlayerId()] != null && server.clients[packet.getPlayerId()].isLoggedin())
+									server.clients[packet.getPlayerId()].sendPacket(packet);
+							}
+							break;
 					}
 				}
 				server.profiler.stopProfiling("Server Packet Sending");

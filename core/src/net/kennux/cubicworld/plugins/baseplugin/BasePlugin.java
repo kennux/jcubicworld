@@ -3,8 +3,6 @@ package net.kennux.cubicworld.plugins.baseplugin;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import com.badlogic.gdx.graphics.Camera;
-
 import net.kennux.cubicworld.CubicWorld;
 import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.admin.AdminSystem;
@@ -14,7 +12,6 @@ import net.kennux.cubicworld.entity.PlayerEntity;
 import net.kennux.cubicworld.entity.TestEntity;
 import net.kennux.cubicworld.gui.GuiManager;
 import net.kennux.cubicworld.gui.IGuiElement;
-import net.kennux.cubicworld.gui.IGuiOverlay;
 import net.kennux.cubicworld.gui.events.IClickHandler;
 import net.kennux.cubicworld.gui.hud.BlockSelectorGui;
 import net.kennux.cubicworld.gui.hud.Chatbox;
@@ -26,9 +23,7 @@ import net.kennux.cubicworld.gui.overlay.XMLOverlayLoader;
 import net.kennux.cubicworld.gui.skin.StandardSkin;
 import net.kennux.cubicworld.input.IKeyInputHandler;
 import net.kennux.cubicworld.input.InputManager;
-import net.kennux.cubicworld.inventory.IInventory;
 import net.kennux.cubicworld.item.ItemClass;
-import net.kennux.cubicworld.item.ItemStack;
 import net.kennux.cubicworld.item.ItemSystem;
 import net.kennux.cubicworld.math.Vector3i;
 import net.kennux.cubicworld.networking.Protocol;

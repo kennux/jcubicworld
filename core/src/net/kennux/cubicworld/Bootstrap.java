@@ -7,7 +7,6 @@ import net.kennux.cubicworld.gui.AGuiOverlay;
 import net.kennux.cubicworld.item.ItemSystem;
 import net.kennux.cubicworld.pluginapi.APlugin;
 import net.kennux.cubicworld.util.ConsoleHelper;
-import net.kennux.cubicworld.voxel.VoxelData;
 import net.kennux.cubicworld.voxel.VoxelEngine;
 
 import com.badlogic.gdx.Gdx;

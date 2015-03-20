@@ -1,11 +1,10 @@
 package net.kennux.cubicworld.voxel.handlers;
 
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
 import net.kennux.cubicworld.voxel.VoxelData;
+
+import com.badlogic.gdx.graphics.Camera;
 
 /**
  * <pre>
