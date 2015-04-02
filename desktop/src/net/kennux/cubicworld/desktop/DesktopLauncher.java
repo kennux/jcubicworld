@@ -1,22 +1,16 @@
 package net.kennux.cubicworld.desktop;
 
 import java.io.IOException;
-import java.util.HashMap;
-
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 
 import net.kennux.cubicworld.Bootstrap;
-import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldConfiguration;
+import net.kennux.cubicworld.CubicWorldGame;
 import net.kennux.cubicworld.CubicWorldServer;
 import net.kennux.cubicworld.ServerBootstrap;
 import net.kennux.cubicworld.util.ConsoleHelper;
-import net.kennux.cubicworld.voxel.ChunkKey;
+
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
 public class DesktopLauncher
 {
@@ -24,7 +18,7 @@ public class DesktopLauncher
 	
 	public static void main (String[] arg)
 	{
-		/*try
+		try
 		{
 			System.in.read();
 		}
@@ -32,7 +26,7 @@ public class DesktopLauncher
 		{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}*/
+		}
 		
 		// Pre-init
 		try

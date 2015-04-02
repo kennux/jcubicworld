@@ -15,7 +15,7 @@ import net.kennux.cubicworld.networking.packet.inventory.ServerBlockInventoryUpd
 import net.kennux.cubicworld.voxel.ChunkMeshBuilder.ChunkMeshBuilderResult;
 import net.kennux.cubicworld.voxel.handlers.IVoxelTileEntityHandler;
 import net.kennux.cubicworld.voxel.lighting.ALightingSystem;
-import net.kennux.cubicworld.voxel.lighting.BasicLightingSystem;
+import net.kennux.cubicworld.voxel.lighting.TestLightingSystem;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
@@ -119,7 +119,7 @@ public class VoxelChunk
 	private BoundingBox boundingBox;
 
 	/**
-	 * The voxel data (voxeltype id's, -1 for no block here). You must lock
+	 * The voxel data (voxeltype id's, -1 for no block (air) here). You must lock
 	 * voxelDataLockObject when you are writing to this field. After direct
 	 * writing to this you must call setDirty().
 	 */
@@ -233,7 +233,7 @@ public class VoxelChunk
 	public VoxelChunk(int chunkX, int chunkY, int chunkZ, VoxelWorld master)
 	{
 		// Init lighting system
-		this.lightingSystem = new BasicLightingSystem();
+		this.lightingSystem = new TestLightingSystem();
 
 		this.voxelData = null;
 
@@ -408,129 +408,8 @@ public class VoxelChunk
 			this.newMeshDataReady = true;
 		}
 	}
+	
 
-	/**
-	 * Calculates an absolute position from the given local blockspace position.
-	 * 
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param vector
-	 * @return
-	 */
-	public Vector3i getAbsoluteVoxelPosition(int x, int y, int z, Vector3i vector)
-	{
-		vector.x = x + this.absoluteChunkPosition.x;
-		vector.y = y + this.absoluteChunkPosition.y;
-		vector.z = z + this.absoluteChunkPosition.z;
-		return vector;
-	}
-
-	/**
-	 * Calculates an absolute position from the given local blockspace position.
-	 * 
-	 * @see VoxelChunk#getAbsoluteVoxelPosition(int, int, int, Vector3i)
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
-	 */
-	public Vector3i getAbsoluteVoxelPosition(int x, int y, int z)
-	{
-		return this.getAbsoluteVoxelPosition(x, y, z, new Vector3i(0, 0, 0));
-	}
-
-	/**
-	 * Returns the bounding box for a voxel given in local voxelspace.
-	 * If there is no voxel at this position, null will be returned.
-	 * If the voxel is a non-collidable (like vegetation), also null is
-	 * returned.
-	 * 
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
-	 */
-	public BoundingBox getBoundingBox(int x, int y, int z)
-	{
-		// Bounds check
-		if (this.voxelData != null && x >= 0 && y >= 0 && z >= 0 && x < VoxelWorld.chunkWidth && y < VoxelWorld.chunkHeight && z < VoxelWorld.chunkDepth && this.hasVoxel(x, y, z))
-		{
-			return new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1, y + 1, z + 1));
-		}
-
-		// Not found!
-		return null;
-	}
-
-	/**
-	 * Returns the global light level of the block at the given position.
-	 * Returns -1 if there is no voxel in the given position or if an error
-	 * happend.
-	 * 
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
-	 */
-	public byte getGlobalLightLevel(int x, int y, int z)
-	{
-		// Bounds check
-		if (this.voxelData != null && x >= 0 && y >= 0 && z >= 0 && x < VoxelWorld.chunkWidth && y < VoxelWorld.chunkHeight && z < VoxelWorld.chunkDepth)
-		{
-			synchronized (this.voxelDataLockObject)
-			{
-				if (this.voxelData[x][y][z] != null)
-					return this.voxelData[x][y][z].getBlockLightLevel();
-			}
-		}
-
-		// Not found!
-		return -1;
-	}
-
-	/**
-	 * Gets the voxel data at the given x|y|z position.
-	 * Returns null in the case of an error.
-	 * 
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param voxel
-	 * @return
-	 */
-	public VoxelData getVoxel(int x, int y, int z)
-	{
-		// Bounds check
-		if (this.voxelData != null && x >= 0 && y >= 0 && z >= 0 && x < VoxelWorld.chunkWidth && y < VoxelWorld.chunkHeight && z < VoxelWorld.chunkDepth)
-		{
-			synchronized (this.voxelDataLockObject)
-			{
-				return this.voxelData[x][y][z];
-			}
-		}
-
-		// Not found!
-		return null;
-	}
-
-	/**
-	 * Returns a copy of the voxel data array.
-	 * Only the array object is a copy, the voxeldata contents of the array are
-	 * references.
-	 * 
-	 * @return
-	 */
-	public VoxelData[][][] getVoxelData()
-	{
-		synchronized (this.voxelDataLockObject)
-		{
-			if (this.voxelData == null)
-				return null;
-
-			return this.voxelData.clone();
-		}
-	}
 
 	/**
 	 * Checks if the the voxel data at the given x|y|z position is not null or
@@ -606,6 +485,156 @@ public class VoxelChunk
 	public boolean isInitializedAndLightingReady()
 	{
 		return this.isInitialized() && this.lightingSystem.isReady();
+	}
+
+	/**
+	 * Calculates an absolute position from the given local blockspace position.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param vector
+	 * @return
+	 */
+	public Vector3i getAbsoluteVoxelPosition(int x, int y, int z, Vector3i vector)
+	{
+		vector.x = x + this.absoluteChunkPosition.x;
+		vector.y = y + this.absoluteChunkPosition.y;
+		vector.z = z + this.absoluteChunkPosition.z;
+		return vector;
+	}
+
+	/**
+	 * Calculates an absolute position from the given local blockspace position.
+	 * 
+	 * @see VoxelChunk#getAbsoluteVoxelPosition(int, int, int, Vector3i)
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	public Vector3i getAbsoluteVoxelPosition(int x, int y, int z)
+	{
+		return this.getAbsoluteVoxelPosition(x, y, z, new Vector3i(0, 0, 0));
+	}
+
+	/**
+	 * Returns the bounding box for a voxel given in local voxelspace.
+	 * If there is no voxel at this position, null will be returned.
+	 * If the voxel is a non-collidable (like vegetation), also null is
+	 * returned.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	public BoundingBox getBoundingBox(int x, int y, int z)
+	{
+		// Bounds check
+		if (this.voxelData != null && x >= 0 && y >= 0 && z >= 0 && x < VoxelWorld.chunkWidth && y < VoxelWorld.chunkHeight && z < VoxelWorld.chunkDepth && this.hasVoxel(x, y, z))
+		{
+			return new BoundingBox(new Vector3(x, y, z), new Vector3(x + 1, y + 1, z + 1));
+		}
+
+		// Not found!
+		return null;
+	}
+
+	/**
+	 * Returns the global light level of the block at the given position.
+	 * Returns -1 if there is no voxel in the given position or if an error
+	 * happend.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	public byte getGlobalLightLevel(int x, int y, int z)
+	{
+		// Bounds check
+		if (this.voxelData != null && x >= 0 && y >= 0 && z >= 0 && x < VoxelWorld.chunkWidth && y < VoxelWorld.chunkHeight && z < VoxelWorld.chunkDepth)
+		{
+			synchronized (this.voxelDataLockObject)
+			{
+				if (this.voxelData[x][y][z] != null)
+					return this.voxelData[x][y][z].getLightLevel();
+			}
+		}
+
+		// Not found!
+		return -1;
+	}
+
+	/**
+	 * Gets the voxel data at the given x|y|z position.
+	 * Returns null in the case of an error.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param voxel
+	 * @return
+	 */
+	public VoxelData getVoxel(int x, int y, int z)
+	{
+		// Bounds check
+		if (this.voxelData != null && x >= 0 && y >= 0 && z >= 0 && x < VoxelWorld.chunkWidth && y < VoxelWorld.chunkHeight && z < VoxelWorld.chunkDepth)
+		{
+			synchronized (this.voxelDataLockObject)
+			{
+				return this.voxelData[x][y][z];
+			}
+		}
+
+		// Not found!
+		return null;
+	}
+
+	/**
+	 * Returns a copy of the voxel data array.
+	 * Only the array object is a copy, the voxeldata contents of the array are
+	 * references.
+	 * 
+	 * @return
+	 */
+	public VoxelData[][][] getVoxelData()
+	{
+		synchronized (this.voxelDataLockObject)
+		{
+			if (this.voxelData == null)
+				return null;
+
+			return this.voxelData.clone();
+		}
+	}
+
+	/**
+	 * Returns this chunk's x-coordinate in chunkspace.
+	 * @return
+	 */
+	public int getChunkX()
+	{
+		return this.chunkX;
+	}
+
+	/**
+	 * Returns this chunk's y-coordinate in chunkspace.
+	 * @return
+	 */
+	public int getChunkY()
+	{
+		return this.chunkY;
+	}
+
+	/**
+	 * Returns this chunk's z-coordinate in chunkspace.
+	 * @return
+	 */
+	public int getChunkZ()
+	{
+		return this.chunkZ;
 	}
 
 	/**
@@ -941,20 +970,5 @@ public class VoxelChunk
 			this.generateMesh();
 			generationsProcessedThisFrame++;
 		}
-	}
-
-	public int getChunkX()
-	{
-		return this.chunkX;
-	}
-
-	public int getChunkY()
-	{
-		return this.chunkY;
-	}
-
-	public int getChunkZ()
-	{
-		return this.chunkZ;
 	}
 }

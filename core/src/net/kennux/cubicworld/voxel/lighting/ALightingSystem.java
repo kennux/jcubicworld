@@ -53,6 +53,7 @@ public abstract class ALightingSystem
 	{
 		this.passes = this.getPasses();
 		this.passStates = new boolean[this.passes.length];
+		this.state = false;
 	}
 
 	/**
@@ -100,7 +101,6 @@ public abstract class ALightingSystem
 		}
 
 		this.state = true;
-		return;
 	}
 
 	/**
@@ -124,6 +124,11 @@ public abstract class ALightingSystem
 		}
 
 		return this.passStates[passIndex];
+	}
+	
+	public <T extends ILightingPass> T getLightingPass(int passIndex)
+	{
+		return (T) this.passes[passIndex];
 	}
 
 	/**

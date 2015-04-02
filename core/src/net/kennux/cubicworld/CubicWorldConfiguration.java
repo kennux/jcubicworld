@@ -55,7 +55,7 @@ public class CubicWorldConfiguration
 	 * This gets used to check if the player needs to request any new chunks
 	 * from the server.
 	 */
-	public static final int chunkLoadDistance = 5;
+	public static final int chunkLoadDistance = 3;
 
 	/**
 	 * The distance used to cull chunk update packets.

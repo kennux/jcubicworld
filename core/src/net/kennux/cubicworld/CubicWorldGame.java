@@ -34,6 +34,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector3;
 
 /**
  * The game's main class.
@@ -279,8 +280,11 @@ public class CubicWorldGame implements ApplicationListener
 		CubicWorldConfiguration.meshCreationsPerFrameLimit = -1;
 
 		// Wait till all chunks are ready
+		Vector3 playerChunk = this.voxelWorld.getChunkspacePosition(this.playerController.getPosition());
+		playerChunk.y = (playerChunk.y > this.voxelWorld.chunksOnYAxis()) ? this.voxelWorld.chunksOnYAxis() : playerChunk.y;
 		while (!this.voxelWorld.allChunksReady())
 		{
+			System.out.println("Waiting for: " + playerChunk + " " + this.voxelWorld.isChunkInitialized((int)playerChunk.x, (int)playerChunk.y, (int)playerChunk.z));
 			this.voxelWorld.update();
 			this.voxelWorld.render(this.cam);
 			try

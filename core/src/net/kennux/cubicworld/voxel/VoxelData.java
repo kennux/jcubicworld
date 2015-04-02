@@ -1,8 +1,6 @@
 package net.kennux.cubicworld.voxel;
 
-import net.kennux.cubicworld.CubicWorldConfiguration;
 import net.kennux.cubicworld.inventory.BlockInventory;
-import net.kennux.cubicworld.math.MathUtils;
 import net.kennux.cubicworld.plugins.baseplugin.BasePlugin;
 import net.kennux.cubicworld.serialization.BitReader;
 import net.kennux.cubicworld.serialization.BitWriter;
@@ -258,7 +256,6 @@ public class VoxelData
 	 */
 	public byte getLightLevel()
 	{
-		byte highestLightLevel = this.blockLightLevel > this.sunLightLevel ? this.blockLightLevel : this.sunLightLevel;
-		return MathUtils.clamp(highestLightLevel, (byte) CubicWorldConfiguration.maxLightLevel, (byte) 0);
+		return this.blockLightLevel > this.sunLightLevel ? this.blockLightLevel : this.sunLightLevel;
 	}
 }
